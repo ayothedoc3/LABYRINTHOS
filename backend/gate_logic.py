@@ -199,7 +199,7 @@ class LabyrinthGateEngine:
                 alert_type="GATE_BLOCK",
                 severity=AlertStatus.RED,
                 function=playbook.function,
-                title=f"Gate 4 Block: Tier Mismatch",
+                title="Gate 4 Block: Tier Mismatch",
                 message=f"Talent {talent.name} (Tier {talent_tier}) cannot execute playbook {playbook.name} (requires Tier {required_tier})",
                 details={
                     "gate": "TALENT_MATCHING",
