@@ -79,7 +79,7 @@ class LabyrinthGateEngine:
             message=f"Strategy selected for {client_package.value} package",
             details={
                 "client_package": client_package.value,
-                "available_levels": [l.value for l in available_levels],
+                "available_levels": [lvl.value for lvl in available_levels],
                 "eliminated_options": f"{100 - len(available_levels) * 33}%"
             },
             next_gate=GateType.LEVEL_SELECTION
