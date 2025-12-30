@@ -105,7 +105,7 @@ class LabyrinthGateEngine:
                 gate_type=GateType.LEVEL_SELECTION,
                 status=GateStatus.BLOCKED,
                 message=f"Level {selected_level.value} not available for {client_package.value} package",
-                blocked_reason=f"Package {client_package.value} only allows: {[l.value for l in available_levels]}",
+                blocked_reason=f"Package {client_package.value} only allows: {[lvl.value for lvl in available_levels]}",
                 details={
                     "requested_level": selected_level.value,
                     "available_levels": [l.value for l in available_levels]
