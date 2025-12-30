@@ -1291,7 +1291,8 @@ function App() {
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSeed = async () => {
     try {
