@@ -1165,7 +1165,8 @@ const SettingsView = ({ onSeed }) => {
 
   useEffect(() => {
     fetchCredentials();
-  }, [fetchCredentials]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const saveCredentials = async () => {
     try {
