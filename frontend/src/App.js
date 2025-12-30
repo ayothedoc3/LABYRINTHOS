@@ -1154,18 +1154,18 @@ const SettingsView = ({ onSeed }) => {
   });
   const [savedCreds, setSavedCreds] = useState([]);
 
-  useEffect(() => {
-    fetchCredentials();
-  }, []);
-
-  const fetchCredentials = async () => {
+  const fetchCredentials = useCallback(async () => {
     try {
       const response = await axios.get(`${API}/platform-credentials`);
       setSavedCreds(response.data);
     } catch (error) {
       console.error("Error fetching credentials:", error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchCredentials();
+  }, [fetchCredentials]);
 
   const saveCredentials = async () => {
     try {
