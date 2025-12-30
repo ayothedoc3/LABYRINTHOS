@@ -108,7 +108,7 @@ class LabyrinthGateEngine:
                 blocked_reason=f"Package {client_package.value} only allows: {[lvl.value for lvl in available_levels]}",
                 details={
                     "requested_level": selected_level.value,
-                    "available_levels": [l.value for l in available_levels]
+                    "available_levels": [lvl.value for lvl in available_levels]
                 }
             )
         
