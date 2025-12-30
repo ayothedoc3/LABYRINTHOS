@@ -237,7 +237,7 @@ class LabyrinthGateEngine:
                 alert_type="GATE_BLOCK",
                 severity=AlertStatus.YELLOW,
                 function=playbook.function,
-                title=f"Gate 4 Warning: Function Mismatch",
+                title="Gate 4 Warning: Function Mismatch",
                 message=f"Talent {talent.name} ({talent.function.value}) assigned to {playbook.function.value} playbook",
                 details={
                     "talent_function": talent.function.value,
