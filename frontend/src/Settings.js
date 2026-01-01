@@ -59,11 +59,12 @@ const Settings = () => {
       console.error('Error fetching settings:', error);
     }
     setLoading(false);
-  }, []);
+  };
 
   useEffect(() => {
     fetchSettings();
-  }, [fetchSettings]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const updateSettings = async (updates) => {
     setSaving(true);
