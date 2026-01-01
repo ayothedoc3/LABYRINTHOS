@@ -108,6 +108,151 @@ const NODE_CONFIG = {
   },
 };
 
+// ==================== CUSTOM LABELED EDGE ====================
+
+const LabeledEdge = ({
+  id,
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+  sourcePosition,
+  targetPosition,
+  data,
+  style = {},
+  markerEnd,
+}) => {
+  const [edgePath, labelX, labelY] = getBezierPath({
+    sourceX,
+    sourceY,
+    sourcePosition,
+    targetX,
+    targetY,
+    targetPosition,
+  });
+
+  const edgeLabel = data?.label || '';
+  const edgeType = data?.edge_type || 'flow';
+  
+  // Edge type configurations
+  const edgeStyles = {
+    flow: { stroke: '#94a3b8', label: '→', color: '#64748b' },
+    depends_on: { stroke: '#f59e0b', label: 'depends on', color: '#d97706' },
+    triggers: { stroke: '#22c55e', label: 'triggers', color: '#16a34a' },
+    produces: { stroke: '#8b5cf6', label: 'produces', color: '#7c3aed' },
+    blocks: { stroke: '#ef4444', label: 'blocks', color: '#dc2626' },
+  };
+
+  const edgeConfig = edgeStyles[edgeType] || edgeStyles.flow;
+
+  return (
+    <>
+      <BaseEdge
+        path={edgePath}
+        markerEnd={markerEnd}
+        style={{
+          ...style,
+          stroke: edgeConfig.stroke,
+          strokeWidth: 2,
+          strokeDasharray: edgeType === 'depends_on' ? '5,5' : undefined,
+        }}
+      />
+      {(edgeLabel || edgeType !== 'flow') && (
+        <EdgeLabelRenderer>
+          <div
+            style={{
+              position: 'absolute',
+              transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+              pointerEvents: 'all',
+            }}
+            className="nodrag nopan"
+          >
+            <div
+              className="px-2 py-1 rounded-full text-xs font-medium shadow-sm border"
+              style={{
+                backgroundColor: 'white',
+                borderColor: edgeConfig.stroke,
+                color: edgeConfig.color,
+              }}
+            >
+              {edgeLabel || edgeConfig.label}
+            </div>
+          </div>
+        </EdgeLabelRenderer>
+      )}
+    </>
+  );
+};
+
+// Edge types for ReactFlow
+const edgeTypes = {
+  labeled: LabeledEdge,
+};
+
+// ==================== TOOLTIPS FOR WORKFLOW ELEMENTS ====================
+
+const NodeTooltip = ({ nodeType, children }) => {
+  const tooltips = {
+    ISSUE: {
+      title: '🔴 Issue Node',
+      desc: 'A problem to solve or trigger event that kicks off actions',
+      tip: 'Every workflow starts with identifying the issue'
+    },
+    ACTION: {
+      title: '🔵 Action Node', 
+      desc: 'A task to complete that moves work forward',
+      tip: 'Break big actions into smaller steps for clarity'
+    },
+    RESOURCE: {
+      title: '🟢 Resource Node',
+      desc: 'Tools, people, or assets needed to enable actions',
+      tip: 'Link resources to the actions that need them'
+    },
+    DELIVERABLE: {
+      title: '🟣 Deliverable Node',
+      desc: 'An output or result that proves progress',
+      tip: 'Clear deliverables = Clear success metrics'
+    },
+    TASK: {
+      title: '🔷 Task Node',
+      desc: 'A specific work item - the building blocks',
+      tip: 'Assign owners and deadlines to tasks'
+    },
+    BLOCKER: {
+      title: '🟠 Blocker Node',
+      desc: 'An obstacle to overcome that needs resolution',
+      tip: 'Address blockers quickly to keep flow moving'
+    },
+    NOTE: {
+      title: '📝 Note Node',
+      desc: 'Additional context or information for clarity',
+      tip: 'Use notes for important context'
+    },
+    STICKY_NOTE: {
+      title: '📌 Sticky Note',
+      desc: 'Quick notes and reminders',
+      tip: 'Perfect for brainstorming ideas'
+    },
+  };
+
+  const tooltip = tooltips[nodeType] || tooltips.ACTION;
+
+  return (
+    <TooltipProvider>
+      <Tooltip delayDuration={300}>
+        <TooltipTrigger asChild>{children}</TooltipTrigger>
+        <TooltipContent side="right" className="max-w-xs">
+          <div className="space-y-1">
+            <p className="font-semibold">{tooltip.title}</p>
+            <p className="text-sm text-muted-foreground">{tooltip.desc}</p>
+            <p className="text-xs text-primary border-t pt-1 mt-1">💡 {tooltip.tip}</p>
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
+
 // ==================== MILANOTE-STYLE CUSTOM NODE ====================
 
 const MilanoteNode = ({ data, selected, id }) => {
