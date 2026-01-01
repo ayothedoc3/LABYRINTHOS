@@ -276,12 +276,22 @@ const PlaybooksView = ({ playbooks, onRefresh }) => {
             </SelectContent>
           </Select>
         </div>
-        <Dialog open={showCreate} onOpenChange={setShowCreate}>
-          <DialogTrigger asChild>
-            <Button data-testid="create-playbook-btn">
-              <Plus className="w-4 h-4 mr-2" /> Add Playbook
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <AIGenerateDialog 
+            contentType="playbook" 
+            onGenerated={() => onRefresh()}
+            trigger={
+              <Button variant="outline" data-testid="ai-generate-playbook-btn">
+                <Sparkles className="w-4 h-4 mr-2" /> Generate with AI
+              </Button>
+            }
+          />
+          <Dialog open={showCreate} onOpenChange={setShowCreate}>
+            <DialogTrigger asChild>
+              <Button data-testid="create-playbook-btn">
+                <Plus className="w-4 h-4 mr-2" /> Add Playbook
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Create New Playbook</DialogTitle>
