@@ -46,7 +46,7 @@ const Settings = () => {
   const [testingKey, setTestingKey] = useState(null);
   const [testResult, setTestResult] = useState(null);
 
-  const fetchSettings = useCallback(async () => {
+  const fetchSettings = async () => {
     setLoading(true);
     try {
       const [settingsRes, keysRes] = await Promise.all([
