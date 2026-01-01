@@ -244,12 +244,13 @@ async def generate_sop(description: str, provider: Optional[str] = None, model: 
             "ai_generated": True
         }
         
+        sop_response = dict(sop)
         await db.sops.insert_one(sop)
         
         return {
             "success": True,
             "sop_id": sop_id,
-            "sop": sop
+            "sop": sop_response
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
