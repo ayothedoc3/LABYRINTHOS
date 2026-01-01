@@ -10,6 +10,8 @@ import ReactFlow, {
   Panel,
   useReactFlow,
   MarkerType,
+  Handle,
+  Position,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,118 +29,236 @@ import {
   Plus, Save, Undo, Redo, Download, Upload, Share2, ZoomIn, ZoomOut, Maximize2,
   AlertTriangle, Zap, FolderOpen, FileText, StickyNote, ListTodo, Ban,
   ChevronRight, ChevronLeft, Home, Users, Settings2, Layers, Search,
-  RefreshCw, Trash2, Copy, Eye, X
+  RefreshCw, Trash2, Copy, Eye, X, GripVertical, CheckCircle2, Circle,
+  Clock, Target, Package, Lightbulb
 } from 'lucide-react';
 import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api/workflowviz`;
 
-// ==================== NODE STYLES ====================
+// ==================== MILANOTE-STYLE NODE CONFIG ====================
 
-const NODE_STYLES = {
+const NODE_CONFIG = {
   ISSUE: {
-    background: '#EF4444',
-    color: 'white',
+    accentColor: '#EF4444',
+    bgColor: '#FEF2F2',
+    borderColor: '#FECACA',
     icon: AlertTriangle,
-    shape: 'hexagon',
+    iconBg: '#FEE2E2',
+    label: 'Issue',
   },
   ACTION: {
-    background: '#3B82F6',
-    color: 'white',
+    accentColor: '#3B82F6',
+    bgColor: '#EFF6FF',
+    borderColor: '#BFDBFE',
     icon: Zap,
-    shape: 'rounded',
+    iconBg: '#DBEAFE',
+    label: 'Action',
   },
   RESOURCE: {
-    background: '#10B981',
-    color: 'white',
+    accentColor: '#10B981',
+    bgColor: '#ECFDF5',
+    borderColor: '#A7F3D0',
     icon: FolderOpen,
-    shape: 'circle',
+    iconBg: '#D1FAE5',
+    label: 'Resource',
   },
   DELIVERABLE: {
-    background: '#8B5CF6',
-    color: 'white',
-    icon: FileText,
-    shape: 'diamond',
+    accentColor: '#8B5CF6',
+    bgColor: '#F5F3FF',
+    borderColor: '#DDD6FE',
+    icon: Package,
+    iconBg: '#EDE9FE',
+    label: 'Deliverable',
   },
   STICKY_NOTE: {
-    background: '#FCD34D',
-    color: 'black',
-    icon: StickyNote,
-    shape: 'square',
+    accentColor: '#F59E0B',
+    bgColor: '#FFFBEB',
+    borderColor: '#FDE68A',
+    icon: Lightbulb,
+    iconBg: '#FEF3C7',
+    label: 'Note',
   },
   TASK: {
-    background: '#06B6D4',
-    color: 'white',
+    accentColor: '#06B6D4',
+    bgColor: '#ECFEFF',
+    borderColor: '#A5F3FC',
     icon: ListTodo,
-    shape: 'rounded',
+    iconBg: '#CFFAFE',
+    label: 'Task',
   },
   BLOCKER: {
-    background: '#F97316',
-    color: 'white',
+    accentColor: '#F97316',
+    bgColor: '#FFF7ED',
+    borderColor: '#FED7AA',
     icon: Ban,
-    shape: 'rounded',
+    iconBg: '#FFEDD5',
+    label: 'Blocker',
   },
 };
 
-// ==================== CUSTOM NODE COMPONENT ====================
+// ==================== MILANOTE-STYLE CUSTOM NODE ====================
 
-const CustomNode = ({ data, selected }) => {
-  const style = NODE_STYLES[data.node_type] || NODE_STYLES.ACTION;
-  const Icon = style.icon;
+const MilanoteNode = ({ data, selected, id }) => {
+  const config = NODE_CONFIG[data.node_type] || NODE_CONFIG.ACTION;
+  const Icon = config.icon;
 
-  const getShapeClass = () => {
-    switch (style.shape) {
-      case 'hexagon':
-        return 'clip-hexagon';
-      case 'circle':
-        return 'rounded-full aspect-square';
-      case 'diamond':
-        return 'rotate-45';
-      default:
-        return 'rounded-lg';
-    }
-  };
+  // Sticky note has a different style
+  if (data.node_type === 'STICKY_NOTE') {
+    return (
+      <div className="relative group">
+        <Handle type="target" position={Position.Top} className="!bg-amber-400 !w-3 !h-3 !border-2 !border-white" />
+        <Handle type="source" position={Position.Bottom} className="!bg-amber-400 !w-3 !h-3 !border-2 !border-white" />
+        <Handle type="target" position={Position.Left} className="!bg-amber-400 !w-3 !h-3 !border-2 !border-white" />
+        <Handle type="source" position={Position.Right} className="!bg-amber-400 !w-3 !h-3 !border-2 !border-white" />
+        
+        <div
+          className={`
+            w-[200px] min-h-[120px] p-4 rounded-sm shadow-lg
+            transition-all duration-200 cursor-move
+            ${selected ? 'ring-2 ring-amber-500 ring-offset-2 shadow-xl' : 'hover:shadow-xl'}
+          `}
+          style={{
+            backgroundColor: '#FEF9C3',
+            backgroundImage: 'linear-gradient(to bottom, #FEF9C3 0%, #FEF08A 100%)',
+          }}
+        >
+          <div className="font-medium text-amber-900 text-sm mb-2">{data.label}</div>
+          {data.description && (
+            <p className="text-xs text-amber-800 leading-relaxed">{data.description}</p>
+          )}
+          {data.note_content && (
+            <p className="text-xs text-amber-800 leading-relaxed mt-2 whitespace-pre-wrap">{data.note_content}</p>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div
-      className={`
-        min-w-[140px] max-w-[200px] p-3 shadow-lg transition-all duration-200
-        ${style.shape === 'diamond' ? '' : getShapeClass()}
-        ${selected ? 'ring-2 ring-primary ring-offset-2 scale-105' : 'hover:shadow-xl hover:scale-102'}
-      `}
-      style={{
-        backgroundColor: style.background,
-        color: style.color,
-        transform: style.shape === 'diamond' ? 'rotate(45deg)' : undefined,
-      }}
-    >
-      <div style={{ transform: style.shape === 'diamond' ? 'rotate(-45deg)' : undefined }}>
-        <div className="flex items-center gap-2 mb-1">
-          <Icon className="w-4 h-4 flex-shrink-0" />
-          <span className="font-semibold text-sm truncate">{data.label}</span>
-        </div>
-        {data.description && (
-          <p className="text-xs opacity-80 line-clamp-2">{data.description}</p>
-        )}
-        {data.assignee_ids && data.assignee_ids.length > 0 && (
-          <div className="flex items-center gap-1 mt-2">
-            <Users className="w-3 h-3" />
-            <span className="text-xs">{data.assignee_ids.length} assigned</span>
+    <div className="relative group">
+      {/* Connection Handles */}
+      <Handle type="target" position={Position.Top} className="!w-3 !h-3 !border-2 !border-white" style={{ backgroundColor: config.accentColor }} />
+      <Handle type="source" position={Position.Bottom} className="!w-3 !h-3 !border-2 !border-white" style={{ backgroundColor: config.accentColor }} />
+      <Handle type="target" position={Position.Left} className="!w-3 !h-3 !border-2 !border-white" style={{ backgroundColor: config.accentColor }} />
+      <Handle type="source" position={Position.Right} className="!w-3 !h-3 !border-2 !border-white" style={{ backgroundColor: config.accentColor }} />
+
+      {/* Main Card */}
+      <div
+        className={`
+          w-[220px] bg-white rounded-xl overflow-hidden
+          transition-all duration-200 cursor-move
+          ${selected 
+            ? 'shadow-xl ring-2 ring-offset-2' 
+            : 'shadow-md hover:shadow-lg'
+          }
+        `}
+        style={{
+          borderLeft: `4px solid ${config.accentColor}`,
+          ringColor: selected ? config.accentColor : undefined,
+        }}
+      >
+        {/* Card Header */}
+        <div 
+          className="px-4 py-3 flex items-center gap-3"
+          style={{ backgroundColor: config.bgColor }}
+        >
+          <div 
+            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={{ backgroundColor: config.iconBg }}
+          >
+            <Icon className="w-4 h-4" style={{ color: config.accentColor }} />
           </div>
-        )}
-        {data.status && (
-          <Badge variant="secondary" className="mt-1 text-xs">
-            {data.status}
-          </Badge>
-        )}
+          <div className="flex-1 min-w-0">
+            <div className="font-semibold text-gray-900 text-sm truncate">{data.label}</div>
+            <div className="text-xs text-gray-500">{config.label}</div>
+          </div>
+        </div>
+
+        {/* Card Body */}
+        <div className="px-4 py-3 space-y-2">
+          {data.description && (
+            <p className="text-xs text-gray-600 leading-relaxed line-clamp-2">{data.description}</p>
+          )}
+
+          {/* Assignees */}
+          {data.assignee_ids && data.assignee_ids.length > 0 && (
+            <div className="flex items-center gap-2 pt-1">
+              <div className="flex -space-x-2">
+                {data.assignee_ids.slice(0, 3).map((_, i) => (
+                  <div 
+                    key={i}
+                    className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-white flex items-center justify-center"
+                  >
+                    <span className="text-white text-xs font-medium">
+                      {String.fromCharCode(65 + i)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              {data.assignee_ids.length > 3 && (
+                <span className="text-xs text-gray-500">+{data.assignee_ids.length - 3}</span>
+              )}
+            </div>
+          )}
+
+          {/* Software/Resource Tag */}
+          {data.software_instance && (
+            <div className="flex items-center gap-1.5">
+              <div className="w-4 h-4 rounded bg-green-100 flex items-center justify-center">
+                <Settings2 className="w-2.5 h-2.5 text-green-600" />
+              </div>
+              <span className="text-xs text-gray-600 truncate">{data.software_instance}</span>
+            </div>
+          )}
+
+          {/* Task Status */}
+          {data.status && (
+            <div className="flex items-center gap-2 pt-1">
+              {data.status === 'DONE' && (
+                <Badge className="bg-green-100 text-green-700 hover:bg-green-100 text-xs">
+                  <CheckCircle2 className="w-3 h-3 mr-1" /> Done
+                </Badge>
+              )}
+              {data.status === 'IN_PROGRESS' && (
+                <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 text-xs">
+                  <Circle className="w-3 h-3 mr-1" /> In Progress
+                </Badge>
+              )}
+              {data.status === 'TODO' && (
+                <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-100 text-xs">
+                  <Circle className="w-3 h-3 mr-1" /> To Do
+                </Badge>
+              )}
+              {data.status === 'BLOCKED' && (
+                <Badge className="bg-red-100 text-red-700 hover:bg-red-100 text-xs">
+                  <Ban className="w-3 h-3 mr-1" /> Blocked
+                </Badge>
+              )}
+            </div>
+          )}
+
+          {/* Due Date */}
+          {data.due_date && (
+            <div className="flex items-center gap-1.5 text-xs text-gray-500">
+              <Clock className="w-3 h-3" />
+              <span>{new Date(data.due_date).toLocaleDateString()}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Drag Handle Indicator */}
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-40 transition-opacity">
+          <GripVertical className="w-4 h-4 text-gray-400" />
+        </div>
       </div>
     </div>
   );
 };
 
 const nodeTypes = {
-  custom: CustomNode,
+  custom: MilanoteNode,
 };
 
 // ==================== WORKFLOW CANVAS COMPONENT ====================
