@@ -621,7 +621,14 @@ const WorkflowCanvas = ({
         setEdges(layerEdges.map(e => ({
           ...e,
           type: 'smoothstep',
-          markerEnd: { type: MarkerType.ArrowClosed },
+          style: { strokeWidth: 2, stroke: '#64748b' },
+          markerEnd: { 
+            type: MarkerType.ArrowClosed,
+            color: '#64748b',
+            width: 20,
+            height: 20,
+          },
+          data: e.data || { edge_type: 'flow' },
         })));
         
         setTimeout(() => fitView({ padding: 0.2 }), 100);
