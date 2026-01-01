@@ -1539,10 +1539,35 @@ const WorkflowViz = () => {
             />
           </ReactFlowProvider>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-            <Layers className="w-16 h-16 mb-4 opacity-20" />
-            <h3 className="text-lg font-medium">Select or create a workflow</h3>
-            <p className="text-sm">Choose a workflow from the sidebar to start editing</p>
+          <div className="flex flex-col items-center justify-center h-full text-muted-foreground bg-gradient-to-b from-slate-50 to-white">
+            <div className="text-center max-w-md">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <Layers className="w-10 h-10 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold text-foreground mb-2">Welcome to WorkflowViz</h3>
+              <p className="text-sm mb-6">Create visual process maps to organize your business operations. Select a workflow from the sidebar or generate one with AI.</p>
+              
+              <div className="flex flex-wrap justify-center gap-2 mb-6">
+                {Object.entries(NODE_CONFIG).slice(0, 5).map(([type, config]) => (
+                  <div key={type} className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-muted">
+                    <div 
+                      className="w-2.5 h-2.5 rounded-full"
+                      style={{ backgroundColor: config.accentColor }}
+                    />
+                    <span className="text-xs">{config.label}</span>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="text-xs text-muted-foreground">
+                <p className="flex items-center justify-center gap-1 mb-1">
+                  <LayoutGrid className="w-3 h-3" /> Auto-layout for clean organization
+                </p>
+                <p className="flex items-center justify-center gap-1">
+                  <Sparkles className="w-3 h-3" /> AI generates workflows from descriptions
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </div>
