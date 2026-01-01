@@ -343,12 +343,13 @@ async def generate_contract(description: str, provider: Optional[str] = None, mo
             "ai_generated": True
         }
         
+        contract_response = dict(contract)
         await db.contracts.insert_one(contract)
         
         return {
             "success": True,
             "contract_id": contract_id,
-            "contract": contract
+            "contract": contract_response
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
