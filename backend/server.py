@@ -42,6 +42,8 @@ from models import (
 from gate_logic import gate_engine, LabyrinthGateEngine
 from seed_data import get_playbooks, get_sops, get_kpis
 from workflow_routes import workflow_router, set_db as set_workflow_db
+from settings_routes import settings_router, set_db as set_settings_db
+from ai_routes import ai_router, set_db as set_ai_db
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -53,6 +55,8 @@ db = client[os.environ.get('DB_NAME', 'labyrinth_db')]
 
 # Set DB for workflow routes
 set_workflow_db(db)
+set_settings_db(db)
+set_ai_db(db)
 
 # Create the main app
 app = FastAPI(title="Labyrinth Operating System + WorkflowViz", version="1.0.0")
