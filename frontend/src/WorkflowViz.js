@@ -1050,6 +1050,39 @@ const WorkflowCanvas = ({
 
       {/* Toolbar */}
       <div className="absolute top-4 right-4 z-10 bg-background/90 backdrop-blur rounded-lg p-2 shadow-md flex items-center gap-2">
+        {/* Undo/Redo Buttons */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              onClick={handleUndo} 
+              disabled={!canUndo}
+              data-testid="undo-btn"
+            >
+              <Undo className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Undo (Ctrl+Z)</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              onClick={handleRedo} 
+              disabled={!canRedo}
+              data-testid="redo-btn"
+            >
+              <Redo className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Redo (Ctrl+Shift+Z)</TooltipContent>
+        </Tooltip>
+
+        <Separator orientation="vertical" className="h-6" />
+
         <Dialog open={showNodeDialog} onOpenChange={setShowNodeDialog}>
           <DialogTrigger asChild>
             <Button size="sm" data-testid="add-node-btn">
