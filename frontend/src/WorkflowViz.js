@@ -1179,14 +1179,14 @@ const WorkflowCanvas = ({
               </div>
             )}
 
-            <div className="flex gap-2 pt-2">
+            <div className="flex gap-2 pt-2 border-t mt-2">
               {(selectedNode.data.node_type === 'ACTION' && layer !== 'EXECUTION') && (
-                <Button size="sm" variant="outline" onClick={() => onNodeDblClick(null, selectedNode)}>
+                <Button size="sm" variant="outline" className="flex-1" onClick={() => onNodeDblClick(null, selectedNode)}>
                   <ChevronRight className="w-4 h-4 mr-1" /> Drill Down
                 </Button>
               )}
               <Button size="sm" variant="destructive" onClick={deleteSelectedNode}>
-                <Trash2 className="w-4 h-4 mr-1" /> Delete
+                <Trash2 className="w-4 h-4" />
               </Button>
             </div>
           </div>
