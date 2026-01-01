@@ -294,12 +294,13 @@ async def generate_talent(description: str, provider: Optional[str] = None, mode
             "ai_generated": True
         }
         
+        talent_response = dict(talent)
         await db.talents.insert_one(talent)
         
         return {
             "success": True,
             "talent_id": talent_id,
-            "talent": talent
+            "talent": talent_response
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
