@@ -1229,6 +1229,28 @@ const WorkflowCanvas = ({
           zoomable
         />
         <Background variant="dots" gap={25} size={1} color="#e2e8f0" />
+        
+        {/* Node Type Legend */}
+        <Panel position="bottom-right" className="!mb-2 !mr-2">
+          <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-lg border p-2 flex gap-3">
+            {Object.entries(NODE_CONFIG).slice(0, 5).map(([type, config]) => (
+              <Tooltip key={type}>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-1.5 cursor-help">
+                    <div 
+                      className="w-3 h-3 rounded-sm"
+                      style={{ backgroundColor: config.accentColor }}
+                    />
+                    <span className="text-xs text-muted-foreground">{config.label}</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <p className="text-xs">{config.label} node - Click to see details</p>
+                </TooltipContent>
+              </Tooltip>
+            ))}
+          </div>
+        </Panel>
       </ReactFlow>
     </div>
   );
