@@ -1309,6 +1309,7 @@ const WorkflowViz = () => {
         </ScrollArea>
       </div>
     </div>
+    </TooltipProvider>
   );
 };
 
