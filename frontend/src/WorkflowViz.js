@@ -213,13 +213,12 @@ const edgeTypes = {
 // ==================== AUTO-LAYOUT ALGORITHM ====================
 
 const AUTO_LAYOUT_CONFIG = {
-  GRID_SIZE: 50,
   NODE_WIDTH: 220,
   NODE_HEIGHT: 100,
-  HORIZONTAL_SPACING: 280,
-  VERTICAL_SPACING: 150,
-  INITIAL_X: 100,
-  INITIAL_Y: 100,
+  HORIZONTAL_SPACING: 300,
+  VERTICAL_SPACING: 130,
+  INITIAL_X: 50,
+  INITIAL_Y: 80,
 };
 
 // Hierarchical layout algorithm for organizing nodes
@@ -233,12 +232,14 @@ const calculateAutoLayout = (nodes, edges) => {
   const outDegree = {};
   const children = {};
   const parents = {};
+  const nodeMap = {};
   
   nodes.forEach(node => {
     inDegree[node.id] = 0;
     outDegree[node.id] = 0;
     children[node.id] = [];
     parents[node.id] = [];
+    nodeMap[node.id] = node;
   });
 
   edges.forEach(edge => {
@@ -256,23 +257,30 @@ const calculateAutoLayout = (nodes, edges) => {
     }
   });
 
-  // Find root nodes (no incoming edges)
-  let roots = nodes.filter(node => inDegree[node.id] === 0).map(n => n.id);
+  // Find root nodes (no incoming edges or type = ISSUE)
+  let roots = nodes.filter(node => 
+    inDegree[node.id] === 0 || node.data?.node_type === 'ISSUE'
+  ).map(n => n.id);
+  
   if (roots.length === 0) {
-    // If no roots, pick first node
-    roots = [nodes[0].id];
+    // If no roots, pick node with least incoming edges
+    roots = [nodes.reduce((min, n) => 
+      inDegree[n.id] < inDegree[min.id] ? n : min, nodes[0]
+    ).id];
   }
 
   // BFS to assign levels
   const levels = {};
   const visited = new Set();
   let queue = roots.map(id => ({ id, level: 0 }));
+  let maxLevel = 0;
   
   while (queue.length > 0) {
     const { id, level } = queue.shift();
     if (visited.has(id)) continue;
     visited.add(id);
-    levels[id] = level;
+    levels[id] = Math.max(levels[id] || 0, level);
+    maxLevel = Math.max(maxLevel, level);
     
     children[id].forEach(childId => {
       if (!visited.has(childId)) {
@@ -281,10 +289,10 @@ const calculateAutoLayout = (nodes, edges) => {
     });
   }
 
-  // Handle unvisited nodes
+  // Handle unvisited nodes - place them at end
   nodes.forEach(node => {
     if (!visited.has(node.id)) {
-      levels[node.id] = 0;
+      levels[node.id] = maxLevel + 1;
     }
   });
 
@@ -308,22 +316,22 @@ const calculateAutoLayout = (nodes, edges) => {
     });
   });
 
-  // Calculate positions
+  // Calculate positions - spread vertically centered
   const newNodes = nodes.map(node => {
     const level = levels[node.id] || 0;
     const levelNodes = nodesByLevel[level];
     const indexInLevel = levelNodes.indexOf(node);
-    const levelWidth = levelNodes.length;
+    const levelHeight = levelNodes.length;
     
-    // Center nodes in each level
-    const totalLevelHeight = levelWidth * VERTICAL_SPACING;
-    const startY = INITIAL_Y + (totalLevelHeight / 2) - VERTICAL_SPACING / 2;
+    // Center nodes vertically in each column
+    const totalHeight = (levelHeight - 1) * VERTICAL_SPACING;
+    const startY = INITIAL_Y + Math.max(0, (400 - totalHeight) / 2);
     
     return {
       ...node,
       position: {
         x: INITIAL_X + level * HORIZONTAL_SPACING,
-        y: startY - indexInLevel * VERTICAL_SPACING + (indexInLevel * VERTICAL_SPACING),
+        y: startY + indexInLevel * VERTICAL_SPACING,
       },
     };
   });
