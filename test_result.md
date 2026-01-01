@@ -238,6 +238,18 @@ frontend:
         agent: "testing"
         comment: "✅ TESTED: All canvas organization features working excellently. Auto-layout button [data-testid='auto-layout-btn'] reorganizes nodes hierarchically left-to-right. Connection lines use smooth step styling with visible arrow markers. Node organization by type: Issue (red) at start, Action (blue) middle, Deliverable (purple) end, Resource (green) logical positioning. MiniMap shows color-coded nodes with interactive navigation. Save status indicator functional. Canvas quality is professional and NOT 'disjointed and unorganized' - comparable to standard workflow tools. Minor: Fit-to-view button selector needs adjustment."
 
+  - task: "WorkflowViz Undo/Redo Functionality"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/WorkflowViz.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Testing undo/redo functionality in WorkflowViz canvas as requested. Need to verify: 1) Undo/Redo buttons presence and tooltips, 2) State management (enabled/disabled states), 3) Auto-layout undo/redo, 4) Multiple actions history, 5) Keyboard shortcuts (Ctrl+Z, Ctrl+Shift+Z), 6) History persistence."
+
 metadata:
   created_by: "main_agent"
   version: "2.0"
