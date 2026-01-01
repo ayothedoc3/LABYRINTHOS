@@ -676,9 +676,17 @@ const WorkflowCanvas = ({
       ...params,
       id: `edge-${Date.now()}`,
       type: 'smoothstep',
-      markerEnd: { type: MarkerType.ArrowClosed },
+      animated: false,
+      style: { strokeWidth: 2, stroke: '#64748b' },
+      markerEnd: { 
+        type: MarkerType.ArrowClosed,
+        color: '#64748b',
+        width: 20,
+        height: 20,
+      },
       layer,
       workflow_id: workflowId,
+      data: { edge_type: 'flow' },
     };
     setEdges((eds) => addEdge(newEdge, eds));
   }, [setEdges, layer, workflowId]);
