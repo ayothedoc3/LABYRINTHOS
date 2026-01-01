@@ -102,78 +102,121 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "WorkflowViz feature in Labyrinth OS - Milanote-style node redesign and URL persistence for selected workflows"
+user_problem_statement: "Add AI generation capabilities (Claude/OpenRouter/OpenAI) with BYOK settings to Labyrinth OS for creating workflows, playbooks, SOPs, talents, contracts. Add gamified tooltips explaining elements."
 
 backend:
-  - task: "WorkflowViz APIs (workflows, nodes, edges, templates, team)"
+  - task: "AI Generation API endpoints"
     implemented: true
     working: true
-    file: "/app/backend/workflow_routes.py"
+    file: "/app/backend/ai_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Created /api/ai/generate/{content_type} endpoints for workflow, playbook, sop, talent, contract. Uses Emergent LLM key for OpenAI/Anthropic/Gemini. BYOK support for OpenRouter."
+
+  - task: "Settings & BYOK API endpoints"
+    implemented: true
+    working: true
+    file: "/app/backend/settings_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Created /api/settings/ai for AI config, /api/settings/api-keys for BYOK management. GET/PUT for settings, CRUD for API keys, POST for key testing."
+
+  - task: "AI Service Module"
+    implemented: true
+    working: true
+    file: "/app/backend/ai_service.py"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
       - working: true
         agent: "main"
-        comment: "All backend APIs for WorkflowViz are functional - workflows CRUD, nodes, edges, templates, team members, software tools"
+        comment: "Created unified AIService class supporting OpenAI, Anthropic, Gemini via Emergent integrations, and OpenRouter via direct API. System prompts for each content type."
 
 frontend:
-  - task: "Milanote-style Node Redesign"
+  - task: "Settings Page with BYOK"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/Settings.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Created Settings page with AI Configuration tab (provider selection, model selection, temperature slider) and API Keys tab (BYOK management with add/delete/view keys)."
+
+  - task: "AI Generate Dialog Component"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/AIGenerateDialog.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Created reusable AIGenerateDialog component with content type configs, description textarea, loading states, and success/error handling."
+
+  - task: "AI Generation Buttons in Playbooks, SOPs, Talents, Contracts"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Added 'Generate with AI' buttons to Playbooks, SOPs, Talents, and Contracts sections. Each button opens AIGenerateDialog with appropriate content type."
+
+  - task: "AI Generation in WorkflowViz"
     implemented: true
     working: true
     file: "/app/frontend/src/WorkflowViz.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: true
         agent: "main"
-        comment: "Implemented card-based Milanote design with colored left borders, icon backgrounds, clean typography. NODE_CONFIG object with colors for each type (Issue=red, Action=blue, Resource=green, Deliverable=purple, Note=amber, Task=cyan, Blocker=orange). Visual verification via screenshots confirmed working."
-      - working: true
-        agent: "testing"
-        comment: "✅ TESTED SUCCESSFULLY: Milanote-style nodes are properly implemented. Verified: (1) White background cards with rounded corners, (2) Colored left borders for different node types (red for Issue, blue for Action, green for Resource, purple for Deliverable), (3) Icons with colored backgrounds in headers, (4) MiniMap displays nodes in corresponding colors, (5) Clean typography and proper spacing. Visual inspection of screenshots confirms all Milanote design elements are working correctly."
+        comment: "Added 'Generate with AI' button in WorkflowViz sidebar. Creates workflow with nodes and edges from AI. Auto-selects new workflow after generation. Shows sparkle icon for AI-generated workflows."
 
-  - task: "URL Persistence for Selected Workflow"
+  - task: "Gamified Tooltips"
     implemented: true
     working: true
-    file: "/app/frontend/src/WorkflowViz.js, /app/frontend/src/App.js"
+    file: "/app/frontend/src/Tooltips.js, /app/frontend/src/WorkflowViz.js"
     stuck_count: 0
-    priority: "high"
-    needs_retesting: false
+    priority: "medium"
+    needs_retesting: true
     status_history:
       - working: true
         agent: "main"
-        comment: "Implemented workflow ID persistence in URL query params. When user selects a workflow, URL updates to include ?workflow=<id>. On page refresh, workflow is auto-restored. Also added tab persistence in App.js - when workflow param exists, auto-switches to WorkflowViz tab."
-      - working: true
-        agent: "testing"
-        comment: "✅ TESTED SUCCESSFULLY: URL persistence working perfectly. Verified: (1) URL updates to include ?workflow=<id> when workflow selected, (2) Page refresh preserves workflow parameter and auto-restores selected workflow, (3) WorkflowViz tab automatically selected when workflow param exists, (4) Tab switching preserves workflow selection and URL parameter, (5) Workflow remains highlighted in sidebar after refresh. All URL persistence functionality working as expected."
-
-  - task: "WorkflowViz Canvas with React Flow"
-    implemented: true
-    working: true
-    file: "/app/frontend/src/WorkflowViz.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: true
-        agent: "main"
-        comment: "React Flow canvas working with nodes, edges, MiniMap, zoom controls, auto-save functionality"
+        comment: "Created Tooltips.js with gamified descriptions for all elements (playbooks, SOPs, gates, nodes, etc.). Added tooltips to WorkflowViz header. Tooltips include emoji icons and pro tips."
 
 metadata:
   created_by: "main_agent"
-  version: "1.0"
-  test_sequence: 1
+  version: "2.0"
+  test_sequence: 2
   run_ui: true
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "AI Generation across all content types"
+    - "BYOK Settings functionality"
+    - "Gamified tooltips in WorkflowViz"
   stuck_tasks: []
-  test_all: false
+  test_all: true
   test_priority: "high_first"
 
 agent_communication:
   - agent: "main"
-    message: "Completed two key tasks: (1) Milanote-style node redesign with card-based design and colored borders, (2) URL persistence for selected workflow. Both verified via screenshots. Please test: 1) Navigate to WorkflowViz tab, select a workflow, verify nodes have Milanote card design with colored left borders. 2) Select a workflow, note URL has ?workflow=<id>, refresh page, verify workflow is auto-selected. 3) Switch to Dashboard tab and back to WorkflowViz - workflow should remain selected."
-  - agent: "testing"
-    message: "✅ TESTING COMPLETE: Both WorkflowViz features tested successfully. (1) Milanote-style Node Redesign: Nodes display with white background cards, colored left borders (red/blue/green/purple), icons with colored backgrounds, and proper MiniMap visualization. (2) URL Persistence: Workflow ID correctly persists in URL (?workflow=<id>), auto-restores on page refresh, auto-switches to WorkflowViz tab, and maintains selection during tab switching. Node interaction also working - Selected Node panel appears when clicking nodes. All core functionality verified and working as expected."
+    message: "Implemented comprehensive AI generation with BYOK support. Please test: 1) Settings page - AI Configuration and API Keys tabs. 2) Playbooks page - 'Generate with AI' button and dialog. 3) WorkflowViz - 'Generate with AI' button creates workflow with nodes. 4) Verify tooltips appear on hover over help icons. Backend endpoints: /api/settings/ai, /api/settings/api-keys, /api/ai/generate/{type}."
