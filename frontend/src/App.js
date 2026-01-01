@@ -1231,6 +1231,11 @@ const SettingsView = ({ onSeed }) => {
 
   return (
     <div className="space-y-6" data-testid="settings-view">
+      {/* AI Settings - New BYOK Section */}
+      <SettingsPage />
+      
+      <Separator className="my-8" />
+
       <Card>
         <CardHeader>
           <CardTitle>System Actions</CardTitle>
