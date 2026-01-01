@@ -1307,6 +1307,7 @@ function App() {
 
   const NAV_ITEMS = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { id: "workflowviz", label: "WorkflowViz", icon: Workflow },
     { id: "playbooks", label: "Playbooks", icon: BookOpen },
     { id: "sops", label: "SOPs", icon: FileText },
     { id: "talents", label: "Talents", icon: Users },
