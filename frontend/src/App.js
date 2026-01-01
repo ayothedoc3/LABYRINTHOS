@@ -341,6 +341,7 @@ const PlaybooksView = ({ playbooks, onRefresh }) => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Playbooks Grid */}
