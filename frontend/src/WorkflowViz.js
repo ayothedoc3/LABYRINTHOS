@@ -989,9 +989,23 @@ const WorkflowCanvas = ({
 
         <Separator orientation="vertical" className="h-6" />
         
-        <Button size="sm" variant="ghost" onClick={() => fitView({ padding: 0.2 })}>
-          <Maximize2 className="w-4 h-4" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button size="sm" variant="ghost" onClick={applyAutoLayout}>
+              <Layers className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Auto-layout nodes</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button size="sm" variant="ghost" onClick={() => fitView({ padding: 0.2 })}>
+              <Maximize2 className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Fit to view</TooltipContent>
+        </Tooltip>
 
         <Separator orientation="vertical" className="h-6" />
 
