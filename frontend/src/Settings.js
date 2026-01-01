@@ -243,8 +243,8 @@ const Settings = () => {
                 <div className="space-y-2">
                   <Label>Default Model</Label>
                   <Select
-                    value={aiSettings?.default_model || ''}
-                    onValueChange={(value) => updateSettings({ default_model: value })}
+                    value={aiSettings?.default_model || 'default'}
+                    onValueChange={(value) => updateSettings({ default_model: value === 'default' ? null : value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Use provider default" />
