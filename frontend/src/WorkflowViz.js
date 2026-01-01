@@ -651,16 +651,72 @@ const WorkflowCanvas = ({
   const [newNodeData, setNewNodeData] = useState({ label: '', description: '' });
   const [saveStatus, setSaveStatus] = useState('saved');
   const saveTimeoutRef = useRef(null);
+  const lastSavedStateRef = useRef(null);
   const { project, fitView } = useReactFlow();
+
+  // Undo/Redo functionality
+  const { pushState, undo, redo, canUndo, canRedo, reset: resetHistory } = useUndoRedo();
+
+  // Handle undo
+  const handleUndo = useCallback(() => {
+    const previousState = undo();
+    if (previousState) {
+      setNodes(previousState.nodes);
+      setEdges(previousState.edges);
+    }
+  }, [undo, setNodes, setEdges]);
+
+  // Handle redo
+  const handleRedo = useCallback(() => {
+    const nextState = redo();
+    if (nextState) {
+      setNodes(nextState.nodes);
+      setEdges(nextState.edges);
+    }
+  }, [redo, setNodes, setEdges]);
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        if (e.shiftKey) {
+          e.preventDefault();
+          handleRedo();
+        } else {
+          e.preventDefault();
+          handleUndo();
+        }
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+        e.preventDefault();
+        handleRedo();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleUndo, handleRedo]);
+
+  // Push state to history when nodes/edges change significantly
+  const pushHistoryState = useCallback(() => {
+    const currentState = JSON.stringify({ nodes, edges });
+    if (lastSavedStateRef.current !== currentState && nodes.length > 0) {
+      lastSavedStateRef.current = currentState;
+      pushState({ nodes, edges });
+    }
+  }, [nodes, edges, pushState]);
 
   // Auto-layout function
   const applyAutoLayout = useCallback(() => {
     if (nodes.length === 0) return;
     
+    // Save state before layout
+    pushHistoryState();
+    
     const layoutedNodes = calculateAutoLayout(nodes, edges);
     setNodes(layoutedNodes);
     setTimeout(() => fitView({ padding: 0.2 }), 100);
-  }, [nodes, edges, setNodes, fitView]);
+  }, [nodes, edges, setNodes, fitView, pushHistoryState]);
 
   // Load nodes and edges for this layer
   useEffect(() => {
