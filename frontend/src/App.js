@@ -399,17 +399,28 @@ const SOPsView = ({ sops, onRefresh }) => {
   return (
     <div className="space-y-6" data-testid="sops-view">
       {/* Filters */}
-      <div className="flex gap-4 items-center">
-        <Select value={filter.function} onValueChange={(v) => setFilter({ ...filter, function: v })}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="Function" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Functions</SelectItem>
-            {FUNCTIONS.map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
-          </SelectContent>
-        </Select>
-        <Badge variant="outline">{filteredSOPs.length} SOPs</Badge>
+      <div className="flex gap-4 items-center justify-between">
+        <div className="flex gap-4 items-center">
+          <Select value={filter.function} onValueChange={(v) => setFilter({ ...filter, function: v })}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Function" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Functions</SelectItem>
+              {FUNCTIONS.map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Badge variant="outline">{filteredSOPs.length} SOPs</Badge>
+        </div>
+        <AIGenerateDialog 
+          contentType="sop" 
+          onGenerated={() => onRefresh()}
+          trigger={
+            <Button variant="outline" data-testid="ai-generate-sop-btn">
+              <Sparkles className="w-4 h-4 mr-2" /> Generate with AI
+            </Button>
+          }
+        />
       </div>
 
       {/* SOPs List */}
