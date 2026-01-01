@@ -1042,33 +1042,68 @@ const WorkflowCanvas = ({
         </div>
       </div>
 
-      {/* Selected Node Panel */}
+      {/* Selected Node Panel - Enhanced */}
       {selectedNode && (
-        <div className="absolute bottom-4 left-4 z-10 bg-white rounded-xl p-4 shadow-xl w-80 border">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div 
-                className="w-8 h-8 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: NODE_CONFIG[selectedNode.data.node_type]?.iconBg }}
-              >
-                {(() => {
-                  const Icon = NODE_CONFIG[selectedNode.data.node_type]?.icon || Zap;
-                  return <Icon className="w-4 h-4" style={{ color: NODE_CONFIG[selectedNode.data.node_type]?.accentColor }} />;
-                })()}
+        <div className="absolute bottom-4 left-4 z-10 bg-white rounded-xl shadow-xl w-80 border overflow-hidden">
+          {/* Header with color accent */}
+          <div 
+            className="px-4 py-3 border-b"
+            style={{ 
+              background: `linear-gradient(90deg, ${NODE_CONFIG[selectedNode.data.node_type]?.iconBg} 0%, white 100%)` 
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div 
+                  className="w-10 h-10 rounded-lg flex items-center justify-center shadow-sm"
+                  style={{ backgroundColor: 'white' }}
+                >
+                  {(() => {
+                    const Icon = NODE_CONFIG[selectedNode.data.node_type]?.icon || Zap;
+                    return <Icon className="w-5 h-5" style={{ color: NODE_CONFIG[selectedNode.data.node_type]?.accentColor }} />;
+                  })()}
+                </div>
+                <div>
+                  <h3 className="font-semibold text-sm leading-tight">{selectedNode.data.label}</h3>
+                  <Badge 
+                    variant="outline" 
+                    className="text-xs mt-0.5"
+                    style={{ 
+                      borderColor: NODE_CONFIG[selectedNode.data.node_type]?.accentColor,
+                      color: NODE_CONFIG[selectedNode.data.node_type]?.accentColor 
+                    }}
+                  >
+                    {NODE_CONFIG[selectedNode.data.node_type]?.label}
+                  </Badge>
+                </div>
               </div>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setSelectedNode(null)}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+          
+          {/* Content */}
+          <div className="p-4 space-y-4">
+            {/* Description */}
+            {selectedNode.data.description && (
               <div>
-                <h3 className="font-semibold text-sm">{selectedNode.data.label}</h3>
-                <span className="text-xs text-gray-500">{NODE_CONFIG[selectedNode.data.node_type]?.label}</span>
+                <Label className="text-xs text-muted-foreground mb-1 block">Description</Label>
+                <p className="text-sm text-foreground bg-muted/50 rounded-lg p-2">{selectedNode.data.description}</p>
+              </div>
+            )}
+
+            {/* Connection info */}
+            <div className="flex gap-2">
+              <div className="flex-1 bg-muted/50 rounded-lg p-2 text-center">
+                <div className="text-lg font-semibold">{edges.filter(e => e.target === selectedNode.id).length}</div>
+                <div className="text-xs text-muted-foreground">Incoming</div>
+              </div>
+              <div className="flex-1 bg-muted/50 rounded-lg p-2 text-center">
+                <div className="text-lg font-semibold">{edges.filter(e => e.source === selectedNode.id).length}</div>
+                <div className="text-xs text-muted-foreground">Outgoing</div>
               </div>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => setSelectedNode(null)}>
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-          <div className="space-y-3">
-            {selectedNode.data.description && (
-              <p className="text-sm text-gray-600">{selectedNode.data.description}</p>
-            )}
 
             {/* Assignee picker for ACTION nodes */}
             {selectedNode.data.node_type === 'ACTION' && (
