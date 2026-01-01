@@ -121,6 +121,7 @@ const LabeledEdge = ({
   data,
   style = {},
   markerEnd,
+  selected,
 }) => {
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -134,30 +135,50 @@ const LabeledEdge = ({
   const edgeLabel = data?.label || '';
   const edgeType = data?.edge_type || 'flow';
   
-  // Edge type configurations
+  // Edge type configurations with clearer styling
   const edgeStyles = {
-    flow: { stroke: '#94a3b8', label: '→', color: '#64748b' },
-    depends_on: { stroke: '#f59e0b', label: 'depends on', color: '#d97706' },
-    triggers: { stroke: '#22c55e', label: 'triggers', color: '#16a34a' },
-    produces: { stroke: '#8b5cf6', label: 'produces', color: '#7c3aed' },
-    blocks: { stroke: '#ef4444', label: 'blocks', color: '#dc2626' },
+    flow: { stroke: '#64748b', label: '', color: '#475569', dash: undefined },
+    depends_on: { stroke: '#f59e0b', label: 'depends', color: '#d97706', dash: '8,4' },
+    triggers: { stroke: '#22c55e', label: 'triggers', color: '#16a34a', dash: undefined },
+    produces: { stroke: '#8b5cf6', label: 'produces', color: '#7c3aed', dash: undefined },
+    blocks: { stroke: '#ef4444', label: 'blocks', color: '#dc2626', dash: '4,4' },
+    requires: { stroke: '#0ea5e9', label: 'requires', color: '#0284c7', dash: '8,4' },
   };
 
   const edgeConfig = edgeStyles[edgeType] || edgeStyles.flow;
+  const isSelected = selected;
 
   return (
     <>
+      {/* Background glow for selected edge */}
+      {isSelected && (
+        <BaseEdge
+          path={edgePath}
+          style={{
+            stroke: edgeConfig.stroke,
+            strokeWidth: 8,
+            opacity: 0.3,
+          }}
+        />
+      )}
+      {/* Main edge line */}
       <BaseEdge
         path={edgePath}
         markerEnd={markerEnd}
         style={{
           ...style,
           stroke: edgeConfig.stroke,
-          strokeWidth: 2,
-          strokeDasharray: edgeType === 'depends_on' ? '5,5' : undefined,
+          strokeWidth: isSelected ? 3 : 2,
+          strokeDasharray: edgeConfig.dash,
+          transition: 'stroke-width 0.2s ease',
         }}
       />
-      {(edgeLabel || edgeType !== 'flow') && (
+      {/* Animated flow indicator */}
+      <circle r="3" fill={edgeConfig.stroke}>
+        <animateMotion dur="2s" repeatCount="indefinite" path={edgePath} />
+      </circle>
+      {/* Edge label */}
+      {(edgeLabel || edgeConfig.label) && (
         <EdgeLabelRenderer>
           <div
             style={{
@@ -168,16 +189,19 @@ const LabeledEdge = ({
             className="nodrag nopan"
           >
             <div
-              className="px-2 py-1 rounded-full text-xs font-medium shadow-sm border"
+              className="px-2 py-0.5 rounded-full text-xs font-medium shadow-sm border bg-white"
               style={{
-                backgroundColor: 'white',
                 borderColor: edgeConfig.stroke,
                 color: edgeConfig.color,
+                fontSize: '10px',
               }}
             >
               {edgeLabel || edgeConfig.label}
             </div>
           </div>
+        </EdgeLabelRenderer>
+      )}
+    </>
         </EdgeLabelRenderer>
       )}
     </>
