@@ -1114,8 +1114,9 @@ async def get_dashboard_stats():
     )
 
 
-# Include the router
+# Include the routers
 app.include_router(api_router)
+app.include_router(workflow_router)  # WorkflowViz routes
 
 # CORS middleware
 app.add_middleware(
