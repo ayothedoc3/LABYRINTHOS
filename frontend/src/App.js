@@ -1373,7 +1373,7 @@ function App() {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsList className="mb-6 flex-wrap h-auto gap-1">
             {NAV_ITEMS.map(item => (
               <TabsTrigger key={item.id} value={item.id} className="flex items-center gap-2" data-testid={`tab-${item.id}`}>
