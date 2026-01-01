@@ -250,7 +250,7 @@ const Settings = () => {
                       <SelectValue placeholder="Use provider default" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Use provider default</SelectItem>
+                      <SelectItem value="default">Use provider default</SelectItem>
                       {aiSettings?.available_providers
                         ?.find(p => p.id === aiSettings.default_provider)
                         ?.models.map((model) => (
