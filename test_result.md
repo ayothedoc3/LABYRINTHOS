@@ -101,3 +101,73 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "WorkflowViz feature in Labyrinth OS - Milanote-style node redesign and URL persistence for selected workflows"
+
+backend:
+  - task: "WorkflowViz APIs (workflows, nodes, edges, templates, team)"
+    implemented: true
+    working: true
+    file: "/app/backend/workflow_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "All backend APIs for WorkflowViz are functional - workflows CRUD, nodes, edges, templates, team members, software tools"
+
+frontend:
+  - task: "Milanote-style Node Redesign"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/WorkflowViz.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Implemented card-based Milanote design with colored left borders, icon backgrounds, clean typography. NODE_CONFIG object with colors for each type (Issue=red, Action=blue, Resource=green, Deliverable=purple, Note=amber, Task=cyan, Blocker=orange). Visual verification via screenshots confirmed working."
+
+  - task: "URL Persistence for Selected Workflow"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/WorkflowViz.js, /app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Implemented workflow ID persistence in URL query params. When user selects a workflow, URL updates to include ?workflow=<id>. On page refresh, workflow is auto-restored. Also added tab persistence in App.js - when workflow param exists, auto-switches to WorkflowViz tab."
+
+  - task: "WorkflowViz Canvas with React Flow"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/WorkflowViz.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "React Flow canvas working with nodes, edges, MiniMap, zoom controls, auto-save functionality"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: true
+
+test_plan:
+  current_focus:
+    - "Milanote-style Node Redesign"
+    - "URL Persistence for Selected Workflow"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Completed two key tasks: (1) Milanote-style node redesign with card-based design and colored borders, (2) URL persistence for selected workflow. Both verified via screenshots. Please test: 1) Navigate to WorkflowViz tab, select a workflow, verify nodes have Milanote card design with colored left borders. 2) Select a workflow, note URL has ?workflow=<id>, refresh page, verify workflow is auto-selected. 3) Switch to Dashboard tab and back to WorkflowViz - workflow should remain selected."
