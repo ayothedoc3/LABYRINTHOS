@@ -1515,33 +1515,49 @@ const WorkflowViz = () => {
   };
 
   const handleNodeDoubleClick = (node) => {
-    if (currentLayer === 'STRATEGIC') {
-      setBreadcrumb([{ layer: 'TACTICAL', node_id: node.id, label: node.data.label }]);
-      setCurrentLayer('TACTICAL');
-      setParentNodeId(node.id);
-    } else if (currentLayer === 'TACTICAL') {
-      setBreadcrumb([
-        ...breadcrumb,
-        { layer: 'EXECUTION', node_id: node.id, label: node.data.label }
-      ]);
-      setCurrentLayer('EXECUTION');
-      setParentNodeId(node.id);
-    }
+    if (!node || node.data.node_type !== 'ACTION') return;
+    
+    const nextLayerMap = {
+      'STRATEGIC': 'TACTICAL',
+      'TACTICAL': 'EXECUTION',
+    };
+    
+    const nextLayer = nextLayerMap[currentLayer];
+    if (!nextLayer) return; // Already at EXECUTION level
+    
+    // Build new breadcrumb trail
+    const newBreadcrumb = [
+      ...breadcrumb,
+      { 
+        layer: nextLayer, 
+        node_id: node.id, 
+        label: node.data.label,
+        parent_layer: currentLayer
+      }
+    ];
+    
+    setBreadcrumb(newBreadcrumb);
+    setCurrentLayer(nextLayer);
+    setParentNodeId(node.id);
   };
 
-  const handleBreadcrumbClick = (layer, nodeId) => {
-    if (layer === 'STRATEGIC') {
+  const navigateToLayer = (targetLayer, targetNodeId = null) => {
+    if (targetLayer === 'STRATEGIC') {
       setCurrentLayer('STRATEGIC');
       setParentNodeId(null);
       setBreadcrumb([]);
     } else {
-      const idx = breadcrumb.findIndex(b => b.layer === layer && b.node_id === nodeId);
+      const idx = breadcrumb.findIndex(b => b.layer === targetLayer && b.node_id === targetNodeId);
       if (idx >= 0) {
         setBreadcrumb(breadcrumb.slice(0, idx + 1));
-        setCurrentLayer(layer);
-        setParentNodeId(nodeId);
+        setCurrentLayer(targetLayer);
+        setParentNodeId(targetNodeId);
       }
     }
+  };
+
+  const handleBreadcrumbClick = (layer, nodeId) => {
+    navigateToLayer(layer, nodeId);
   };
 
   const exportWorkflow = async () => {
