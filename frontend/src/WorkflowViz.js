@@ -1027,25 +1027,82 @@ const WorkflowCanvas = ({
 
   return (
     <div className="h-full w-full relative">
-      {/* Breadcrumb Navigation */}
-      <div className="absolute top-4 left-4 z-10 bg-background/90 backdrop-blur rounded-lg p-2 shadow-md flex items-center gap-2">
-        <Button variant="ghost" size="sm" onClick={() => onBreadcrumbClick?.('STRATEGIC', null)}>
-          <Home className="w-4 h-4 mr-1" />
-          Strategic
-        </Button>
-        {breadcrumb?.map((crumb, i) => (
-          <React.Fragment key={i}>
-            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+      {/* Breadcrumb Navigation - Enhanced */}
+      <div className="absolute top-4 left-4 z-10 bg-white/95 backdrop-blur rounded-xl p-1 shadow-lg border flex items-center gap-1">
+        {/* Strategic - Always shown */}
+        <Tooltip>
+          <TooltipTrigger asChild>
             <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => onBreadcrumbClick?.(crumb.layer, crumb.node_id)}
+              variant={layer === 'STRATEGIC' ? 'default' : 'ghost'} 
+              size="sm" 
+              onClick={() => onBreadcrumbClick?.('STRATEGIC', null)}
+              className={layer === 'STRATEGIC' ? 'bg-primary text-primary-foreground' : ''}
             >
-              {crumb.label}
+              <Home className="w-4 h-4 mr-1" />
+              Strategic
             </Button>
+          </TooltipTrigger>
+          <TooltipContent>🏔️ High-level goals and major initiatives</TooltipContent>
+        </Tooltip>
+        
+        {/* Tactical level in breadcrumb */}
+        {breadcrumb?.filter(b => b.layer === 'TACTICAL').map((crumb, i) => (
+          <React.Fragment key={`tactical-${i}`}>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant={layer === 'TACTICAL' && parentNodeId === crumb.node_id ? 'default' : 'ghost'} 
+                  size="sm"
+                  onClick={() => onBreadcrumbClick?.('TACTICAL', crumb.node_id)}
+                  className={`max-w-[150px] truncate ${layer === 'TACTICAL' ? 'bg-amber-500 text-white hover:bg-amber-600' : ''}`}
+                >
+                  <Target className="w-4 h-4 mr-1 flex-shrink-0" />
+                  <span className="truncate">{crumb.label}</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>⚔️ Tactical: {crumb.label}</TooltipContent>
+            </Tooltip>
           </React.Fragment>
         ))}
-        <Badge variant="outline" className="ml-2">{layer}</Badge>
+        
+        {/* Execution level in breadcrumb */}
+        {breadcrumb?.filter(b => b.layer === 'EXECUTION').map((crumb, i) => (
+          <React.Fragment key={`execution-${i}`}>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant={layer === 'EXECUTION' ? 'default' : 'ghost'} 
+                  size="sm"
+                  onClick={() => onBreadcrumbClick?.('EXECUTION', crumb.node_id)}
+                  className={`max-w-[150px] truncate ${layer === 'EXECUTION' ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}
+                >
+                  <CheckCircle2 className="w-4 h-4 mr-1 flex-shrink-0" />
+                  <span className="truncate">{crumb.label}</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>🎯 Execution: {crumb.label}</TooltipContent>
+            </Tooltip>
+          </React.Fragment>
+        ))}
+        
+        {/* Current Layer Badge */}
+        <div className="ml-2 pl-2 border-l">
+          <Badge 
+            variant="secondary" 
+            className={`
+              ${layer === 'STRATEGIC' ? 'bg-primary/10 text-primary' : ''}
+              ${layer === 'TACTICAL' ? 'bg-amber-100 text-amber-700' : ''}
+              ${layer === 'EXECUTION' ? 'bg-green-100 text-green-700' : ''}
+            `}
+          >
+            {layer === 'STRATEGIC' && '🏔️'}
+            {layer === 'TACTICAL' && '⚔️'}
+            {layer === 'EXECUTION' && '🎯'}
+            {' '}{layer}
+          </Badge>
+        </div>
       </div>
 
       {/* Toolbar */}
