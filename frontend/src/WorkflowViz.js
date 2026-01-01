@@ -844,6 +844,9 @@ const WorkflowCanvas = ({
   }, [onNodeDoubleClick, layer]);
 
   const addNode = async (nodeType, templateData = null) => {
+    // Push current state to history before making change
+    pushHistoryState();
+    
     const position = project({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
     
     const nodeData = templateData || {
