@@ -811,6 +811,9 @@ const WorkflowCanvas = ({
   }, [nodes, edges]);
 
   const onConnect = useCallback((params) => {
+    // Push current state to history before making change
+    pushHistoryState();
+    
     const newEdge = {
       ...params,
       id: `edge-${Date.now()}`,
@@ -828,7 +831,7 @@ const WorkflowCanvas = ({
       data: { edge_type: 'flow' },
     };
     setEdges((eds) => addEdge(newEdge, eds));
-  }, [setEdges, layer, workflowId]);
+  }, [setEdges, layer, workflowId, pushHistoryState]);
 
   const onNodeClick = useCallback((event, node) => {
     setSelectedNode(node);
