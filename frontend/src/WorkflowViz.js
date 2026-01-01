@@ -1006,8 +1006,8 @@ const WorkflowCanvas = ({
         
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button size="sm" variant="ghost" onClick={applyAutoLayout}>
-              <Settings2 className="w-4 h-4" />
+            <Button size="sm" variant="ghost" onClick={applyAutoLayout} data-testid="auto-layout-btn">
+              <LayoutGrid className="w-4 h-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Auto-arrange nodes</TooltipContent>
