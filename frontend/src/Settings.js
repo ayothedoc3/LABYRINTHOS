@@ -361,7 +361,7 @@ const Settings = () => {
                               <SelectValue placeholder="Use default" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="">Use default</SelectItem>
+                              <SelectItem value="default">Use default</SelectItem>
                               {aiSettings?.available_providers
                                 ?.find(p => p.id === newKey.provider)
                                 ?.models.map((model) => (
