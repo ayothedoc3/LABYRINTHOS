@@ -258,7 +258,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "WorkflowViz Canvas Organization & Layout Features"
+    - "WorkflowViz Undo/Redo Functionality"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
