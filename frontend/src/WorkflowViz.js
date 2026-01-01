@@ -12,6 +12,9 @@ import ReactFlow, {
   MarkerType,
   Handle,
   Position,
+  BaseEdge,
+  EdgeLabelRenderer,
+  getBezierPath,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,13 +29,20 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Plus, Save, Undo, Redo, Download, Upload, Share2, ZoomIn, ZoomOut, Maximize2,
   AlertTriangle, Zap, FolderOpen, FileText, StickyNote, ListTodo, Ban,
   ChevronRight, ChevronLeft, Home, Users, Settings2, Layers, Search,
   RefreshCw, Trash2, Copy, Eye, X, GripVertical, CheckCircle2, Circle,
-  Clock, Target, Package, Lightbulb
+  Clock, Target, Package, Lightbulb, Sparkles, HelpCircle, ArrowRight
 } from 'lucide-react';
 import axios from 'axios';
+import AIGenerateDialog from './AIGenerateDialog';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api/workflowviz`;
