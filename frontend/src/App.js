@@ -1083,10 +1083,20 @@ const ContractsView = ({ contracts, talents, playbooks, onRefresh }) => {
     <div className="space-y-6" data-testid="contracts-view">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold">Contracts ({contracts?.length || 0})</h2>
-        <Dialog open={showCreate} onOpenChange={setShowCreate}>
-          <DialogTrigger asChild>
-            <Button data-testid="create-contract-btn"><Plus className="w-4 h-4 mr-2" /> New Contract</Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <AIGenerateDialog 
+            contentType="contract" 
+            onGenerated={() => onRefresh()}
+            trigger={
+              <Button variant="outline" data-testid="ai-generate-contract-btn">
+                <Sparkles className="w-4 h-4 mr-2" /> Generate with AI
+              </Button>
+            }
+          />
+          <Dialog open={showCreate} onOpenChange={setShowCreate}>
+            <DialogTrigger asChild>
+              <Button data-testid="create-contract-btn"><Plus className="w-4 h-4 mr-2" /> New Contract</Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Create Contract</DialogTitle>
