@@ -899,7 +899,11 @@ const WorkflowCanvas = ({
         parent_node_id: parentNodeId || null,
       });
       
-      setNodes((nds) => [...nds, { ...response.data, type: 'custom' }]);
+      setNodes((nds) => [...nds, { 
+        ...response.data, 
+        type: 'custom',
+        data: { ...response.data.data, layer }  // Add layer to node data
+      }]);
       setShowNodeDialog(false);
       setNewNodeData({ label: '', description: '' });
     } catch (error) {
