@@ -990,6 +990,10 @@ const WorkflowCanvas = ({
 
   const deleteSelectedNode = async () => {
     if (!selectedNode) return;
+    
+    // Push current state to history before making change
+    pushHistoryState();
+    
     try {
       await axios.delete(`${API}/workflows/${workflowId}/nodes/${selectedNode.id}`);
       setNodes((nds) => nds.filter(n => n.id !== selectedNode.id));
@@ -1002,6 +1006,10 @@ const WorkflowCanvas = ({
 
   const updateSelectedNode = async (updates) => {
     if (!selectedNode) return;
+    
+    // Push current state to history before making change
+    pushHistoryState();
+    
     try {
       const updatedData = { ...selectedNode.data, ...updates };
       await axios.put(`${API}/workflows/${workflowId}/nodes/${selectedNode.id}`, {
