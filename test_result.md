@@ -167,9 +167,7 @@ metadata:
   run_ui: true
 
 test_plan:
-  current_focus:
-    - "Milanote-style Node Redesign"
-    - "URL Persistence for Selected Workflow"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -177,3 +175,5 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: "Completed two key tasks: (1) Milanote-style node redesign with card-based design and colored borders, (2) URL persistence for selected workflow. Both verified via screenshots. Please test: 1) Navigate to WorkflowViz tab, select a workflow, verify nodes have Milanote card design with colored left borders. 2) Select a workflow, note URL has ?workflow=<id>, refresh page, verify workflow is auto-selected. 3) Switch to Dashboard tab and back to WorkflowViz - workflow should remain selected."
+  - agent: "testing"
+    message: "✅ TESTING COMPLETE: Both WorkflowViz features tested successfully. (1) Milanote-style Node Redesign: Nodes display with white background cards, colored left borders (red/blue/green/purple), icons with colored backgrounds, and proper MiniMap visualization. (2) URL Persistence: Workflow ID correctly persists in URL (?workflow=<id>), auto-restores on page refresh, auto-switches to WorkflowViz tab, and maintains selection during tab switching. Node interaction also working - Selected Node panel appears when clicking nodes. All core functionality verified and working as expected."
