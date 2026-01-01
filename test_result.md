@@ -240,15 +240,18 @@ frontend:
 
   - task: "WorkflowViz Undo/Redo Functionality"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/frontend/src/WorkflowViz.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "testing"
         comment: "Testing undo/redo functionality in WorkflowViz canvas as requested. Need to verify: 1) Undo/Redo buttons presence and tooltips, 2) State management (enabled/disabled states), 3) Auto-layout undo/redo, 4) Multiple actions history, 5) Keyboard shortcuts (Ctrl+Z, Ctrl+Shift+Z), 6) History persistence."
+      - working: true
+        agent: "testing"
+        comment: "✅ COMPREHENSIVE UNDO/REDO TESTING COMPLETED: 1) Buttons Presence: Undo button [data-testid='undo-btn'] ✅, Redo button [data-testid='redo-btn'] ✅. 2) State Management: Both buttons initially disabled ✅, Undo enabled after auto-layout ✅, Redo enabled after undo ✅, Redo disabled after redo ✅. 3) Auto-layout Undo/Redo: Auto-layout changes node positions ✅, Undo restores previous positions ✅, Redo reapplies auto-layout ✅. 4) Multiple Actions: History tracks multiple operations ✅, Multiple undo/redo operations work correctly ✅. 5) Keyboard Shortcuts: Ctrl+Z (undo) ✅, Ctrl+Shift+Z (redo) ✅, Ctrl+Y (alternative redo) ✅. 6) History Persistence: Multiple actions tracked in history ✅, Sequential undo/redo operations maintain state correctly ✅. All functionality working as expected with proper state management and user feedback."
 
 metadata:
   created_by: "main_agent"
