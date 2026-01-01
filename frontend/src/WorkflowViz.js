@@ -756,13 +756,20 @@ const WorkflowCanvas = ({
           data: e.data || { edge_type: 'flow' },
         })));
         
-        setTimeout(() => fitView({ padding: 0.2 }), 100);
+        // Reset history when loading new data
+        setTimeout(() => {
+          resetHistory({ 
+            nodes: nodesRes.data.map(n => ({ ...n, type: 'custom' })),
+            edges: layerEdges 
+          });
+          fitView({ padding: 0.2 });
+        }, 100);
       } catch (error) {
         console.error('Error loading workflow data:', error);
       }
     };
     loadData();
-  }, [workflowId, layer, parentNodeId, setNodes, setEdges, fitView]);
+  }, [workflowId, layer, parentNodeId, setNodes, setEdges, fitView, resetHistory]);
 
   // Auto-save with debounce
   const triggerAutoSave = useCallback(() => {
