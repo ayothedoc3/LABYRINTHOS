@@ -1228,7 +1228,17 @@ const WorkflowViz = () => {
                 `}
                 onClick={() => selectWorkflow(wf)}
               >
-                <div className="font-medium text-sm">{wf.name}</div>
+                <div className="font-medium text-sm flex items-center gap-2">
+                  {wf.name}
+                  {wf.ai_generated && (
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Sparkles className="w-3 h-3 text-primary" />
+                      </TooltipTrigger>
+                      <TooltipContent>AI Generated</TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
                 <div className="text-xs text-muted-foreground">
                   Updated {new Date(wf.updated_at).toLocaleDateString()}
                 </div>
