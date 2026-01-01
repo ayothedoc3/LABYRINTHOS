@@ -1138,6 +1138,19 @@ const WorkflowViz = () => {
     }
   };
 
+  // Handle AI generated workflow
+  const handleAIWorkflowGenerated = async (result) => {
+    if (result?.success && result?.workflow_id) {
+      await refreshWorkflows();
+      // Select the new workflow
+      const newWorkflows = await axios.get(`${API}/workflows`);
+      const newWorkflow = newWorkflows.data.find(w => w.id === result.workflow_id);
+      if (newWorkflow) {
+        selectWorkflow(newWorkflow);
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[600px]">
