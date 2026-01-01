@@ -1256,7 +1256,18 @@ const SettingsView = ({ onSeed }) => {
 // ==================== MAIN APP ====================
 
 function App() {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  // Initialize activeTab from URL or default to dashboard
+  const getInitialTab = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabFromUrl = urlParams.get('tab');
+    const workflowFromUrl = urlParams.get('workflow');
+    // If workflow param exists, default to workflowviz tab
+    if (workflowFromUrl) return 'workflowviz';
+    if (tabFromUrl) return tabFromUrl;
+    return 'dashboard';
+  };
+
+  const [activeTab, setActiveTab] = useState(getInitialTab);
   const [stats, setStats] = useState(null);
   const [alerts, setAlerts] = useState([]);
   const [playbooks, setPlaybooks] = useState([]);
@@ -1265,6 +1276,18 @@ function App() {
   const [kpis, setKPIs] = useState([]);
   const [contracts, setContracts] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Update URL when tab changes
+  const handleTabChange = useCallback((newTab) => {
+    setActiveTab(newTab);
+    const url = new URL(window.location);
+    url.searchParams.set('tab', newTab);
+    // Keep workflow param if switching to workflowviz
+    if (newTab !== 'workflowviz') {
+      url.searchParams.delete('workflow');
+    }
+    window.history.replaceState({}, '', url);
+  }, []);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
