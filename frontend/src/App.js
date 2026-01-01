@@ -1282,10 +1282,7 @@ function App() {
     setActiveTab(newTab);
     const url = new URL(window.location);
     url.searchParams.set('tab', newTab);
-    // Keep workflow param if switching to workflowviz
-    if (newTab !== 'workflowviz') {
-      url.searchParams.delete('workflow');
-    }
+    // Preserve workflow param when switching tabs (don't remove it)
     window.history.replaceState({}, '', url);
   }, []);
 
