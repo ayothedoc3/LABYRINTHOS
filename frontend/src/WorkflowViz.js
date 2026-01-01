@@ -304,6 +304,7 @@ const WorkflowCanvas = ({
     const position = project({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
     const nodesToAdd = [];
     const edgesToAdd = [];
+    // eslint-disable-next-line react-hooks/purity
     const timestamp = Date.now();
 
     // Create main action node
