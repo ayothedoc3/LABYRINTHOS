@@ -19,8 +19,9 @@ import {
   LayoutDashboard, BookOpen, FileText, Users, FileCheck, 
   BarChart3, Shield, Settings, AlertTriangle, CheckCircle2, 
   XCircle, Clock, TrendingUp, TrendingDown, Play, RefreshCw,
-  Plus, ChevronRight, Activity, Zap, Target, ArrowRight
+  Plus, ChevronRight, Activity, Zap, Target, ArrowRight, Workflow
 } from "lucide-react";
+import WorkflowViz from "./WorkflowViz";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
