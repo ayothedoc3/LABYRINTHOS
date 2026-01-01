@@ -105,6 +105,7 @@ async def generate_workflow(description: str, provider: Optional[str] = None, mo
             "ai_generated": True
         }
         
+        workflow_response = dict(workflow)
         await db.workflows.insert_one(workflow)
         
         # Create nodes
@@ -153,7 +154,7 @@ async def generate_workflow(description: str, provider: Optional[str] = None, mo
         return {
             "success": True,
             "workflow_id": workflow_id,
-            "workflow": workflow,
+            "workflow": workflow_response,
             "nodes_created": len(nodes),
             "edges_created": len(connections)
         }
