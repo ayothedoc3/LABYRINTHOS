@@ -857,7 +857,16 @@ const WorkflowViz = () => {
   const [newWorkflowName, setNewWorkflowName] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // Load initial data
+  // Update URL when workflow selection changes
+  useEffect(() => {
+    if (selectedWorkflow) {
+      const url = new URL(window.location);
+      url.searchParams.set('workflow', selectedWorkflow.id);
+      window.history.replaceState({}, '', url);
+    }
+  }, [selectedWorkflow]);
+
+  // Load initial data and restore workflow from URL
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
@@ -874,6 +883,16 @@ const WorkflowViz = () => {
         setSoftware(softwareRes.data);
         setTemplates(templatesRes.data);
         setActionTemplates(actionRes.data);
+
+        // Restore selected workflow from URL query parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const workflowIdFromUrl = urlParams.get('workflow');
+        if (workflowIdFromUrl && workflowsRes.data.length > 0) {
+          const savedWorkflow = workflowsRes.data.find(wf => wf.id === workflowIdFromUrl);
+          if (savedWorkflow) {
+            setSelectedWorkflow(savedWorkflow);
+          }
+        }
       } catch (error) {
         console.error('Error loading data:', error);
       }
