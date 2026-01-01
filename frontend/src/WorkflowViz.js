@@ -695,26 +695,36 @@ const WorkflowCanvas = ({
 
       {/* Selected Node Panel */}
       {selectedNode && (
-        <div className="absolute bottom-4 left-4 z-10 bg-background/95 backdrop-blur rounded-lg p-4 shadow-lg w-80">
+        <div className="absolute bottom-4 left-4 z-10 bg-white rounded-xl p-4 shadow-xl w-80 border">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold">{selectedNode.data.label}</h3>
+            <div className="flex items-center gap-2">
+              <div 
+                className="w-8 h-8 rounded-lg flex items-center justify-center"
+                style={{ backgroundColor: NODE_CONFIG[selectedNode.data.node_type]?.iconBg }}
+              >
+                {(() => {
+                  const Icon = NODE_CONFIG[selectedNode.data.node_type]?.icon || Zap;
+                  return <Icon className="w-4 h-4" style={{ color: NODE_CONFIG[selectedNode.data.node_type]?.accentColor }} />;
+                })()}
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm">{selectedNode.data.label}</h3>
+                <span className="text-xs text-gray-500">{NODE_CONFIG[selectedNode.data.node_type]?.label}</span>
+              </div>
+            </div>
             <Button variant="ghost" size="sm" onClick={() => setSelectedNode(null)}>
               <X className="w-4 h-4" />
             </Button>
           </div>
           <div className="space-y-3">
-            <Badge style={{ backgroundColor: NODE_STYLES[selectedNode.data.node_type]?.background }}>
-              {selectedNode.data.node_type}
-            </Badge>
-            
             {selectedNode.data.description && (
-              <p className="text-sm text-muted-foreground">{selectedNode.data.description}</p>
+              <p className="text-sm text-gray-600">{selectedNode.data.description}</p>
             )}
 
             {/* Assignee picker for ACTION nodes */}
             {selectedNode.data.node_type === 'ACTION' && (
               <div>
-                <Label className="text-xs">Assign Team Members</Label>
+                <Label className="text-xs text-gray-500">Assign Team Members</Label>
                 <Select
                   value={selectedNode.data.assignee_ids?.[0] || ''}
                   onValueChange={(value) => {
@@ -742,7 +752,7 @@ const WorkflowCanvas = ({
             {/* Software picker for RESOURCE nodes */}
             {selectedNode.data.node_type === 'RESOURCE' && (
               <div>
-                <Label className="text-xs">Software/Tool</Label>
+                <Label className="text-xs text-gray-500">Software/Tool</Label>
                 <Select
                   value={selectedNode.data.software_instance || ''}
                   onValueChange={(value) => updateSelectedNode({ software_instance: value })}
@@ -767,7 +777,7 @@ const WorkflowCanvas = ({
             {/* Task status for TASK nodes */}
             {selectedNode.data.node_type === 'TASK' && (
               <div>
-                <Label className="text-xs">Status</Label>
+                <Label className="text-xs text-gray-500">Status</Label>
                 <Select
                   value={selectedNode.data.status || 'TODO'}
                   onValueChange={(value) => updateSelectedNode({ status: value })}
@@ -816,14 +826,16 @@ const WorkflowCanvas = ({
         defaultEdgeOptions={{
           type: 'smoothstep',
           markerEnd: { type: MarkerType.ArrowClosed },
+          style: { strokeWidth: 2, stroke: '#94a3b8' },
         }}
       >
-        <Controls />
+        <Controls className="!bg-white !rounded-lg !shadow-lg !border" />
         <MiniMap 
-          nodeColor={(node) => NODE_STYLES[node.data?.node_type]?.background || '#999'}
-          maskColor="rgba(0,0,0,0.1)"
+          nodeColor={(node) => NODE_CONFIG[node.data?.node_type]?.accentColor || '#94a3b8'}
+          maskColor="rgba(0,0,0,0.08)"
+          className="!bg-white !rounded-lg !shadow-lg !border"
         />
-        <Background variant="dots" gap={20} size={1} />
+        <Background variant="dots" gap={24} size={1} color="#e2e8f0" />
       </ReactFlow>
     </div>
   );
