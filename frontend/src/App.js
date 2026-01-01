@@ -639,6 +639,7 @@ const TalentsView = ({ talents, onRefresh }) => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Talents Grid */}
