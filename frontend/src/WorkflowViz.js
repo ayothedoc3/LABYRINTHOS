@@ -1165,8 +1165,20 @@ const WorkflowViz = () => {
       {/* Sidebar */}
       <div className="w-72 border-r bg-muted/30 flex flex-col">
         <div className="p-4 border-b">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold">Workflows</h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="font-semibold flex items-center gap-2">
+              Workflows
+              <Tooltip>
+                <TooltipTrigger>
+                  <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent side="right" className="max-w-xs">
+                  <p className="font-semibold">🔄 Workflows</p>
+                  <p className="text-sm">Visual process maps showing how work flows through your organization.</p>
+                  <p className="text-xs text-primary mt-1">💡 Drag nodes, draw connections, build your perfect process!</p>
+                </TooltipContent>
+              </Tooltip>
+            </h2>
             <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
               <DialogTrigger asChild>
                 <Button size="sm" data-testid="create-workflow-btn">
@@ -1193,6 +1205,16 @@ const WorkflowViz = () => {
               </DialogContent>
             </Dialog>
           </div>
+          {/* AI Generate Workflow Button */}
+          <AIGenerateDialog 
+            contentType="workflow" 
+            onGenerated={handleAIWorkflowGenerated}
+            trigger={
+              <Button variant="outline" size="sm" className="w-full" data-testid="ai-generate-workflow-btn">
+                <Sparkles className="w-4 h-4 mr-2" /> Generate with AI
+              </Button>
+            }
+          />
         </div>
 
         <ScrollArea className="flex-1">
