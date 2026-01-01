@@ -273,7 +273,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "WorkflowViz Undo/Redo Functionality"
+    - "WorkflowViz 3-Layer Hierarchy Navigation"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
