@@ -551,6 +551,23 @@ const MilanoteNode = ({ data, selected, id }) => {
               <span>{new Date(data.due_date).toLocaleDateString()}</span>
             </div>
           )}
+
+          {/* Drill-down Indicator for ACTION nodes */}
+          {data.node_type === 'ACTION' && data.layer !== 'EXECUTION' && (
+            <div className="pt-2 mt-2 border-t border-dashed border-gray-200">
+              <div className="flex items-center gap-1.5 text-xs text-primary cursor-pointer hover:text-primary/80 transition-colors">
+                <Layers className="w-3 h-3" />
+                <span>Double-click to drill down</span>
+                <ChevronRight className="w-3 h-3" />
+              </div>
+              {data.child_count > 0 && (
+                <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                  <Package className="w-3 h-3" />
+                  <span>{data.child_count} sub-item{data.child_count !== 1 ? 's' : ''}</span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Drag Handle Indicator */}
