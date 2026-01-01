@@ -202,15 +202,133 @@ const LabeledEdge = ({
         </EdgeLabelRenderer>
       )}
     </>
-        </EdgeLabelRenderer>
-      )}
-    </>
   );
 };
 
 // Edge types for ReactFlow
 const edgeTypes = {
   labeled: LabeledEdge,
+};
+
+// ==================== AUTO-LAYOUT ALGORITHM ====================
+
+const AUTO_LAYOUT_CONFIG = {
+  GRID_SIZE: 50,
+  NODE_WIDTH: 220,
+  NODE_HEIGHT: 100,
+  HORIZONTAL_SPACING: 280,
+  VERTICAL_SPACING: 150,
+  INITIAL_X: 100,
+  INITIAL_Y: 100,
+};
+
+// Hierarchical layout algorithm for organizing nodes
+const calculateAutoLayout = (nodes, edges) => {
+  if (nodes.length === 0) return nodes;
+
+  const { HORIZONTAL_SPACING, VERTICAL_SPACING, INITIAL_X, INITIAL_Y } = AUTO_LAYOUT_CONFIG;
+
+  // Build adjacency graph
+  const inDegree = {};
+  const outDegree = {};
+  const children = {};
+  const parents = {};
+  
+  nodes.forEach(node => {
+    inDegree[node.id] = 0;
+    outDegree[node.id] = 0;
+    children[node.id] = [];
+    parents[node.id] = [];
+  });
+
+  edges.forEach(edge => {
+    if (inDegree[edge.target] !== undefined) {
+      inDegree[edge.target]++;
+    }
+    if (outDegree[edge.source] !== undefined) {
+      outDegree[edge.source]++;
+    }
+    if (children[edge.source]) {
+      children[edge.source].push(edge.target);
+    }
+    if (parents[edge.target]) {
+      parents[edge.target].push(edge.source);
+    }
+  });
+
+  // Find root nodes (no incoming edges)
+  let roots = nodes.filter(node => inDegree[node.id] === 0).map(n => n.id);
+  if (roots.length === 0) {
+    // If no roots, pick first node
+    roots = [nodes[0].id];
+  }
+
+  // BFS to assign levels
+  const levels = {};
+  const visited = new Set();
+  let queue = roots.map(id => ({ id, level: 0 }));
+  
+  while (queue.length > 0) {
+    const { id, level } = queue.shift();
+    if (visited.has(id)) continue;
+    visited.add(id);
+    levels[id] = level;
+    
+    children[id].forEach(childId => {
+      if (!visited.has(childId)) {
+        queue.push({ id: childId, level: level + 1 });
+      }
+    });
+  }
+
+  // Handle unvisited nodes
+  nodes.forEach(node => {
+    if (!visited.has(node.id)) {
+      levels[node.id] = 0;
+    }
+  });
+
+  // Group nodes by level
+  const nodesByLevel = {};
+  nodes.forEach(node => {
+    const level = levels[node.id] || 0;
+    if (!nodesByLevel[level]) {
+      nodesByLevel[level] = [];
+    }
+    nodesByLevel[level].push(node);
+  });
+
+  // Sort nodes within each level by type for visual consistency
+  const typeOrder = { ISSUE: 0, ACTION: 1, TASK: 2, RESOURCE: 3, DELIVERABLE: 4, BLOCKER: 5, NOTE: 6, STICKY_NOTE: 7 };
+  Object.values(nodesByLevel).forEach(levelNodes => {
+    levelNodes.sort((a, b) => {
+      const orderA = typeOrder[a.data?.node_type] ?? 99;
+      const orderB = typeOrder[b.data?.node_type] ?? 99;
+      return orderA - orderB;
+    });
+  });
+
+  // Calculate positions
+  const newNodes = nodes.map(node => {
+    const level = levels[node.id] || 0;
+    const levelNodes = nodesByLevel[level];
+    const indexInLevel = levelNodes.indexOf(node);
+    const levelWidth = levelNodes.length;
+    
+    // Center nodes in each level
+    const totalLevelHeight = levelWidth * VERTICAL_SPACING;
+    const startY = INITIAL_Y + (totalLevelHeight / 2) - VERTICAL_SPACING / 2;
+    
+    return {
+      ...node,
+      position: {
+        x: INITIAL_X + level * HORIZONTAL_SPACING,
+        y: startY - indexInLevel * VERTICAL_SPACING + (indexInLevel * VERTICAL_SPACING),
+      },
+    };
+  });
+
+  return newNodes;
 };
 
 // ==================== TOOLTIPS FOR WORKFLOW ELEMENTS ====================
