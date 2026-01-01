@@ -756,9 +756,14 @@ const WorkflowCanvas = ({
           layerNodeIds.has(e.source) && layerNodeIds.has(e.target)
         );
         
+        // Add layer info to node data for drill-down indicator
         setNodes(nodesRes.data.map(n => ({
           ...n,
           type: 'custom',
+          data: {
+            ...n.data,
+            layer: layer,  // Add current layer to node data
+          }
         })));
         setEdges(layerEdges.map(e => ({
           ...e,
@@ -776,7 +781,7 @@ const WorkflowCanvas = ({
         // Reset history when loading new data
         setTimeout(() => {
           resetHistory({ 
-            nodes: nodesRes.data.map(n => ({ ...n, type: 'custom' })),
+            nodes: nodesRes.data.map(n => ({ ...n, type: 'custom', data: { ...n.data, layer } })),
             edges: layerEdges 
           });
           fitView({ padding: 0.2 });
