@@ -304,10 +304,11 @@ const WorkflowCanvas = ({
     const position = project({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
     const nodesToAdd = [];
     const edgesToAdd = [];
+    const timestamp = Date.now();
 
     // Create main action node
     const actionNode = {
-      id: `node-${Date.now()}`,
+      id: `node-${timestamp}`,
       type: 'custom',
       position,
       data: {
@@ -326,7 +327,7 @@ const WorkflowCanvas = ({
     // Create resource nodes
     template.resources?.forEach((resource, i) => {
       const resourceNode = {
-        id: `node-${Date.now()}-r${i}`,
+        id: `node-${timestamp}-r${i}`,
         type: 'custom',
         position: { x: position.x - 150, y: position.y + 80 + (i * 80) },
         data: {
@@ -340,7 +341,7 @@ const WorkflowCanvas = ({
       };
       nodesToAdd.push(resourceNode);
       edgesToAdd.push({
-        id: `edge-${Date.now()}-r${i}`,
+        id: `edge-${timestamp}-r${i}`,
         source: resourceNode.id,
         target: actionNode.id,
         type: 'smoothstep',
@@ -353,7 +354,7 @@ const WorkflowCanvas = ({
     // Create deliverable nodes
     template.deliverables?.forEach((deliverable, i) => {
       const deliverableNode = {
-        id: `node-${Date.now()}-d${i}`,
+        id: `node-${timestamp}-d${i}`,
         type: 'custom',
         position: { x: position.x + 200, y: position.y + (i * 80) },
         data: {
@@ -366,7 +367,7 @@ const WorkflowCanvas = ({
       };
       nodesToAdd.push(deliverableNode);
       edgesToAdd.push({
-        id: `edge-${Date.now()}-d${i}`,
+        id: `edge-${timestamp}-d${i}`,
         source: actionNode.id,
         target: deliverableNode.id,
         type: 'smoothstep',
