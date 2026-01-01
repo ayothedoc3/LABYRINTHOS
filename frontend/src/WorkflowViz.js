@@ -584,6 +584,15 @@ const WorkflowCanvas = ({
   const saveTimeoutRef = useRef(null);
   const { project, fitView } = useReactFlow();
 
+  // Auto-layout function
+  const applyAutoLayout = useCallback(() => {
+    if (nodes.length === 0) return;
+    
+    const layoutedNodes = calculateAutoLayout(nodes, edges);
+    setNodes(layoutedNodes);
+    setTimeout(() => fitView({ padding: 0.2 }), 100);
+  }, [nodes, edges, setNodes, fitView]);
+
   // Load nodes and edges for this layer
   useEffect(() => {
     const loadData = async () => {
