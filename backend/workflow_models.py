@@ -287,7 +287,7 @@ class PredefinedActionTemplate(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     action_name: str  # e.g., "Discovery Call"
-    resources: List[Dict[str, str]] = []  # [{name, software_id}]
+    resources: List[Dict[str, Any]] = []  # [{name, software}] - software can be None
     deliverables: List[str] = []  # List of deliverable names
     description: Optional[str] = None
     category: TemplateCategory
