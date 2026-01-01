@@ -1160,6 +1160,7 @@ const WorkflowViz = () => {
   }
 
   return (
+    <TooltipProvider>
     <div className="h-[calc(100vh-200px)] min-h-[600px] flex" data-testid="workflowviz">
       {/* Sidebar */}
       <div className="w-72 border-r bg-muted/30 flex flex-col">
