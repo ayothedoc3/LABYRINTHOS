@@ -566,6 +566,67 @@ const nodeTypes = {
   custom: MilanoteNode,
 };
 
+// ==================== UNDO/REDO HISTORY HOOK ====================
+
+const useUndoRedo = (initialState = { nodes: [], edges: [] }) => {
+  const [history, setHistory] = useState([initialState]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const isUndoingRef = useRef(false);
+
+  const canUndo = currentIndex > 0;
+  const canRedo = currentIndex < history.length - 1;
+
+  const pushState = useCallback((newState) => {
+    if (isUndoingRef.current) {
+      isUndoingRef.current = false;
+      return;
+    }
+
+    setHistory(prev => {
+      // Remove any future states if we're not at the end
+      const newHistory = prev.slice(0, currentIndex + 1);
+      // Add new state
+      newHistory.push({
+        nodes: JSON.parse(JSON.stringify(newState.nodes)),
+        edges: JSON.parse(JSON.stringify(newState.edges)),
+      });
+      // Keep history manageable (max 50 states)
+      if (newHistory.length > 50) {
+        newHistory.shift();
+        return newHistory;
+      }
+      return newHistory;
+    });
+    setCurrentIndex(prev => Math.min(prev + 1, 49));
+  }, [currentIndex]);
+
+  const undo = useCallback(() => {
+    if (!canUndo) return null;
+    isUndoingRef.current = true;
+    const newIndex = currentIndex - 1;
+    setCurrentIndex(newIndex);
+    return history[newIndex];
+  }, [canUndo, currentIndex, history]);
+
+  const redo = useCallback(() => {
+    if (!canRedo) return null;
+    isUndoingRef.current = true;
+    const newIndex = currentIndex + 1;
+    setCurrentIndex(newIndex);
+    return history[newIndex];
+  }, [canRedo, currentIndex, history]);
+
+  const reset = useCallback((state) => {
+    setHistory([{
+      nodes: JSON.parse(JSON.stringify(state.nodes)),
+      edges: JSON.parse(JSON.stringify(state.edges)),
+    }]);
+    setCurrentIndex(0);
+  }, []);
+
+  return { pushState, undo, redo, canUndo, canRedo, reset, currentIndex, historyLength: history.length };
+};
+
 // ==================== WORKFLOW CANVAS COMPONENT ====================
 
 const WorkflowCanvas = ({ 
