@@ -567,12 +567,22 @@ const TalentsView = ({ talents, onRefresh }) => {
             </SelectContent>
           </Select>
         </div>
-        <Dialog open={showCreate} onOpenChange={setShowCreate}>
-          <DialogTrigger asChild>
-            <Button data-testid="create-talent-btn">
-              <Plus className="w-4 h-4 mr-2" /> Add Talent
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <AIGenerateDialog 
+            contentType="talent" 
+            onGenerated={() => onRefresh()}
+            trigger={
+              <Button variant="outline" data-testid="ai-generate-talent-btn">
+                <Sparkles className="w-4 h-4 mr-2" /> Generate with AI
+              </Button>
+            }
+          />
+          <Dialog open={showCreate} onOpenChange={setShowCreate}>
+            <DialogTrigger asChild>
+              <Button data-testid="create-talent-btn">
+                <Plus className="w-4 h-4 mr-2" /> Add Talent
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>Add New Talent</DialogTitle>
