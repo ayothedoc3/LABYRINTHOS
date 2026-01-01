@@ -196,12 +196,14 @@ async def generate_playbook(description: str, provider: Optional[str] = None, mo
             "ai_generated": True
         }
         
+        # Create a copy for response (before _id is added)
+        playbook_response = dict(playbook)
         await db.playbooks.insert_one(playbook)
         
         return {
             "success": True,
             "playbook_id": playbook_id,
-            "playbook": playbook
+            "playbook": playbook_response
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
