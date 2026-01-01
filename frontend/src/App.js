@@ -19,9 +19,11 @@ import {
   LayoutDashboard, BookOpen, FileText, Users, FileCheck, 
   BarChart3, Shield, Settings, AlertTriangle, CheckCircle2, 
   XCircle, Clock, TrendingUp, TrendingDown, Play, RefreshCw,
-  Plus, ChevronRight, Activity, Zap, Target, ArrowRight, Workflow
+  Plus, ChevronRight, Activity, Zap, Target, ArrowRight, Workflow, Sparkles
 } from "lucide-react";
 import WorkflowViz from "./WorkflowViz";
+import SettingsPage from "./Settings";
+import AIGenerateDialog from "./AIGenerateDialog";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
