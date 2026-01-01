@@ -246,9 +246,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "AI Generation across all content types"
-    - "BYOK Settings functionality"
-    - "Gamified tooltips in WorkflowViz"
+    - "WorkflowViz Canvas Organization & Layout Features"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
