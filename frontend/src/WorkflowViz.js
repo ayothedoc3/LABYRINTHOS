@@ -1162,21 +1162,30 @@ const WorkflowCanvas = ({
         nodeTypes={nodeTypes}
         fitView
         snapToGrid
-        snapGrid={[15, 15]}
+        snapGrid={[25, 25]}
         connectionMode="loose"
+        connectionLineType="smoothstep"
         defaultEdgeOptions={{
           type: 'smoothstep',
-          markerEnd: { type: MarkerType.ArrowClosed },
-          style: { strokeWidth: 2, stroke: '#94a3b8' },
+          markerEnd: { 
+            type: MarkerType.ArrowClosed,
+            color: '#64748b',
+            width: 20,
+            height: 20,
+          },
+          style: { strokeWidth: 2, stroke: '#64748b' },
         }}
+        proOptions={{ hideAttribution: true }}
       >
         <Controls className="!bg-white !rounded-lg !shadow-lg !border" />
         <MiniMap 
           nodeColor={(node) => NODE_CONFIG[node.data?.node_type]?.accentColor || '#94a3b8'}
           maskColor="rgba(0,0,0,0.08)"
           className="!bg-white !rounded-lg !shadow-lg !border"
+          pannable
+          zoomable
         />
-        <Background variant="dots" gap={24} size={1} color="#e2e8f0" />
+        <Background variant="dots" gap={25} size={1} color="#e2e8f0" />
       </ReactFlow>
     </div>
   );
