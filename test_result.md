@@ -111,11 +111,14 @@ backend:
     file: "/app/backend/ai_routes.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Created /api/ai/generate/{content_type} endpoints for workflow, playbook, sop, talent, contract. Uses Emergent LLM key for OpenAI/Anthropic/Gemini. BYOK support for OpenRouter."
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: Backend API endpoints working correctly. GET /api/settings/ai returns 4 providers with proper configuration. POST /api/ai/generate/playbook successful with 200 OK. Backend logs show successful LiteLLM completion calls with gpt-5.2 model."
 
   - task: "Settings & BYOK API endpoints"
     implemented: true
@@ -123,11 +126,14 @@ backend:
     file: "/app/backend/settings_routes.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Created /api/settings/ai for AI config, /api/settings/api-keys for BYOK management. GET/PUT for settings, CRUD for API keys, POST for key testing."
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: Settings API endpoints working. /api/settings/ai returns available_providers array with 4 providers, default_provider set to 'openai'. API structure matches expected format."
 
   - task: "AI Service Module"
     implemented: true
