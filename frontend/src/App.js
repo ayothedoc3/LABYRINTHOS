@@ -1364,6 +1364,10 @@ function App() {
             <Dashboard stats={stats} alerts={alerts} onRefresh={fetchData} />
           </TabsContent>
 
+          <TabsContent value="workflowviz">
+            <WorkflowViz />
+          </TabsContent>
+
           <TabsContent value="playbooks">
             <PlaybooksView playbooks={playbooks} onRefresh={fetchData} />
           </TabsContent>
