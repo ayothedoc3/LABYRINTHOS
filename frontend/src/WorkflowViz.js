@@ -15,6 +15,7 @@ import ReactFlow, {
   BaseEdge,
   EdgeLabelRenderer,
   getBezierPath,
+  SelectionMode,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
