@@ -662,14 +662,18 @@ const WorkflowCanvas = ({
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState(null);
+  const [selectedNodes, setSelectedNodes] = useState([]);
   const [showNodeDialog, setShowNodeDialog] = useState(false);
   const [showTemplateDialog, setShowTemplateDialog] = useState(false);
+  const [showSaveTemplateDialog, setShowSaveTemplateDialog] = useState(false);
   const [newNodeType, setNewNodeType] = useState('ACTION');
   const [newNodeData, setNewNodeData] = useState({ label: '', description: '' });
   const [saveStatus, setSaveStatus] = useState('saved');
+  const [newTemplateName, setNewTemplateName] = useState('');
+  const [newTemplateCategory, setNewTemplateCategory] = useState('OPERATIONS');
   const saveTimeoutRef = useRef(null);
   const lastSavedStateRef = useRef(null);
-  const { project, fitView } = useReactFlow();
+  const { project, fitView, getNodes } = useReactFlow();
 
   // Undo/Redo functionality
   const { pushState, undo, redo, canUndo, canRedo, reset: resetHistory } = useUndoRedo();
