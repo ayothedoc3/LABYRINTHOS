@@ -212,7 +212,7 @@ class BackendTester:
                     "relative_position": {"x": 0, "y": 0}
                 }
             ],
-            "connections": [],
+            "edges": [],
             "is_predefined": False
         }
         
