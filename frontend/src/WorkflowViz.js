@@ -863,11 +863,69 @@ const WorkflowCanvas = ({
     setSelectedNode(node);
   }, []);
 
+  // Handle multi-select with shift+click or selection box
+  const onSelectionChange = useCallback(({ nodes: selectedFlowNodes }) => {
+    setSelectedNodes(selectedFlowNodes || []);
+  }, []);
+
   const onNodeDblClick = useCallback((event, node) => {
     if (node.data.node_type === 'ACTION' && layer !== 'EXECUTION') {
       onNodeDoubleClick?.(node);
     }
   }, [onNodeDoubleClick, layer]);
+
+  // Save selected nodes as template
+  const saveSelectedAsTemplate = async () => {
+    if (selectedNodes.length === 0 || !newTemplateName.trim()) return;
+    
+    // Get edges that connect selected nodes
+    const selectedNodeIds = new Set(selectedNodes.map(n => n.id));
+    const templateEdges = edges.filter(e => 
+      selectedNodeIds.has(e.source) && selectedNodeIds.has(e.target)
+    );
+    
+    // Calculate relative positions (offset from first node)
+    const firstNode = selectedNodes[0];
+    const nodesWithRelativePos = selectedNodes.map(n => ({
+      label: n.data.label,
+      description: n.data.description || '',
+      node_type: n.data.node_type,
+      relative_position: {
+        x: n.position.x - firstNode.position.x,
+        y: n.position.y - firstNode.position.y,
+      }
+    }));
+    
+    // Create connections based on node order in selection
+    const nodeIndexMap = {};
+    selectedNodes.forEach((n, i) => { nodeIndexMap[n.id] = i; });
+    const connections = templateEdges.map(e => ({
+      from_index: nodeIndexMap[e.source],
+      to_index: nodeIndexMap[e.target],
+    }));
+    
+    try {
+      await axios.post(`${API}/templates`, {
+        name: newTemplateName,
+        description: `Template created from ${selectedNodes.length} selected nodes`,
+        category: newTemplateCategory,
+        nodes: nodesWithRelativePos,
+        connections,
+        is_predefined: false,
+      });
+      
+      setShowSaveTemplateDialog(false);
+      setNewTemplateName('');
+      setSelectedNodes([]);
+      // Deselect nodes on canvas
+      setNodes(nds => nds.map(n => ({ ...n, selected: false })));
+      
+      // Refresh templates list
+      onSave?.();
+    } catch (error) {
+      console.error('Error saving template:', error);
+    }
+  };
 
   const addNode = async (nodeType, templateData = null) => {
     // Push current state to history before making change
