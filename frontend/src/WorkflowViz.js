@@ -1283,6 +1283,75 @@ const WorkflowCanvas = ({
           </DialogContent>
         </Dialog>
 
+        {/* Save Selected as Template */}
+        <Dialog open={showSaveTemplateDialog} onOpenChange={setShowSaveTemplateDialog}>
+          <DialogTrigger asChild>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              disabled={selectedNodes.length === 0}
+              data-testid="save-template-btn"
+            >
+              <Save className="w-4 h-4 mr-1" /> Save Template
+              {selectedNodes.length > 0 && (
+                <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                  {selectedNodes.length}
+                </Badge>
+              )}
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Save as Template</DialogTitle>
+              <DialogDescription>
+                Save {selectedNodes.length} selected node{selectedNodes.length !== 1 ? 's' : ''} as a reusable template
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Template Name</Label>
+                <Input 
+                  value={newTemplateName} 
+                  onChange={(e) => setNewTemplateName(e.target.value)}
+                  placeholder="My Custom Template"
+                />
+              </div>
+              <div>
+                <Label>Category</Label>
+                <Select value={newTemplateCategory} onValueChange={setNewTemplateCategory}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="SALES">Sales</SelectItem>
+                    <SelectItem value="MARKETING">Marketing</SelectItem>
+                    <SelectItem value="DEVELOPMENT">Development</SelectItem>
+                    <SelectItem value="OPERATIONS">Operations</SelectItem>
+                    <SelectItem value="FINANCE">Finance</SelectItem>
+                    <SelectItem value="HR">HR</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="bg-muted rounded-lg p-3">
+                <Label className="text-xs text-muted-foreground">Selected Nodes:</Label>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {selectedNodes.map(n => (
+                    <Badge key={n.id} variant="outline" className="text-xs">
+                      {n.data.label}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSaveTemplateDialog(false)}>Cancel</Button>
+              <Button onClick={saveSelectedAsTemplate} disabled={!newTemplateName.trim()}>
+                Save Template
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
           <DialogTrigger asChild>
             <Button size="sm" variant="outline">
