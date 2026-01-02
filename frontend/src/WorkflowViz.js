@@ -1587,12 +1587,16 @@ const WorkflowCanvas = ({
         onConnect={onConnect}
         onNodeClick={onNodeClick}
         onNodeDoubleClick={onNodeDblClick}
+        onSelectionChange={onSelectionChange}
         nodeTypes={nodeTypes}
         fitView
         snapToGrid
         snapGrid={[25, 25]}
         connectionMode="loose"
         connectionLineType="smoothstep"
+        selectionMode="partial"
+        selectNodesOnDrag={false}
+        multiSelectionKeyCode="Shift"
         defaultEdgeOptions={{
           type: 'smoothstep',
           markerEnd: { 
