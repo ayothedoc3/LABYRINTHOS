@@ -193,7 +193,7 @@ python reseed_templates.py
 
 The app is already configured for Emergent. Just:
 1. Push to GitHub (done ✅)
-2. Emergent auto-deploys to: https://labyrinth-os.preview.emergentagent.com
+2. Emergent auto-deploys to: https://full-canvas-mode.preview.emergentagent.com
 3. Done!
 
 ---
