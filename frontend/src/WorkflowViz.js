@@ -1267,7 +1267,7 @@ const WorkflowCanvas = ({
       </div>
 
       {/* Toolbar */}
-      <div className="absolute top-4 right-4 z-10 bg-background/90 backdrop-blur rounded-lg p-2 shadow-md flex items-center gap-2">
+      <div className="absolute top-4 right-4 z-10 bg-white border rounded-lg p-2 shadow-lg flex items-center gap-1.5">
         {/* Undo/Redo Buttons */}
         <Tooltip>
           <TooltipTrigger asChild>
