@@ -583,6 +583,7 @@ const TalentsView = ({ talents, onRefresh }) => {
               </Button>
             }
           />
+          <BulkUploadButton entityType="talents" onSuccess={onRefresh} />
           <Dialog open={showCreate} onOpenChange={setShowCreate}>
             <DialogTrigger asChild>
               <Button data-testid="create-talent-btn">
