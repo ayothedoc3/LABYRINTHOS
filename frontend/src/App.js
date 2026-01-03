@@ -415,15 +415,18 @@ const SOPsView = ({ sops, onRefresh }) => {
           </Select>
           <Badge variant="outline">{filteredSOPs.length} SOPs</Badge>
         </div>
-        <AIGenerateDialog 
-          contentType="sop" 
-          onGenerated={() => onRefresh()}
-          trigger={
-            <Button variant="outline" data-testid="ai-generate-sop-btn">
-              <Sparkles className="w-4 h-4 mr-2" /> Generate with AI
-            </Button>
-          }
-        />
+        <div className="flex gap-2">
+          <AIGenerateDialog 
+            contentType="sop" 
+            onGenerated={() => onRefresh()}
+            trigger={
+              <Button variant="outline" data-testid="ai-generate-sop-btn">
+                <Sparkles className="w-4 h-4 mr-2" /> Generate with AI
+              </Button>
+            }
+          />
+          <BulkUploadButton entityType="sops" onSuccess={onRefresh} />
+        </div>
       </div>
 
       {/* SOPs List */}
