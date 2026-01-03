@@ -731,17 +731,20 @@ const KPIsView = ({ kpis, onRefresh }) => {
   return (
     <div className="space-y-6" data-testid="kpis-view">
       {/* Filters */}
-      <div className="flex gap-4 items-center">
-        <Select value={filter.function} onValueChange={(v) => setFilter({ ...filter, function: v })}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="Function" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Functions</SelectItem>
-            {FUNCTIONS.map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
-          </SelectContent>
-        </Select>
-        <Badge variant="outline">{filteredKPIs.length} KPIs</Badge>
+      <div className="flex gap-4 items-center justify-between">
+        <div className="flex gap-4 items-center">
+          <Select value={filter.function} onValueChange={(v) => setFilter({ ...filter, function: v })}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Function" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Functions</SelectItem>
+              {FUNCTIONS.map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Badge variant="outline">{filteredKPIs.length} KPIs</Badge>
+        </div>
+        <BulkUploadButton entityType="kpis" onSuccess={onRefresh} />
       </div>
 
       {/* Record Value Dialog */}
