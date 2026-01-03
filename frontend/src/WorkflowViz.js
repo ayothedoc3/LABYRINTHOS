@@ -678,10 +678,19 @@ const WorkflowCanvas = ({
   const [newTemplateName, setNewTemplateName] = useState('');
   const [newTemplateCategory, setNewTemplateCategory] = useState('OPERATIONS');
   const [isExporting, setIsExporting] = useState(false);
+  const [showLayerGuide, setShowLayerGuide] = useState(true);
   const saveTimeoutRef = useRef(null);
   const lastSavedStateRef = useRef(null);
   const flowRef = useRef(null);
   const { project, fitView, getNodes } = useReactFlow();
+
+  // Handle showing guide again
+  const handleShowGuide = useCallback(() => {
+    resetGuide();
+    setShowLayerGuide(false);
+    // Force re-render
+    setTimeout(() => setShowLayerGuide(true), 100);
+  }, []);
 
   // Undo/Redo functionality
   const { pushState, undo, redo, canUndo, canRedo, reset: resetHistory } = useUndoRedo();
