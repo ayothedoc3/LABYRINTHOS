@@ -280,6 +280,18 @@ frontend:
         agent: "testing"
         comment: "✅ COMPREHENSIVE BULK UPLOAD BACKEND TESTING COMPLETED: 1) Templates Info API: GET /api/bulk/templates-info returns 5 available templates (playbooks, sops, talents, contracts, kpis) with proper structure ✅. 2) Template Downloads: CSV template download working with sample data ✅, JSON template download working with 2 sample records ✅, Excel template download working (5.3KB file generated) ✅. 3) Preview Functionality: POST /api/bulk/preview/playbooks successfully processes uploaded CSV with validation, returns preview with 2 total rows, 2 valid rows ✅. 4) Import Functionality: POST /api/bulk/import/kpis successfully imports test data (1 processed, 1 successful, 0 failed) ✅. 5) All API endpoints responding with 200 OK status. Backend logs confirm healthy service status. All bulk upload backend functionality working correctly."
 
+  - task: "WorkflowViz Layer Guide Bubble Feature"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/LayerGuide.js, /app/frontend/src/WorkflowViz.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Testing new Layer Guide bubble feature in WorkflowViz. Need to verify: 1) Guide appears on workflow load with proper title and content, 2) Step navigation (Next/Back buttons), 3) Guide minimizes to icon after completion, 4) Dismiss functionality (X button), 5) Guide updates when layer changes (Strategic → Tactical → Execution). Testing scenarios: guide appearance, step progression, minimize/expand, dismiss persistence, layer-specific content updates."
+
 metadata:
   created_by: "main_agent"
   version: "2.0"
