@@ -1957,8 +1957,11 @@ const WorkflowViz = () => {
   return (
     <TooltipProvider>
     <div className="h-[calc(100vh-200px)] min-h-[600px] flex" data-testid="workflowviz">
-      {/* Sidebar */}
-      <div className="w-72 border-r bg-muted/30 flex flex-col">
+      {/* Left Sidebar - Collapsible */}
+      <div className={`
+        border-r bg-muted/30 flex flex-col transition-all duration-300 ease-in-out relative
+        ${leftSidebarCollapsed ? 'w-0 overflow-hidden border-r-0' : 'w-72'}
+      `}>
         <div className="p-4 border-b">
           <div className="flex items-center justify-between mb-2">
             <h2 className="font-semibold flex items-center gap-2">
