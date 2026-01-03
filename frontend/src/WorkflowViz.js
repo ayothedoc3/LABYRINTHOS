@@ -677,8 +677,10 @@ const WorkflowCanvas = ({
   const [saveStatus, setSaveStatus] = useState('saved');
   const [newTemplateName, setNewTemplateName] = useState('');
   const [newTemplateCategory, setNewTemplateCategory] = useState('OPERATIONS');
+  const [isExporting, setIsExporting] = useState(false);
   const saveTimeoutRef = useRef(null);
   const lastSavedStateRef = useRef(null);
+  const flowRef = useRef(null);
   const { project, fitView, getNodes } = useReactFlow();
 
   // Undo/Redo functionality
