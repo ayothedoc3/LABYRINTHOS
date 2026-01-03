@@ -232,6 +232,105 @@ class BackendTester:
         except Exception as e:
             self.log_test("POST /api/workflowviz/templates", False, None, str(e))
     
+    def test_bulk_upload_apis(self):
+        """Test Bulk Upload APIs"""
+        print("\n=== Testing Bulk Upload APIs ===")
+        
+        # Test 1: GET /api/bulk/templates-info - Should return info about 5 available templates
+        try:
+            response = self.session.get(f"{self.base_url}/bulk/templates-info", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                templates = data.get('available_templates', [])
+                if len(templates) == 5:
+                    template_types = [t.get('entity_type') for t in templates]
+                    expected_types = ['playbooks', 'sops', 'talents', 'contracts', 'kpis']
+                    if all(t in template_types for t in expected_types):
+                        self.log_test("GET /api/bulk/templates-info", True, response.status_code, f"Found {len(templates)} templates: {template_types}")
+                    else:
+                        self.log_test("GET /api/bulk/templates-info", False, response.status_code, f"Missing expected template types. Found: {template_types}")
+                else:
+                    self.log_test("GET /api/bulk/templates-info", False, response.status_code, f"Expected 5 templates, found {len(templates)}")
+            else:
+                self.log_test("GET /api/bulk/templates-info", False, response.status_code, response.text[:100])
+        except Exception as e:
+            self.log_test("GET /api/bulk/templates-info", False, None, str(e))
+        
+        # Test 2: GET /api/bulk/template/playbooks?format=csv - Should download CSV template with sample data
+        try:
+            response = self.session.get(f"{self.base_url}/bulk/template/playbooks?format=csv", timeout=10)
+            if response.status_code == 200:
+                content = response.text
+                # Check if it's valid CSV with headers
+                lines = content.strip().split('\n')
+                if len(lines) >= 2:  # Header + at least one data row
+                    headers = lines[0].split(',')
+                    expected_headers = ['playbook_id', 'name', 'function', 'level', 'min_tier', 'description', 'linked_sop_ids']
+                    if all(h.strip('"') in expected_headers for h in headers):
+                        self.log_test("GET /api/bulk/template/playbooks?format=csv", True, response.status_code, f"CSV template downloaded with {len(lines)-1} sample rows")
+                        # Save for later use in preview test
+                        with open('/tmp/playbooks_template.csv', 'w') as f:
+                            f.write(content)
+                    else:
+                        self.log_test("GET /api/bulk/template/playbooks?format=csv", False, response.status_code, f"Invalid CSV headers: {headers}")
+                else:
+                    self.log_test("GET /api/bulk/template/playbooks?format=csv", False, response.status_code, "CSV template has insufficient data")
+            else:
+                self.log_test("GET /api/bulk/template/playbooks?format=csv", False, response.status_code, response.text[:100])
+        except Exception as e:
+            self.log_test("GET /api/bulk/template/playbooks?format=csv", False, None, str(e))
+        
+        # Test 3: GET /api/bulk/template/talents?format=json - Should download JSON template with sample data
+        try:
+            response = self.session.get(f"{self.base_url}/bulk/template/talents?format=json", timeout=10)
+            if response.status_code == 200:
+                try:
+                    data = response.json()
+                    if isinstance(data, list) and len(data) > 0:
+                        sample_talent = data[0]
+                        required_fields = ['name', 'email', 'function', 'communication', 'technical_skills']
+                        if all(field in sample_talent for field in required_fields):
+                            self.log_test("GET /api/bulk/template/talents?format=json", True, response.status_code, f"JSON template downloaded with {len(data)} sample records")
+                        else:
+                            self.log_test("GET /api/bulk/template/talents?format=json", False, response.status_code, f"Missing required fields in JSON template")
+                    else:
+                        self.log_test("GET /api/bulk/template/talents?format=json", False, response.status_code, "JSON template is empty or invalid format")
+                except json.JSONDecodeError:
+                    self.log_test("GET /api/bulk/template/talents?format=json", False, response.status_code, "Invalid JSON response")
+            else:
+                self.log_test("GET /api/bulk/template/talents?format=json", False, response.status_code, response.text[:100])
+        except Exception as e:
+            self.log_test("GET /api/bulk/template/talents?format=json", False, None, str(e))
+        
+        # Test 4: POST /api/bulk/preview/playbooks - Upload the CSV template and verify preview response with validation
+        try:
+            # Check if CSV file exists from previous test
+            import os
+            if os.path.exists('/tmp/playbooks_template.csv'):
+                with open('/tmp/playbooks_template.csv', 'rb') as f:
+                    files = {'file': ('playbooks_template.csv', f, 'text/csv')}
+                    response = self.session.post(f"{self.base_url}/bulk/preview/playbooks", files=files, timeout=15)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    required_fields = ['entity_type', 'total_rows', 'valid_rows', 'invalid_rows', 'preview_data', 'columns']
+                    if all(field in data for field in required_fields):
+                        total_rows = data.get('total_rows', 0)
+                        valid_rows = data.get('valid_rows', 0)
+                        preview_data = data.get('preview_data', [])
+                        if total_rows > 0 and len(preview_data) > 0:
+                            self.log_test("POST /api/bulk/preview/playbooks", True, response.status_code, f"Preview successful: {total_rows} total, {valid_rows} valid rows")
+                        else:
+                            self.log_test("POST /api/bulk/preview/playbooks", False, response.status_code, "Preview returned no data")
+                    else:
+                        self.log_test("POST /api/bulk/preview/playbooks", False, response.status_code, f"Missing required fields in preview response")
+                else:
+                    self.log_test("POST /api/bulk/preview/playbooks", False, response.status_code, response.text[:100])
+            else:
+                self.log_test("POST /api/bulk/preview/playbooks", False, None, "CSV template file not found for preview test")
+        except Exception as e:
+            self.log_test("POST /api/bulk/preview/playbooks", False, None, str(e))
+    
     def run_all_tests(self):
         """Run all test suites"""
         print(f"🚀 Starting Comprehensive Backend API Tests")
