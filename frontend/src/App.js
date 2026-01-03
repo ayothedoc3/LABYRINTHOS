@@ -287,6 +287,7 @@ const PlaybooksView = ({ playbooks, onRefresh }) => {
               </Button>
             }
           />
+          <BulkUploadButton entityType="playbooks" onSuccess={onRefresh} />
           <Dialog open={showCreate} onOpenChange={setShowCreate}>
             <DialogTrigger asChild>
               <Button data-testid="create-playbook-btn">
