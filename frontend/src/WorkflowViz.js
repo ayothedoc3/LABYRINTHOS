@@ -1266,8 +1266,8 @@ const WorkflowCanvas = ({
         </div>
       </div>
 
-      {/* Toolbar */}
-      <div className="absolute top-4 right-4 z-10 bg-white border rounded-lg p-2 shadow-lg flex items-center gap-1.5">
+      {/* Toolbar - positioned below breadcrumb */}
+      <div className="absolute top-16 left-4 z-10 bg-white border rounded-lg p-1.5 shadow-lg flex items-center gap-1">
         {/* Undo/Redo Buttons */}
         <Tooltip>
           <TooltipTrigger asChild>
