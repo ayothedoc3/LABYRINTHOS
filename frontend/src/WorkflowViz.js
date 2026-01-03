@@ -726,6 +726,61 @@ const WorkflowCanvas = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleUndo, handleRedo]);
 
+  // Export workflow as PNG
+  const handleExportPNG = useCallback(async () => {
+    if (!flowRef.current || nodes.length === 0) return;
+    
+    setIsExporting(true);
+    try {
+      // Find the react-flow viewport element
+      const flowElement = flowRef.current.querySelector('.react-flow__viewport');
+      if (!flowElement) {
+        console.error('Could not find flow viewport');
+        setIsExporting(false);
+        return;
+      }
+
+      // Calculate bounds to capture all nodes with padding
+      const nodesBounds = getNodesBounds(nodes);
+      const padding = 50;
+      const width = nodesBounds.width + padding * 2;
+      const height = nodesBounds.height + padding * 2;
+
+      // Get viewport transform for proper positioning
+      const transform = getViewportForBounds(
+        nodesBounds,
+        width,
+        height,
+        0.5,
+        2,
+        padding
+      );
+
+      // Generate PNG with high quality
+      const dataUrl = await toPng(flowElement, {
+        backgroundColor: '#f8fafc',
+        width: width,
+        height: height,
+        style: {
+          width: `${width}px`,
+          height: `${height}px`,
+          transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.zoom})`,
+        },
+        quality: 1,
+        pixelRatio: 2,
+      });
+
+      // Download the image
+      const link = document.createElement('a');
+      link.download = `workflow-${layer.toLowerCase()}-${new Date().toISOString().slice(0,10)}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (error) {
+      console.error('Error exporting PNG:', error);
+    }
+    setIsExporting(false);
+  }, [nodes, layer]);
+
   // Push state to history when nodes/edges change significantly
   const pushHistoryState = useCallback(() => {
     const currentState = JSON.stringify({ nodes, edges });
