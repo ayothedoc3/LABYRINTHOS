@@ -264,9 +264,9 @@ class BackendTester:
                 # Check if it's valid CSV with headers
                 lines = content.strip().split('\n')
                 if len(lines) >= 2:  # Header + at least one data row
-                    headers = lines[0].split(',')
+                    headers = [h.strip().strip('"').strip() for h in lines[0].split(',')]  # Clean headers
                     expected_headers = ['playbook_id', 'name', 'function', 'level', 'min_tier', 'description', 'linked_sop_ids']
-                    if all(h.strip('"') in expected_headers for h in headers):
+                    if all(h in expected_headers for h in headers):
                         self.log_test("GET /api/bulk/template/playbooks?format=csv", True, response.status_code, f"CSV template downloaded with {len(lines)-1} sample rows")
                         # Save for later use in preview test
                         with open('/tmp/playbooks_template.csv', 'w') as f:
