@@ -42,6 +42,7 @@ A quick guide to verify all WorkflowViz features are working correctly.
 ### 5. Canvas Controls (Top-Right Toolbar)
 - [ ] **Undo/Redo** buttons - make a change, then undo it
 - [ ] **Auto-Layout** (grid icon) - click to reorganize nodes neatly
+- [ ] **Export PNG** - click to download workflow as image
 - [ ] **Zoom controls** - use +/- buttons or scroll wheel
 - [ ] **Fit View** - centers and fits all nodes on screen
 
