@@ -44,7 +44,7 @@ import {
   ChevronRight, ChevronLeft, Home, Users, Settings2, Layers, Search,
   RefreshCw, Trash2, Copy, Eye, X, GripVertical, CheckCircle2, Circle,
   Clock, Target, Package, Lightbulb, Sparkles, HelpCircle, ArrowRight, LayoutGrid,
-  Image, FileImage, HelpCircle as HelpIcon
+  Image, FileImage, HelpCircle as HelpIcon, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen
 } from 'lucide-react';
 import axios from 'axios';
 import AIGenerateDialog from './AIGenerateDialog';
