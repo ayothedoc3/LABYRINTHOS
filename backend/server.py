@@ -44,6 +44,7 @@ from seed_data import get_playbooks, get_sops, get_kpis
 from workflow_routes import workflow_router, set_db as set_workflow_db
 from settings_routes import settings_router, set_db as set_settings_db
 from ai_routes import ai_router, set_db as set_ai_db
+from bulk_routes import bulk_router, set_db as set_bulk_db
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -57,6 +58,7 @@ db = client[os.environ.get('DB_NAME', 'labyrinth_db')]
 set_workflow_db(db)
 set_settings_db(db)
 set_ai_db(db)
+set_bulk_db(db)
 
 # Create the main app
 app = FastAPI(title="Labyrinth Operating System + WorkflowViz", version="1.0.0")
@@ -1123,6 +1125,7 @@ app.include_router(api_router)
 app.include_router(workflow_router)  # WorkflowViz routes
 app.include_router(settings_router, prefix="/api")  # Settings & BYOK routes
 app.include_router(ai_router, prefix="/api")  # AI Generation routes
+app.include_router(bulk_router, prefix="/api")  # Bulk Upload routes
 
 # CORS middleware
 app.add_middleware(
