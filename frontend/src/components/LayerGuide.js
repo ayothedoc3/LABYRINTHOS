@@ -118,21 +118,44 @@ export const LayerGuide = ({
   position = 'bottom-right' // 'bottom-right', 'bottom-left', 'top-right', 'center'
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [showGuide, setShowGuide] = useState(false);
+  const [showGuide, setShowGuide] = useState(true); // Start as true
   const [minimized, setMinimized] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   const guideContent = LAYER_GUIDES[layer] || LAYER_GUIDES.STRATEGIC;
   const totalSteps = guideContent.steps.length;
 
-  // Show guide when layer changes (with small delay for animation)
+  // Initialize guide visibility on mount
   useEffect(() => {
-    if (!isGuideDismissed()) {
-      setCurrentStep(0);
-      setMinimized(false);
-      const timer = setTimeout(() => setShowGuide(true), 500);
-      return () => clearTimeout(timer);
+    if (!initialized) {
+      const dismissed = isGuideDismissed();
+      const completed = hasCompletedGuide();
+      
+      // Show guide if not dismissed, minimize if completed but not dismissed
+      if (dismissed) {
+        setShowGuide(false);
+      } else if (completed) {
+        setMinimized(true);
+        setShowGuide(true);
+      } else {
+        setShowGuide(true);
+        setMinimized(false);
+      }
+      setInitialized(true);
     }
-  }, [layer]);
+  }, [initialized]);
+
+  // Reset guide when layer changes
+  useEffect(() => {
+    if (initialized && !isGuideDismissed()) {
+      setCurrentStep(0);
+      // Don't auto-minimize when changing layers - let user see the new content
+      if (!hasCompletedGuide()) {
+        setMinimized(false);
+      }
+      setShowGuide(true);
+    }
+  }, [layer, initialized]);
 
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
