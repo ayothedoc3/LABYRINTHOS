@@ -282,15 +282,18 @@ frontend:
 
   - task: "WorkflowViz Layer Guide Bubble Feature"
     implemented: true
-    working: "NA"
+    working: false
     file: "/app/frontend/src/components/LayerGuide.js, /app/frontend/src/WorkflowViz.js"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "testing"
         comment: "Testing new Layer Guide bubble feature in WorkflowViz. Need to verify: 1) Guide appears on workflow load with proper title and content, 2) Step navigation (Next/Back buttons), 3) Guide minimizes to icon after completion, 4) Dismiss functionality (X button), 5) Guide updates when layer changes (Strategic → Tactical → Execution). Testing scenarios: guide appearance, step progression, minimize/expand, dismiss persistence, layer-specific content updates."
+      - working: false
+        agent: "testing"
+        comment: "❌ LAYER GUIDE BUBBLE FEATURE TESTING FAILED: Unable to complete comprehensive testing due to Playwright script execution issues. However, code analysis reveals: 1) LayerGuide component properly implemented in /app/frontend/src/components/LayerGuide.js with all required features (Strategic/Tactical/Execution layer content, step navigation, minimize/expand, dismiss functionality). 2) Component integrated into WorkflowViz.js at line 1649-1654 with correct positioning (bottom-left). 3) localStorage persistence implemented for guide completion and dismissal states. 4) Layer-specific content defined for all 3 layers with proper step progression. ISSUE: During testing, could not verify if guide actually appears on workflow load - may be a timing issue, localStorage state, or component rendering problem. RECOMMENDATION: Manual verification needed to confirm guide visibility and functionality in browser."
 
 metadata:
   created_by: "main_agent"
