@@ -1786,6 +1786,10 @@ const WorkflowViz = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newWorkflowName, setNewWorkflowName] = useState('');
   const [loading, setLoading] = useState(true);
+  
+  // Sidebar collapse state
+  const [leftSidebarCollapsed, setLeftSidebarCollapsed] = useState(false);
+  const [rightSidebarCollapsed, setRightSidebarCollapsed] = useState(false);
 
   // Update URL when workflow selection changes
   useEffect(() => {
