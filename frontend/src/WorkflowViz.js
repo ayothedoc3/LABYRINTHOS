@@ -1377,6 +1377,23 @@ const WorkflowCanvas = ({
           <TooltipContent>Export workflow as PNG image</TooltipContent>
         </Tooltip>
 
+        <Separator orientation="vertical" className="h-6" />
+
+        {/* Show Guide Button */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              onClick={handleShowGuide}
+              data-testid="show-guide-btn"
+            >
+              <HelpIcon className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Show layer guide</TooltipContent>
+        </Tooltip>
+
         {/* Save Selected as Template */}
         <Dialog open={showSaveTemplateDialog} onOpenChange={setShowSaveTemplateDialog}>
           <DialogTrigger asChild>
