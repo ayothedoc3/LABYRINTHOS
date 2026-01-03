@@ -16,8 +16,11 @@ import ReactFlow, {
   EdgeLabelRenderer,
   getBezierPath,
   SelectionMode,
+  getNodesBounds,
+  getViewportForBounds,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
+import { toPng } from 'html-to-image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -40,7 +43,8 @@ import {
   AlertTriangle, Zap, FolderOpen, FileText, StickyNote, ListTodo, Ban,
   ChevronRight, ChevronLeft, Home, Users, Settings2, Layers, Search,
   RefreshCw, Trash2, Copy, Eye, X, GripVertical, CheckCircle2, Circle,
-  Clock, Target, Package, Lightbulb, Sparkles, HelpCircle, ArrowRight, LayoutGrid
+  Clock, Target, Package, Lightbulb, Sparkles, HelpCircle, ArrowRight, LayoutGrid,
+  Image, FileImage
 } from 'lucide-react';
 import axios from 'axios';
 import AIGenerateDialog from './AIGenerateDialog';
