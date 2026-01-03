@@ -300,7 +300,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Bulk Upload Feature"
+    - "WorkflowViz Layer Guide Bubble Feature"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
