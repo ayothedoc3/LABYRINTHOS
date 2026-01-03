@@ -265,6 +265,18 @@ frontend:
         agent: "testing"
         comment: "✅ COMPREHENSIVE 3-LAYER HIERARCHY NAVIGATION TESTING COMPLETED: 1) Strategic Layer Initial State: Breadcrumb shows Strategic button with home icon ✅, STRATEGIC layer badge with mountain icon 🏔️ displayed ✅, ACTION nodes show 'Double-click to drill down' text ✅, Found 5 nodes on canvas including ACTION nodes ✅. 2) Drill Down to Tactical Layer: Double-click on ACTION node successfully navigates to TACTICAL layer ✅, Breadcrumb updates to show Strategic → Node Name → TACTICAL ✅, Layer badge changes to ⚔️ TACTICAL with amber color (bg-amber-100 text-amber-700) ✅. 3) Navigate Back via Breadcrumb: Strategic button in breadcrumb works correctly ✅, Successfully returns to Strategic layer ✅, Original nodes visible again ✅. 4) Drill Down via Button: Selected node panel shows 'Drill Down' button for ACTION nodes ✅, Drill Down button successfully navigates to TACTICAL layer ✅. 5) Multi-level Navigation: Breadcrumb shows proper hierarchy (Strategic → Parent → Child) ✅, Layer transitions work smoothly ✅, Color coding correct for each layer (Strategic: primary, Tactical: amber, Execution: green) ✅. All test scenarios verified: Strategic layer initial state, double-click drill down, breadcrumb navigation, drill down button, multi-level hierarchy, and layer badge colors/icons all working perfectly. The 3-layer hierarchy navigation system is fully functional and meets all requirements."
 
+  - task: "Bulk Upload Feature"
+    implemented: true
+    working: true
+    file: "/app/backend/bulk_routes.py, /app/frontend/src/components/BulkUpload.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Implemented bulk upload for all entities (Playbooks, SOPs, Talents, Contracts, KPIs). Supports CSV, JSON, Excel (.xlsx). Features: 1) Template download with sample data in all 3 formats. 2) Preview mode with validation before import. 3) Multi-step wizard UI with progress indicator. 4) Drag-and-drop file upload. 5) Duplicate detection (update existing vs insert new). Backend endpoints: /api/bulk/template/{type}, /api/bulk/preview/{type}, /api/bulk/import/{type}."
+
 metadata:
   created_by: "main_agent"
   version: "2.0"
@@ -273,14 +285,14 @@ metadata:
 
 test_plan:
   current_focus:
-    - "WorkflowViz 3-Layer Hierarchy Navigation"
+    - "Bulk Upload Feature"
   stuck_tasks: []
-  test_all: true
+  test_all: false
   test_priority: "high_first"
 
 agent_communication:
   - agent: "main"
-    message: "Implemented comprehensive AI generation with BYOK support. Please test: 1) Settings page - AI Configuration and API Keys tabs. 2) Playbooks page - 'Generate with AI' button and dialog. 3) WorkflowViz - 'Generate with AI' button creates workflow with nodes. 4) Verify tooltips appear on hover over help icons. Backend endpoints: /api/settings/ai, /api/settings/api-keys, /api/ai/generate/{type}."
+    message: "Implemented Bulk Upload feature for all entities. Please test: 1) Playbooks page - Click 'Bulk Upload' button, dialog opens with entity selection. 2) Step 1: Select entity type (should show all 5). 3) Step 2: Download template buttons (CSV, JSON, Excel), file drop zone. 4) Step 3: Upload a test file and verify preview with validation. 5) Step 4: Import valid rows and verify result. Backend endpoints: /api/bulk/templates-info, /api/bulk/template/{type}, /api/bulk/preview/{type}, /api/bulk/import/{type}."
   - agent: "testing"
     message: "COMPREHENSIVE AI GENERATION TESTING COMPLETED ✅ All major functionality working: 1) Settings page - AI Configuration tab shows provider cards (OpenAI, OpenRouter), temperature slider, AI toggle. 2) API Keys (BYOK) tab has Add API Key dialog with provider selection and key input. 3) AI Generate buttons found in ALL sections (Playbooks, SOPs, Talents, Contracts, WorkflowViz). 4) AI generation dialogs open correctly with appropriate placeholders. 5) Backend APIs working - /api/settings/ai returns providers, /api/ai/generate/playbook successful. 6) Backend logs show successful LiteLLM calls and 200 OK responses. MINOR ISSUES: Provider links in BYOK section not displaying correctly, help icon tooltip in WorkflowViz not found, AI generation success messages may have display timing issues in frontend dialogs."
   - agent: "testing"
