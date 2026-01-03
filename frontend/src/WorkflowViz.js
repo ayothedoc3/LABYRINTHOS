@@ -2058,8 +2058,82 @@ const WorkflowViz = () => {
         </div>
       </div>
 
+      {/* Left Sidebar Toggle Button - Shows when collapsed */}
+      {leftSidebarCollapsed && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute left-0 top-4 z-20 h-10 w-6 rounded-l-none rounded-r-lg border border-l-0 bg-white shadow-md hover:bg-muted"
+              onClick={() => setLeftSidebarCollapsed(false)}
+              data-testid="expand-left-sidebar-btn"
+            >
+              <PanelLeftOpen className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right">Expand Workflows Panel</TooltipContent>
+        </Tooltip>
+      )}
+
       {/* Main Canvas Area */}
       <div className="flex-1 relative">
+        {/* Sidebar Toggle Buttons - Inside Canvas Area */}
+        <div className="absolute top-4 right-4 z-20 flex gap-1">
+          {!leftSidebarCollapsed && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 w-8 p-0 bg-white shadow-sm"
+                  onClick={() => setLeftSidebarCollapsed(true)}
+                  data-testid="collapse-left-sidebar-btn"
+                >
+                  <PanelLeftClose className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Hide Workflows Panel</TooltipContent>
+            </Tooltip>
+          )}
+          {!rightSidebarCollapsed && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 w-8 p-0 bg-white shadow-sm"
+                  onClick={() => setRightSidebarCollapsed(true)}
+                  data-testid="collapse-right-sidebar-btn"
+                >
+                  <PanelRightClose className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Hide Templates Panel</TooltipContent>
+            </Tooltip>
+          )}
+          {(leftSidebarCollapsed || rightSidebarCollapsed) && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 px-2 bg-white shadow-sm"
+                  onClick={() => {
+                    setLeftSidebarCollapsed(false);
+                    setRightSidebarCollapsed(false);
+                  }}
+                  data-testid="expand-all-btn"
+                >
+                  <Maximize2 className="w-4 h-4 mr-1" />
+                  <span className="text-xs">Reset</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Show All Panels</TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+
         {selectedWorkflow ? (
           <ReactFlowProvider>
             <WorkflowCanvas
@@ -2110,8 +2184,11 @@ const WorkflowViz = () => {
         )}
       </div>
 
-      {/* Right Panel - Templates */}
-      <div className="w-64 border-l bg-muted/30 hidden lg:block">
+      {/* Right Panel - Templates - Collapsible */}
+      <div className={`
+        border-l bg-muted/30 transition-all duration-300 ease-in-out relative
+        ${rightSidebarCollapsed ? 'w-0 overflow-hidden border-l-0' : 'w-64 hidden lg:block'}
+      `}>
         <div className="p-4 border-b">
           <h3 className="font-semibold">Workflow Templates</h3>
         </div>
@@ -2131,6 +2208,24 @@ const WorkflowViz = () => {
           </div>
         </ScrollArea>
       </div>
+
+      {/* Right Sidebar Toggle Button - Shows when collapsed */}
+      {rightSidebarCollapsed && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-0 top-4 z-20 h-10 w-6 rounded-r-none rounded-l-lg border border-r-0 bg-white shadow-md hover:bg-muted"
+              onClick={() => setRightSidebarCollapsed(false)}
+              data-testid="expand-right-sidebar-btn"
+            >
+              <PanelRightOpen className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="left">Expand Templates Panel</TooltipContent>
+        </Tooltip>
+      )}
     </div>
     </TooltipProvider>
   );
