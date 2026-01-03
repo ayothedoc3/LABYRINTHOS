@@ -1178,7 +1178,7 @@ const WorkflowCanvas = ({
         ))}
         
         {/* Current Layer Badge */}
-        <div className="ml-2 pl-2 border-l">
+        <div className="ml-2 pl-2 border-l flex items-center gap-2">
           <Badge 
             variant="secondary" 
             className={`
@@ -1192,6 +1192,7 @@ const WorkflowCanvas = ({
             {layer === 'EXECUTION' && '🎯'}
             {' '}{layer}
           </Badge>
+          <ActionHint layer={layer} show={true} />
         </div>
       </div>
 
