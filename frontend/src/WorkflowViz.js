@@ -2187,7 +2187,7 @@ const WorkflowViz = () => {
       {/* Right Panel - Templates - Collapsible */}
       <div className={`
         border-l bg-muted/30 transition-all duration-300 ease-in-out relative
-        ${rightSidebarCollapsed ? 'w-0 overflow-hidden border-l-0' : 'w-64 hidden lg:block'}
+        ${rightSidebarCollapsed ? 'w-0 overflow-hidden border-l-0' : 'w-64'}
       `}>
         <div className="p-4 border-b">
           <h3 className="font-semibold">Workflow Templates</h3>
