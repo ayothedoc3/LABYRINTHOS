@@ -1188,7 +1188,7 @@ const WorkflowCanvas = ({
   return (
     <div className="h-full w-full relative" ref={flowRef}>
       {/* Breadcrumb Navigation - Enhanced */}
-      <div className="absolute top-4 left-4 z-10 bg-white/95 backdrop-blur rounded-xl p-1 shadow-lg border flex items-center gap-1">
+      <div className="absolute top-4 left-4 z-10 bg-white border rounded-xl p-1 shadow-lg flex items-center gap-1">
         {/* Strategic - Always shown */}
         <Tooltip>
           <TooltipTrigger asChild>
