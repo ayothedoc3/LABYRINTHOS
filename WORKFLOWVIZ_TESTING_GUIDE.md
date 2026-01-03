@@ -118,9 +118,10 @@ A quick guide to verify all WorkflowViz features are working correctly.
 6. Verify breadcrumb shows "Strategic > [Name]"
 7. Click "Strategic" to go back
 8. Click Auto-Layout button
-9. Add a new node
-10. Delete the node
-11. ✅ All features working!
+9. Click Export PNG - verify image downloads
+10. Add a new node
+11. Delete the node
+12. ✅ All features working!
 ```
 
 ---
