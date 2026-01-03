@@ -1347,6 +1347,27 @@ const WorkflowCanvas = ({
           </DialogContent>
         </Dialog>
 
+        {/* Export as PNG Button */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={handleExportPNG}
+              disabled={isExporting || nodes.length === 0}
+              data-testid="export-png-btn"
+            >
+              {isExporting ? (
+                <RefreshCw className="w-4 h-4 mr-1 animate-spin" />
+              ) : (
+                <FileImage className="w-4 h-4 mr-1" />
+              )}
+              Export PNG
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Export workflow as PNG image</TooltipContent>
+        </Tooltip>
+
         {/* Save Selected as Template */}
         <Dialog open={showSaveTemplateDialog} onOpenChange={setShowSaveTemplateDialog}>
           <DialogTrigger asChild>
