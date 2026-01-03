@@ -214,6 +214,357 @@ PREDEFINED_ACTION_TEMPLATES = [
             "Follow-up Schedule"
         ]
     },
+    # Additional Sales Templates
+    {
+        "action_name": "Proposal Creation",
+        "category": TemplateCategory.SALES,
+        "description": "Create customized proposal based on discovery insights",
+        "resources": [
+            {"name": "Proposal Template Library", "software": "Google Drive"},
+            {"name": "Pricing Calculator", "software": "Google Drive"},
+            {"name": "Case Studies", "software": "SuiteDash"},
+        ],
+        "deliverables": [
+            "Custom Proposal Document",
+            "Pricing Breakdown",
+            "Next Steps Outline"
+        ]
+    },
+    {
+        "action_name": "Contract Negotiation",
+        "category": TemplateCategory.SALES,
+        "description": "Navigate contract terms and close the deal",
+        "resources": [
+            {"name": "Contract Templates", "software": "SuiteDash"},
+            {"name": "Negotiation Playbook", "software": "Google Drive"},
+            {"name": "Legal Review Checklist", "software": "Google Drive"},
+        ],
+        "deliverables": [
+            "Signed Contract",
+            "Payment Schedule",
+            "SOW Document"
+        ]
+    },
+    {
+        "action_name": "Follow-up Sequence",
+        "category": TemplateCategory.SALES,
+        "description": "Automated follow-up sequence for nurturing leads",
+        "resources": [
+            {"name": "Email Templates", "software": "GHL (GoHighLevel)"},
+            {"name": "Follow-up Cadence Guide", "software": "Google Drive"},
+            {"name": "CRM Automation", "software": "GHL (GoHighLevel)"},
+        ],
+        "deliverables": [
+            "Configured Email Sequence",
+            "Response Tracking Dashboard",
+            "Engagement Report"
+        ]
+    },
+    # Additional Operations Templates
+    {
+        "action_name": "Issue Resolution",
+        "category": TemplateCategory.OPERATIONS,
+        "description": "Identify, track, and resolve operational issues",
+        "resources": [
+            {"name": "Issue Tracker", "software": "ClickUp"},
+            {"name": "Root Cause Analysis Template", "software": "Google Drive"},
+            {"name": "Communication Plan", "software": "Slack"},
+        ],
+        "deliverables": [
+            "Issue Resolution Report",
+            "Preventive Measures",
+            "Updated Documentation"
+        ]
+    },
+    {
+        "action_name": "Process Documentation",
+        "category": TemplateCategory.OPERATIONS,
+        "description": "Document standard operating procedures",
+        "resources": [
+            {"name": "SOP Template", "software": "Google Drive"},
+            {"name": "Screen Recording Tool", "software": None},
+            {"name": "Process Flowchart Tool", "software": "Canva"},
+        ],
+        "deliverables": [
+            "Written SOP",
+            "Video Tutorial",
+            "Process Flowchart"
+        ]
+    },
+    {
+        "action_name": "Quality Audit",
+        "category": TemplateCategory.OPERATIONS,
+        "description": "Conduct quality assurance audit and review",
+        "resources": [
+            {"name": "Audit Checklist", "software": "ClickUp"},
+            {"name": "Quality Standards Doc", "software": "Google Drive"},
+            {"name": "Reporting Dashboard", "software": "Google Drive"},
+        ],
+        "deliverables": [
+            "Audit Report",
+            "Non-Conformance List",
+            "Improvement Plan"
+        ]
+    },
+    # Additional Marketing Templates
+    {
+        "action_name": "Social Media Campaign",
+        "category": TemplateCategory.MARKETING,
+        "description": "Multi-platform social media campaign execution",
+        "resources": [
+            {"name": "Social Media Calendar", "software": "ClickUp"},
+            {"name": "Content Library", "software": "Canva"},
+            {"name": "Scheduling Tool", "software": "GHL (GoHighLevel)"},
+        ],
+        "deliverables": [
+            "Content Calendar",
+            "Scheduled Posts",
+            "Engagement Metrics"
+        ]
+    },
+    {
+        "action_name": "SEO Optimization",
+        "category": TemplateCategory.MARKETING,
+        "description": "On-page and technical SEO improvements",
+        "resources": [
+            {"name": "SEO Audit Tool", "software": None},
+            {"name": "Keyword Research Data", "software": "Google Drive"},
+            {"name": "Content Guidelines", "software": "Google Drive"},
+        ],
+        "deliverables": [
+            "SEO Audit Report",
+            "Optimized Content",
+            "Technical Fixes List"
+        ]
+    },
+    {
+        "action_name": "Webinar Hosting",
+        "category": TemplateCategory.MARKETING,
+        "description": "Plan, promote, and host educational webinar",
+        "resources": [
+            {"name": "Webinar Platform", "software": "Zoom"},
+            {"name": "Registration Landing Page", "software": "GHL (GoHighLevel)"},
+            {"name": "Slide Deck Template", "software": "Canva"},
+        ],
+        "deliverables": [
+            "Webinar Recording",
+            "Attendee List",
+            "Follow-up Campaign"
+        ]
+    },
+    {
+        "action_name": "Email Marketing Campaign",
+        "category": TemplateCategory.MARKETING,
+        "description": "Design and deploy targeted email campaign",
+        "resources": [
+            {"name": "Email Builder", "software": "GHL (GoHighLevel)"},
+            {"name": "Segment List", "software": "GHL (GoHighLevel)"},
+            {"name": "A/B Testing Framework", "software": "Google Drive"},
+        ],
+        "deliverables": [
+            "Email Designs",
+            "Campaign Analytics",
+            "Winner Variant Report"
+        ]
+    },
+    # Additional Development Templates
+    {
+        "action_name": "Bug Triage & Fixing",
+        "category": TemplateCategory.DEVELOPMENT,
+        "description": "Prioritize and resolve reported bugs",
+        "resources": [
+            {"name": "Bug Tracker", "software": "GitHub"},
+            {"name": "Triage Guidelines", "software": "Google Drive"},
+            {"name": "Testing Environment", "software": None},
+        ],
+        "deliverables": [
+            "Bug Fix Commits",
+            "Test Coverage Report",
+            "Release Notes"
+        ]
+    },
+    {
+        "action_name": "Feature Implementation",
+        "category": TemplateCategory.DEVELOPMENT,
+        "description": "Build and deploy new feature from spec to production",
+        "resources": [
+            {"name": "Feature Spec", "software": "Google Drive"},
+            {"name": "Design Mockups", "software": "Figma"},
+            {"name": "Dev Environment", "software": "VS Code"},
+        ],
+        "deliverables": [
+            "Working Feature",
+            "Unit Tests",
+            "User Documentation"
+        ]
+    },
+    {
+        "action_name": "Performance Optimization",
+        "category": TemplateCategory.DEVELOPMENT,
+        "description": "Identify and fix performance bottlenecks",
+        "resources": [
+            {"name": "Profiling Tools", "software": None},
+            {"name": "Performance Benchmarks", "software": "Google Drive"},
+            {"name": "Code Repository", "software": "GitHub"},
+        ],
+        "deliverables": [
+            "Performance Report",
+            "Optimized Code",
+            "Benchmark Results"
+        ]
+    },
+    {
+        "action_name": "Code Review Session",
+        "category": TemplateCategory.DEVELOPMENT,
+        "description": "Comprehensive peer code review process",
+        "resources": [
+            {"name": "Pull Request", "software": "GitHub"},
+            {"name": "Review Checklist", "software": "Google Drive"},
+            {"name": "Style Guide", "software": "Google Drive"},
+        ],
+        "deliverables": [
+            "Review Comments",
+            "Approved PR",
+            "Knowledge Transfer Notes"
+        ]
+    },
+    # Additional Finance Templates
+    {
+        "action_name": "Invoice Processing",
+        "category": TemplateCategory.FINANCE,
+        "description": "Process and track invoices for payment",
+        "resources": [
+            {"name": "Invoice Template", "software": "Google Drive"},
+            {"name": "Payment Gateway", "software": None},
+            {"name": "Accounting System", "software": "Google Drive"},
+        ],
+        "deliverables": [
+            "Generated Invoice",
+            "Payment Confirmation",
+            "Accounting Entry"
+        ]
+    },
+    {
+        "action_name": "Expense Review",
+        "category": TemplateCategory.FINANCE,
+        "description": "Review and approve expense reports",
+        "resources": [
+            {"name": "Expense Report Template", "software": "Google Drive"},
+            {"name": "Approval Workflow", "software": "ClickUp"},
+            {"name": "Receipt Storage", "software": "Google Drive"},
+        ],
+        "deliverables": [
+            "Approved Expenses",
+            "Reimbursement List",
+            "Budget Impact Report"
+        ]
+    },
+    {
+        "action_name": "Budget Planning",
+        "category": TemplateCategory.FINANCE,
+        "description": "Create quarterly or annual budget plan",
+        "resources": [
+            {"name": "Budget Template", "software": "Google Drive"},
+            {"name": "Historical Data", "software": "Google Drive"},
+            {"name": "Forecasting Model", "software": "Google Drive"},
+        ],
+        "deliverables": [
+            "Budget Document",
+            "Variance Analysis",
+            "Approval Presentation"
+        ]
+    },
+    {
+        "action_name": "Financial Forecasting",
+        "category": TemplateCategory.FINANCE,
+        "description": "Project future financial performance",
+        "resources": [
+            {"name": "Forecasting Model", "software": "Google Drive"},
+            {"name": "Market Data", "software": "Google Drive"},
+            {"name": "Scenario Planning Tool", "software": "Google Drive"},
+        ],
+        "deliverables": [
+            "Forecast Report",
+            "Scenario Analysis",
+            "Recommendations"
+        ]
+    },
+    # Additional Powerhouse (HR) Templates
+    {
+        "action_name": "Performance Review",
+        "category": TemplateCategory.POWERHOUSE,
+        "description": "Conduct employee performance evaluation",
+        "resources": [
+            {"name": "Review Template", "software": "Google Drive"},
+            {"name": "Performance Metrics", "software": "ClickUp"},
+            {"name": "Feedback Forms", "software": "Google Drive"},
+        ],
+        "deliverables": [
+            "Performance Report",
+            "Development Plan",
+            "Goal Setting Document"
+        ]
+    },
+    {
+        "action_name": "Training Session",
+        "category": TemplateCategory.POWERHOUSE,
+        "description": "Design and deliver employee training",
+        "resources": [
+            {"name": "Training Materials", "software": "Google Drive"},
+            {"name": "Presentation Slides", "software": "Canva"},
+            {"name": "Meeting Platform", "software": "Zoom"},
+        ],
+        "deliverables": [
+            "Training Recording",
+            "Participant Certificates",
+            "Assessment Results"
+        ]
+    },
+    {
+        "action_name": "Team Building Event",
+        "category": TemplateCategory.POWERHOUSE,
+        "description": "Plan and execute team building activity",
+        "resources": [
+            {"name": "Event Planning Checklist", "software": "ClickUp"},
+            {"name": "Budget Tracker", "software": "Google Drive"},
+            {"name": "RSVP System", "software": "GHL (GoHighLevel)"},
+        ],
+        "deliverables": [
+            "Event Summary",
+            "Participant Feedback",
+            "Photos & Recap"
+        ]
+    },
+    {
+        "action_name": "Onboarding New Hire",
+        "category": TemplateCategory.POWERHOUSE,
+        "description": "Complete employee onboarding from day 1",
+        "resources": [
+            {"name": "Onboarding Checklist", "software": "ClickUp"},
+            {"name": "Welcome Kit Template", "software": "Google Drive"},
+            {"name": "Training Schedule", "software": "Google Drive"},
+        ],
+        "deliverables": [
+            "Completed Paperwork",
+            "System Access Setup",
+            "30-Day Review"
+        ]
+    },
+    {
+        "action_name": "Exit Interview Process",
+        "category": TemplateCategory.POWERHOUSE,
+        "description": "Conduct exit interview and offboarding",
+        "resources": [
+            {"name": "Exit Interview Form", "software": "Google Drive"},
+            {"name": "Offboarding Checklist", "software": "ClickUp"},
+            {"name": "Knowledge Transfer Plan", "software": "Google Drive"},
+        ],
+        "deliverables": [
+            "Exit Interview Notes",
+            "Access Revocation Report",
+            "Improvement Insights"
+        ]
+    },
 ]
 
 

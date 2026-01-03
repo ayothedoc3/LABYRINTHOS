@@ -492,11 +492,11 @@ const Settings = () => {
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span>OpenAI</span>
-                  <a 
-                    href="https://platform.openai.com/api-keys" 
-                    target="_blank" 
+                  <a
+                    href="https://platform.openai.com/api-keys"
+                    target="_blank"
                     rel="noopener noreferrer"
-                    className="text-primary hover:underline text-sm"
+                    className="text-blue-600 hover:text-blue-800 underline text-sm font-medium"
                   >
                     platform.openai.com/api-keys →
                   </a>
@@ -504,11 +504,11 @@ const Settings = () => {
                 <Separator />
                 <div className="flex items-center justify-between">
                   <span>Anthropic (Claude)</span>
-                  <a 
-                    href="https://console.anthropic.com/settings/keys" 
-                    target="_blank" 
+                  <a
+                    href="https://console.anthropic.com/settings/keys"
+                    target="_blank"
                     rel="noopener noreferrer"
-                    className="text-primary hover:underline text-sm"
+                    className="text-blue-600 hover:text-blue-800 underline text-sm font-medium"
                   >
                     console.anthropic.com →
                   </a>
@@ -516,11 +516,11 @@ const Settings = () => {
                 <Separator />
                 <div className="flex items-center justify-between">
                   <span>OpenRouter</span>
-                  <a 
-                    href="https://openrouter.ai/keys" 
-                    target="_blank" 
+                  <a
+                    href="https://openrouter.ai/keys"
+                    target="_blank"
                     rel="noopener noreferrer"
-                    className="text-primary hover:underline text-sm"
+                    className="text-blue-600 hover:text-blue-800 underline text-sm font-medium"
                   >
                     openrouter.ai/keys →
                   </a>
@@ -528,11 +528,11 @@ const Settings = () => {
                 <Separator />
                 <div className="flex items-center justify-between">
                   <span>Google AI (Gemini)</span>
-                  <a 
-                    href="https://aistudio.google.com/app/apikey" 
-                    target="_blank" 
+                  <a
+                    href="https://aistudio.google.com/app/apikey"
+                    target="_blank"
                     rel="noopener noreferrer"
-                    className="text-primary hover:underline text-sm"
+                    className="text-blue-600 hover:text-blue-800 underline text-sm font-medium"
                   >
                     aistudio.google.com →
                   </a>

@@ -48,7 +48,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import AIGenerateDialog from './AIGenerateDialog';
-import { LayerGuide, ActionHint, resetGuide, isGuideDismissed, resetOnboarding } from './components/LayerGuide';
+import { LayerGuide, ActionHint, resetGuide, isGuideDismissed } from './components/LayerGuide';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api/workflowviz`;
@@ -690,6 +690,11 @@ const WorkflowCanvas = ({
     setShowLayerGuide(false);
     // Force re-render
     setTimeout(() => setShowLayerGuide(true), 100);
+  }, []);
+
+  // Handle guide dismissal
+  const handleGuideDismiss = useCallback(() => {
+    setShowLayerGuide(false);
   }, []);
 
   // Undo/Redo functionality
@@ -1755,10 +1760,11 @@ const WorkflowCanvas = ({
       
       {/* Layer Guide Bubble */}
       {showLayerGuide && (
-        <LayerGuide 
-          layer={layer} 
+        <LayerGuide
+          layer={layer}
           isVisible={true}
           position="bottom-left"
+          onDismiss={handleGuideDismiss}
         />
       )}
     </div>

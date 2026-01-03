@@ -8,7 +8,23 @@ import uuid
 from typing import Optional, Dict, Any
 from dotenv import load_dotenv
 from openai import OpenAI
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+
+# Try to import emergentintegrations, but make it optional
+try:
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+    HAS_EMERGENT = True
+except ImportError:
+    HAS_EMERGENT = False
+    # Create mock classes if emergentintegrations is not available
+    class LlmChat:
+        def __init__(self, **kwargs):
+            pass
+        def chat(self, messages):
+            return {"content": "Emergent integrations not available. Using mock response."}
+
+    class UserMessage:
+        def __init__(self, content):
+            self.content = content
 
 load_dotenv()
 

@@ -77,10 +77,19 @@ def deserialize_datetime(doc: dict) -> dict:
 # ==================== SEEDING ====================
 
 @workflow_router.post("/seed")
-async def seed_workflow_data():
-    """Seed WorkflowViz with predefined data"""
+async def seed_workflow_data(force: bool = False):
+    """Seed WorkflowViz with predefined data
+
+    Args:
+        force: If True, clear existing data and reseed everything
+    """
     results = {"software": 0, "team_members": 0, "action_templates": 0, "workflow_templates": 0}
-    
+
+    if force:
+        # Clear existing predefined data
+        await db.wf_action_templates.delete_many({})
+        await db.wf_templates.delete_many({"is_predefined": True})
+
     # Seed software
     software_list = get_predefined_software()
     for sw in software_list:
@@ -88,7 +97,7 @@ async def seed_workflow_data():
         if not existing:
             await db.wf_software.insert_one(serialize_doc(sw.model_dump()))
             results["software"] += 1
-    
+
     # Seed team members
     team = get_mock_team_members()
     for member in team:
@@ -96,7 +105,7 @@ async def seed_workflow_data():
         if not existing:
             await db.wf_team_members.insert_one(serialize_doc(member.model_dump()))
             results["team_members"] += 1
-    
+
     # Seed action templates
     action_templates = get_predefined_action_templates()
     for at in action_templates:
@@ -104,7 +113,7 @@ async def seed_workflow_data():
         if not existing:
             await db.wf_action_templates.insert_one(serialize_doc(at.model_dump()))
             results["action_templates"] += 1
-    
+
     # Seed workflow templates
     wf_templates = get_sample_workflow_templates()
     for wft in wf_templates:
@@ -112,7 +121,7 @@ async def seed_workflow_data():
         if not existing:
             await db.wf_templates.insert_one(serialize_doc(wft.model_dump()))
             results["workflow_templates"] += 1
-    
+
     return {"message": "WorkflowViz seeding complete", "created": results}
 
 

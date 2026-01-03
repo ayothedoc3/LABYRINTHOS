@@ -35,6 +35,7 @@
     "@reactflow/controls": "^11.2.14",
     "@reactflow/core": "^11.11.4",
     "@reactflow/minimap": "^11.7.14",
+    "ajv": "^8.17.1",
     "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
