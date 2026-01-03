@@ -44,11 +44,11 @@ import {
   ChevronRight, ChevronLeft, Home, Users, Settings2, Layers, Search,
   RefreshCw, Trash2, Copy, Eye, X, GripVertical, CheckCircle2, Circle,
   Clock, Target, Package, Lightbulb, Sparkles, HelpCircle, ArrowRight, LayoutGrid,
-  Image, FileImage
+  Image, FileImage, HelpCircle as HelpIcon
 } from 'lucide-react';
 import axios from 'axios';
 import AIGenerateDialog from './AIGenerateDialog';
-import { LayerGuide, ActionHint, resetGuide } from './components/LayerGuide';
+import { LayerGuide, ActionHint, resetGuide, isGuideDismissed, resetOnboarding } from './components/LayerGuide';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api/workflowviz`;
