@@ -1101,6 +1101,7 @@ const ContractsView = ({ contracts, talents, playbooks, onRefresh }) => {
               </Button>
             }
           />
+          <BulkUploadButton entityType="contracts" onSuccess={onRefresh} />
           <Dialog open={showCreate} onOpenChange={setShowCreate}>
             <DialogTrigger asChild>
               <Button data-testid="create-contract-btn"><Plus className="w-4 h-4 mr-2" /> New Contract</Button>
