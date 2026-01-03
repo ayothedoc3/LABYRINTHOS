@@ -24,6 +24,7 @@ import {
 import WorkflowViz from "./WorkflowViz";
 import SettingsPage from "./Settings";
 import AIGenerateDialog from "./AIGenerateDialog";
+import { BulkUploadButton } from "./components/BulkUpload";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
