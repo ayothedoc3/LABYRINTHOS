@@ -1649,7 +1649,7 @@ const WorkflowCanvas = ({
       <LayerGuide 
         layer={layer} 
         isVisible={true}
-        position="bottom-right"
+        position="bottom-left"
       />
     </div>
   );
