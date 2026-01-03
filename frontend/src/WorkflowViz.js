@@ -1754,11 +1754,13 @@ const WorkflowCanvas = ({
       </ReactFlow>
       
       {/* Layer Guide Bubble */}
-      <LayerGuide 
-        layer={layer} 
-        isVisible={true}
-        position="bottom-left"
-      />
+      {showLayerGuide && (
+        <LayerGuide 
+          layer={layer} 
+          isVisible={true}
+          position="bottom-left"
+        />
+      )}
     </div>
   );
 };
