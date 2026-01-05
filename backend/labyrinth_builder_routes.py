@@ -476,7 +476,7 @@ async def render_workflow(request: WorkflowRenderRequest):
         }
     }
     
-    await db.workflows.insert_one(workflow_data)
+    await db.wf_workflows.insert_one(workflow_data)
     
     # Save nodes for this workflow
     for node in nodes:
