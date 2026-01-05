@@ -544,24 +544,24 @@ async def preview_workflow(
     # Get sprint config
     sprint_config = SPRINT_CONFIG.get(sprint, {})
     
-    # Get SOPs
-    sops = await db.builder_sops.find({
+    # Get SOPs (from unified collection)
+    sops = await db.sops.find({
         "issue_category": issue_category.value,
         "issue_type_id": issue_type_id,
         "tier": tier.value
     }, {"_id": 0}).to_list(100)
     
-    # Get templates and contracts
+    # Get templates and contracts (from unified collections)
     sop_ids = [s["id"] for s in sops]
     templates = []
     contracts = []
     
     if sop_ids:
-        templates = await db.builder_templates.find({
+        templates = await db.templates.find({
             "linked_sop_ids": {"$in": sop_ids}
         }, {"_id": 0}).to_list(100)
         
-        contracts = await db.builder_contracts.find({
+        contracts = await db.contracts.find({
             "linked_sop_ids": {"$in": sop_ids}
         }, {"_id": 0}).to_list(100)
     
@@ -585,14 +585,14 @@ async def preview_workflow(
     if not templates:
         template_names = category_template_map.get(issue_category.value, [])
         if template_names:
-            templates = await db.builder_templates.find({
+            templates = await db.templates.find({
                 "name": {"$in": template_names}
             }, {"_id": 0}).to_list(100)
     
     if not contracts:
         contract_names = category_contract_map.get(issue_category.value, [])
         if contract_names:
-            contracts = await db.builder_contracts.find({
+            contracts = await db.contracts.find({
                 "name": {"$in": contract_names}
             }, {"_id": 0}).to_list(100)
     
