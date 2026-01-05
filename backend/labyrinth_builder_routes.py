@@ -455,46 +455,6 @@ async def render_workflow(request: WorkflowRenderRequest):
             "target": completion_node_id,
             "type": "smoothstep"
         })
-        contract_node_id = f"contract_{uuid.uuid4().hex[:8]}"
-        nodes.append({
-            "id": contract_node_id,
-            "type": "custom",
-            "position": {"x": last_x, "y": 200 + (idx * 120)},
-            "data": {
-                "label": contract["name"],
-                "node_type": "DELIVERABLE",
-                "description": f"{contract.get('description', '')} ({contract.get('contract_type', 'PROJECT')})",
-                "contract_id": contract["id"]
-            }
-        })
-        # Connect from last SOP
-        if prev_node_id:
-            edges.append({
-                "id": f"e_{prev_node_id}_{contract_node_id}",
-                "source": prev_node_id,
-                "target": contract_node_id,
-                "type": "smoothstep"
-            })
-    
-    # If no SOPs/templates/contracts, add a placeholder note
-    if not sops:
-        note_id = f"note_{uuid.uuid4().hex[:8]}"
-        nodes.append({
-            "id": note_id,
-            "type": "custom",
-            "position": {"x": 300, "y": 200},
-            "data": {
-                "label": "Add SOPs for this configuration",
-                "node_type": "STICKY_NOTE",
-                "description": f"No SOPs found for {selection.issue_category.value} > {selection.issue_type_id} > {selection.tier.value}"
-            }
-        })
-        edges.append({
-            "id": f"e_{issue_node_id}_{note_id}",
-            "source": issue_node_id,
-            "target": note_id,
-            "type": "smoothstep"
-        })
     
     # Create workflow in database
     workflow_id = str(uuid.uuid4())
