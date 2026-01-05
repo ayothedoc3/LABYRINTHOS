@@ -487,6 +487,37 @@ async def preview_workflow(
             "linked_sop_ids": {"$in": sop_ids}
         }, {"_id": 0}).to_list(100)
     
+    # Fallback: If no templates/contracts found via SOP links, get by category mapping
+    category_template_map = {
+        "CLIENT_SERVICES": ["Client Welcome Packet", "Service Agreement Template", "Onboarding Checklist", "Client Portal Guide", "Success Plan Template"],
+        "OPERATIONS": ["Job Description Template", "Interview Scorecard", "Training Materials Template", "SOP Template", "Meeting Agenda Template", "Event Planning Checklist", "Performance Review Form"],
+        "CONSULTATION": ["Strategy Presentation", "Financial Analysis Report", "Market Analysis Report", "Recommendation Report"],
+        "CRISIS_MANAGEMENT": ["Incident Report Form", "Crisis Communication Template", "Emergency Contact List", "Business Continuity Plan", "Post-Mortem Template"],
+        "APP_DEVELOPMENT": ["PRD Template", "Technical Spec Template", "Test Plan Template", "Release Notes Template", "User Guide Template"],
+    }
+    
+    category_contract_map = {
+        "CLIENT_SERVICES": ["Bronze Service Agreement", "Silver Service Agreement", "Gold Service Agreement", "Platinum Service Agreement", "Black VIP Agreement", "Monthly Retainer", "Annual Support Contract"],
+        "OPERATIONS": ["Employment Contract", "Contractor Agreement", "NDA Template"],
+        "CONSULTATION": ["Consulting Engagement", "Advisory Retainer"],
+        "CRISIS_MANAGEMENT": ["Business Continuity Plan"],
+        "APP_DEVELOPMENT": ["Contractor Agreement", "NDA Template"],
+    }
+    
+    if not templates:
+        template_names = category_template_map.get(issue_category.value, [])
+        if template_names:
+            templates = await db.builder_templates.find({
+                "name": {"$in": template_names}
+            }, {"_id": 0}).to_list(100)
+    
+    if not contracts:
+        contract_names = category_contract_map.get(issue_category.value, [])
+        if contract_names:
+            contracts = await db.builder_contracts.find({
+                "name": {"$in": contract_names}
+            }, {"_id": 0}).to_list(100)
+    
     return {
         "issue": issue,
         "sprint": sprint_config,
