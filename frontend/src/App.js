@@ -1393,7 +1393,7 @@ function App() {
     { id: "sops", label: "SOPs", icon: FileText },
     { id: "talents", label: "Talents", icon: Users },
     { id: "kpis", label: "KPIs", icon: BarChart3 },
-    { id: "gates", label: "Gate Console", icon: Shield },
+    { id: "gates", label: "Labyrinth Builder", icon: Shield },
     { id: "contracts", label: "Contracts", icon: FileCheck },
     { id: "settings", label: "Settings", icon: Settings }
   ];
