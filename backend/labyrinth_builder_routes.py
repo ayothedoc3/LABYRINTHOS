@@ -189,12 +189,12 @@ async def create_template(template: LabyrinthTemplate):
 
 @builder_router.post("/templates/bulk")
 async def bulk_create_templates(templates: List[LabyrinthTemplate]):
-    """Bulk create templates"""
+    """Bulk create templates (unified collection)"""
     db = get_db()
     created = []
     for template in templates:
         template_dict = serialize_doc(template.model_dump())
-        await db.builder_templates.insert_one(template_dict)
+        await db.templates.insert_one(template_dict)
         created.append(template_dict)
     return {"created": len(created), "templates": created}
 
@@ -203,9 +203,9 @@ async def bulk_create_templates(templates: List[LabyrinthTemplate]):
 
 @builder_router.get("/contracts")
 async def get_all_contracts():
-    """Get all contracts"""
+    """Get all contracts (unified collection)"""
     db = get_db()
-    contracts = await db.builder_contracts.find({}, {"_id": 0}).to_list(1000)
+    contracts = await db.contracts.find({}, {"_id": 0}).to_list(1000)
     return contracts
 
 
@@ -214,7 +214,7 @@ async def get_contracts_for_sops(sop_ids: str):
     """Get contracts linked to specific SOPs"""
     db = get_db()
     sop_id_list = sop_ids.split(",")
-    contracts = await db.builder_contracts.find({
+    contracts = await db.contracts.find({
         "linked_sop_ids": {"$in": sop_id_list}
     }, {"_id": 0}).to_list(100)
     return contracts
@@ -222,21 +222,25 @@ async def get_contracts_for_sops(sop_ids: str):
 
 @builder_router.post("/contracts")
 async def create_contract(contract: LabyrinthContract):
-    """Create a new contract"""
+    """Create a new contract (unified collection)"""
     db = get_db()
     contract_dict = serialize_doc(contract.model_dump())
-    await db.builder_contracts.insert_one(contract_dict)
+    contract_dict["contract_id"] = f"CNT-{str(uuid.uuid4())[:6].upper()}"
+    contract_dict["status"] = "TEMPLATE"
+    await db.contracts.insert_one(contract_dict)
     return contract_dict
 
 
 @builder_router.post("/contracts/bulk")
 async def bulk_create_contracts(contracts: List[LabyrinthContract]):
-    """Bulk create contracts"""
+    """Bulk create contracts (unified collection)"""
     db = get_db()
     created = []
     for contract in contracts:
         contract_dict = serialize_doc(contract.model_dump())
-        await db.builder_contracts.insert_one(contract_dict)
+        contract_dict["contract_id"] = f"CNT-{str(uuid.uuid4())[:6].upper()}"
+        contract_dict["status"] = "TEMPLATE"
+        await db.contracts.insert_one(contract_dict)
         created.append(contract_dict)
     return {"created": len(created), "contracts": created}
 
