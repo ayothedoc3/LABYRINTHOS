@@ -107,9 +107,9 @@ async def get_tier_options():
 
 @builder_router.get("/sops")
 async def get_all_sops():
-    """Get all builder SOPs"""
+    """Get all SOPs (unified collection)"""
     db = get_db()
-    sops = await db.builder_sops.find({}, {"_id": 0}).to_list(1000)
+    sops = await db.sops.find({}, {"_id": 0}).to_list(1000)
     return sops
 
 
@@ -121,7 +121,7 @@ async def get_sops_for_selection(
 ):
     """Get SOPs for a specific issue + tier combination"""
     db = get_db()
-    sops = await db.builder_sops.find({
+    sops = await db.sops.find({
         "issue_category": issue_category.value,
         "issue_type_id": issue_type_id,
         "tier": tier.value
@@ -131,21 +131,28 @@ async def get_sops_for_selection(
 
 @builder_router.post("/sops")
 async def create_sop(sop: LabyrinthSOP):
-    """Create a new SOP"""
+    """Create a new SOP (unified collection)"""
     db = get_db()
     sop_dict = serialize_doc(sop.model_dump())
-    await db.builder_sops.insert_one(sop_dict)
+    # Add unified fields
+    sop_dict["sop_id"] = f"SOP-{sop.issue_category.value[:3]}-{str(uuid.uuid4())[:4].upper()}"
+    sop_dict["function"] = sop.issue_category.value
+    sop_dict["category"] = sop.issue_type_id
+    await db.sops.insert_one(sop_dict)
     return sop_dict
 
 
 @builder_router.post("/sops/bulk")
 async def bulk_create_sops(sops: List[LabyrinthSOP]):
-    """Bulk create SOPs"""
+    """Bulk create SOPs (unified collection)"""
     db = get_db()
     created = []
     for sop in sops:
         sop_dict = serialize_doc(sop.model_dump())
-        await db.builder_sops.insert_one(sop_dict)
+        sop_dict["sop_id"] = f"SOP-{sop.issue_category.value[:3]}-{str(uuid.uuid4())[:4].upper()}"
+        sop_dict["function"] = sop.issue_category.value
+        sop_dict["category"] = sop.issue_type_id
+        await db.sops.insert_one(sop_dict)
         created.append(sop_dict)
     return {"created": len(created), "sops": created}
 
@@ -154,9 +161,9 @@ async def bulk_create_sops(sops: List[LabyrinthSOP]):
 
 @builder_router.get("/templates")
 async def get_all_templates():
-    """Get all deliverable templates"""
+    """Get all deliverable templates (unified collection)"""
     db = get_db()
-    templates = await db.builder_templates.find({}, {"_id": 0}).to_list(1000)
+    templates = await db.templates.find({}, {"_id": 0}).to_list(1000)
     return templates
 
 
@@ -165,7 +172,7 @@ async def get_templates_for_sops(sop_ids: str):
     """Get templates linked to specific SOPs"""
     db = get_db()
     sop_id_list = sop_ids.split(",")
-    templates = await db.builder_templates.find({
+    templates = await db.templates.find({
         "linked_sop_ids": {"$in": sop_id_list}
     }, {"_id": 0}).to_list(100)
     return templates
@@ -173,10 +180,10 @@ async def get_templates_for_sops(sop_ids: str):
 
 @builder_router.post("/templates")
 async def create_template(template: LabyrinthTemplate):
-    """Create a new template"""
+    """Create a new template (unified collection)"""
     db = get_db()
     template_dict = serialize_doc(template.model_dump())
-    await db.builder_templates.insert_one(template_dict)
+    await db.templates.insert_one(template_dict)
     return template_dict
 
 
