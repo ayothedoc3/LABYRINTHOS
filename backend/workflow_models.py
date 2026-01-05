@@ -26,6 +26,7 @@ class NodeType(str, Enum):
     STICKY_NOTE = "STICKY_NOTE"
     TASK = "TASK"
     BLOCKER = "BLOCKER"
+    MILESTONE = "MILESTONE"
 
 
 class BlockerCategory(str, Enum):
