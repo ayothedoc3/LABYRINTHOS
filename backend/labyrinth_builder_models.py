@@ -21,12 +21,12 @@ class IssueCategory(str, Enum):
 
 
 class SprintTimeline(str, Enum):
-    URGENT = "URGENT"           # 1-3 days (Red)
-    ONE_WEEK = "ONE_WEEK"       # 1 week (Orange)
-    TWO_WEEKS = "TWO_WEEKS"     # 2 weeks (Yellow)
-    THREE_FOUR_WEEKS = "THREE_FOUR_WEEKS"  # 3-4 weeks (Green)
-    FIVE_WEEKS = "FIVE_WEEKS"   # 5 weeks (Blue)
-    SIX_PLUS_WEEKS = "SIX_PLUS_WEEKS"  # 6+ weeks (Purple)
+    YESTERDAY = "YESTERDAY"         # Red - Yesterday
+    THREE_DAYS = "THREE_DAYS"       # Pink - <3 Days
+    ONE_WEEK = "ONE_WEEK"           # Orange - 1 Week
+    TWO_THREE_WEEKS = "TWO_THREE_WEEKS"  # Yellow - 2-3 Weeks
+    FOUR_SIX_WEEKS = "FOUR_SIX_WEEKS"    # Teal - 4-6 Weeks
+    SIX_PLUS_WEEKS = "SIX_PLUS_WEEKS"    # Purple - 6+ Weeks
 
 
 class PlaybookTier(str, Enum):
@@ -38,12 +38,12 @@ class PlaybookTier(str, Enum):
 # ==================== SPRINT CONFIG ====================
 
 SPRINT_CONFIG = {
-    SprintTimeline.URGENT: {"label": "Urgent (1-3 days)", "color": "#EF4444", "days": 3},
+    SprintTimeline.YESTERDAY: {"label": "Yesterday (URGENT)", "color": "#EF4444", "days": 1},
+    SprintTimeline.THREE_DAYS: {"label": "< 3 Days", "color": "#EC4899", "days": 3},
     SprintTimeline.ONE_WEEK: {"label": "1 Week", "color": "#F97316", "days": 7},
-    SprintTimeline.TWO_WEEKS: {"label": "2 Weeks", "color": "#EAB308", "days": 14},
-    SprintTimeline.THREE_FOUR_WEEKS: {"label": "3-4 Weeks", "color": "#22C55E", "days": 28},
-    SprintTimeline.FIVE_WEEKS: {"label": "5 Weeks", "color": "#3B82F6", "days": 35},
-    SprintTimeline.SIX_PLUS_WEEKS: {"label": "6+ Weeks", "color": "#8B5CF6", "days": 42},
+    SprintTimeline.TWO_THREE_WEEKS: {"label": "2-3 Weeks", "color": "#EAB308", "days": 21},
+    SprintTimeline.FOUR_SIX_WEEKS: {"label": "4-6 Weeks", "color": "#14B8A6", "days": 42},
+    SprintTimeline.SIX_PLUS_WEEKS: {"label": "6+ Weeks", "color": "#8B5CF6", "days": 49},
 }
 
 
