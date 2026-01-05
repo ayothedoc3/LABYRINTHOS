@@ -25,13 +25,13 @@ load_dotenv()
 PROVIDERS = {
     "openai": {
         "name": "OpenAI",
-        "models": ["gpt-5.2", "gpt-5.1", "gpt-4o", "gpt-4o-mini"],
-        "default_model": "gpt-5.2"
+        "models": ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo"],
+        "default_model": "gpt-4o-mini"
     },
     "anthropic": {
         "name": "Anthropic (Claude)",
         "models": ["claude-sonnet-4-5-20250929", "claude-4-sonnet-20250514", "claude-3-5-haiku-20241022"],
-        "default_model": "claude-sonnet-4-5-20250929"
+        "default_model": "claude-3-5-haiku-20241022"
     },
     "gemini": {
         "name": "Google Gemini",
