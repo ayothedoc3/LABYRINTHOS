@@ -150,13 +150,14 @@ class LabyrinthTemplate(BaseModel):
 
 
 class LabyrinthContract(BaseModel):
-    """Contract definition"""
+    """Contract definition with KPIs"""
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
     description: str = ""
     contract_type: str  # "PROJECT" or "RECURRING"
     linked_sop_ids: List[str] = []
     deliverables: List[str] = []
+    kpis: List[Dict[str, Any]] = []  # KPIs associated with this contract
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
