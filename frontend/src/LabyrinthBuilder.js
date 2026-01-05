@@ -106,6 +106,13 @@ const LabyrinthBuilder = ({ onWorkflowCreated }) => {
           }
         });
         setPreview(response.data);
+        
+        // Auto-generate workflow name from selections
+        const issueName = response.data.issue?.name || selectedIssueType;
+        const sprintLabel = response.data.sprint?.label || selectedSprint;
+        const tierLabel = selectedTier.replace("_", " ");
+        const autoName = `${issueName} - ${sprintLabel} - ${tierLabel}`;
+        setWorkflowName(autoName);
       } catch (error) {
         console.error("Error loading preview:", error);
       }
