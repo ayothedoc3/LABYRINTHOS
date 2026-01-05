@@ -45,6 +45,7 @@ from workflow_routes import workflow_router, set_db as set_workflow_db
 from settings_routes import settings_router, set_db as set_settings_db
 from ai_routes import ai_router, set_db as set_ai_db
 from bulk_routes import bulk_router, set_db as set_bulk_db
+from labyrinth_builder_routes import builder_router
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
