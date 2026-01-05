@@ -271,14 +271,14 @@ async def render_workflow(request: WorkflowRenderRequest):
     # Get sprint config
     sprint_config = SPRINT_CONFIG.get(selection.sprint, {})
     
-    # Get SOPs for this selection
-    sops = await db.builder_sops.find({
+    # Get SOPs for this selection (from unified collection)
+    sops = await db.sops.find({
         "issue_category": selection.issue_category.value,
         "issue_type_id": selection.issue_type_id,
         "tier": selection.tier.value
     }, {"_id": 0}).to_list(100)
     
-    # Get templates and contracts by category fallback
+    # Get templates and contracts by category fallback (from unified collections)
     category_template_map = {
         "CLIENT_SERVICES": ["Client Welcome Packet", "Service Agreement Template", "Onboarding Checklist", "Client Portal Guide", "Success Plan Template"],
         "OPERATIONS": ["Job Description Template", "Interview Scorecard", "Training Materials Template", "SOP Template", "Meeting Agenda Template"],
@@ -298,8 +298,8 @@ async def render_workflow(request: WorkflowRenderRequest):
     template_names = category_template_map.get(selection.issue_category.value, [])[:3]
     contract_names = category_contract_map.get(selection.issue_category.value, [])[:2]
     
-    templates = await db.builder_templates.find({"name": {"$in": template_names}}, {"_id": 0}).to_list(10)
-    contracts = await db.builder_contracts.find({"name": {"$in": contract_names}}, {"_id": 0}).to_list(10)
+    templates = await db.templates.find({"name": {"$in": template_names}}, {"_id": 0}).to_list(10)
+    contracts = await db.contracts.find({"name": {"$in": contract_names}}, {"_id": 0}).to_list(10)
     
     # Generate workflow nodes - Create a proper visual workflow
     nodes = []
