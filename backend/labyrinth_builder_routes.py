@@ -267,87 +267,194 @@ async def render_workflow(request: WorkflowRenderRequest):
         "tier": selection.tier.value
     }, {"_id": 0}).to_list(100)
     
-    # Get templates and contracts linked to these SOPs
-    sop_ids = [s["id"] for s in sops]
-    templates = []
-    contracts = []
+    # Get templates and contracts by category fallback
+    category_template_map = {
+        "CLIENT_SERVICES": ["Client Welcome Packet", "Service Agreement Template", "Onboarding Checklist", "Client Portal Guide", "Success Plan Template"],
+        "OPERATIONS": ["Job Description Template", "Interview Scorecard", "Training Materials Template", "SOP Template", "Meeting Agenda Template"],
+        "CONSULTATION": ["Strategy Presentation", "Financial Analysis Report", "Market Analysis Report", "Recommendation Report"],
+        "CRISIS_MANAGEMENT": ["Incident Report Form", "Crisis Communication Template", "Emergency Contact List", "Business Continuity Plan", "Post-Mortem Template"],
+        "APP_DEVELOPMENT": ["PRD Template", "Technical Spec Template", "Test Plan Template", "Release Notes Template", "User Guide Template"],
+    }
     
-    if sop_ids:
-        templates = await db.builder_templates.find({
-            "linked_sop_ids": {"$in": sop_ids}
-        }, {"_id": 0}).to_list(100)
-        
-        contracts = await db.builder_contracts.find({
-            "linked_sop_ids": {"$in": sop_ids}
-        }, {"_id": 0}).to_list(100)
+    category_contract_map = {
+        "CLIENT_SERVICES": ["Gold Service Agreement", "Monthly Retainer"],
+        "OPERATIONS": ["Employment Contract", "Contractor Agreement"],
+        "CONSULTATION": ["Consulting Engagement", "Advisory Retainer"],
+        "CRISIS_MANAGEMENT": ["Business Continuity Plan"],
+        "APP_DEVELOPMENT": ["Contractor Agreement", "NDA Template"],
+    }
     
-    # Generate workflow nodes
+    template_names = category_template_map.get(selection.issue_category.value, [])[:3]
+    contract_names = category_contract_map.get(selection.issue_category.value, [])[:2]
+    
+    templates = await db.builder_templates.find({"name": {"$in": template_names}}, {"_id": 0}).to_list(10)
+    contracts = await db.builder_contracts.find({"name": {"$in": contract_names}}, {"_id": 0}).to_list(10)
+    
+    # Generate workflow nodes - Create a proper visual workflow
     nodes = []
     edges = []
     
-    # Issue Node (Starting Point)
+    # Layout configuration
+    NODE_WIDTH = 200
+    NODE_HEIGHT = 80
+    H_SPACING = 280  # Horizontal spacing between nodes
+    V_SPACING = 150  # Vertical spacing between rows
+    
+    # Row positions
+    RESOURCE_ROW = 50      # Top row for resources/templates
+    MAIN_ROW = 250         # Middle row for main workflow
+    DELIVERABLE_ROW = 450  # Bottom row for deliverables/contracts
+    
+    # ==================== ISSUE NODE (Start) ====================
     issue_node_id = f"issue_{uuid.uuid4().hex[:8]}"
     nodes.append({
         "id": issue_node_id,
         "type": "custom",
-        "position": {"x": 0, "y": 200},
+        "position": {"x": 50, "y": MAIN_ROW},
         "data": {
-            "label": issue["name"],
+            "label": f"📋 {issue['name']}",
             "node_type": "ISSUE",
-            "description": f"{issue['description']} | Sprint: {sprint_config.get('label', 'N/A')} | {selection.tier.value.replace('_', ' ')}"
+            "description": f"Challenge: {issue['description']}\nSprint: {sprint_config.get('label', 'N/A')}\nTier: {selection.tier.value.replace('_', ' ')}"
         }
     })
     
-    # SOP Nodes (Actions)
+    # ==================== SOP STEPS AS ACTION NODES ====================
     prev_node_id = issue_node_id
-    for idx, sop in enumerate(sops):
-        sop_node_id = f"sop_{uuid.uuid4().hex[:8]}"
+    all_step_nodes = []
+    
+    # Collect all steps from all SOPs
+    step_x = 350
+    for sop in sops:
+        steps = sop.get("steps", [])
+        for step in steps:
+            step_node_id = f"step_{uuid.uuid4().hex[:8]}"
+            nodes.append({
+                "id": step_node_id,
+                "type": "custom",
+                "position": {"x": step_x, "y": MAIN_ROW},
+                "data": {
+                    "label": f"⚡ {step.get('title', 'Step')}",
+                    "node_type": "ACTION",
+                    "description": step.get('description', ''),
+                    "sop_name": sop["name"]
+                }
+            })
+            # Connect to previous node
+            edges.append({
+                "id": f"e_{prev_node_id}_{step_node_id}",
+                "source": prev_node_id,
+                "target": step_node_id,
+                "type": "smoothstep"
+            })
+            prev_node_id = step_node_id
+            all_step_nodes.append(step_node_id)
+            step_x += H_SPACING
+    
+    # If no SOPs, create placeholder
+    if not sops:
+        placeholder_id = f"placeholder_{uuid.uuid4().hex[:8]}"
         nodes.append({
-            "id": sop_node_id,
+            "id": placeholder_id,
             "type": "custom",
-            "position": {"x": 250 + (idx * 250), "y": 200},
+            "position": {"x": 350, "y": MAIN_ROW},
             "data": {
-                "label": sop["name"],
-                "node_type": "ACTION",
-                "description": sop.get("description", ""),
-                "sop_id": sop["id"]
+                "label": "📝 Define SOP Steps",
+                "node_type": "STICKY_NOTE",
+                "description": "Add SOPs for this Issue + Tier combination"
             }
         })
         edges.append({
-            "id": f"e_{prev_node_id}_{sop_node_id}",
-            "source": prev_node_id,
-            "target": sop_node_id,
+            "id": f"e_{issue_node_id}_{placeholder_id}",
+            "source": issue_node_id,
+            "target": placeholder_id,
             "type": "smoothstep"
         })
-        prev_node_id = sop_node_id
+        prev_node_id = placeholder_id
+        step_x = 600
     
-    # Template Nodes (Resources)
-    template_start_x = 250
+    # ==================== TEMPLATE NODES (Resources - Top Row) ====================
+    template_x = 350
     for idx, template in enumerate(templates):
         template_node_id = f"template_{uuid.uuid4().hex[:8]}"
         nodes.append({
             "id": template_node_id,
             "type": "custom",
-            "position": {"x": template_start_x + (idx * 200), "y": 50},
+            "position": {"x": template_x, "y": RESOURCE_ROW},
             "data": {
-                "label": template["name"],
+                "label": f"📄 {template['name']}",
                 "node_type": "RESOURCE",
                 "description": template.get("description", ""),
-                "template_id": template["id"]
+                "template_type": template.get("template_type", "document")
             }
         })
-        # Connect to first SOP if exists
-        if sops:
+        # Connect templates to first step node if exists
+        if all_step_nodes:
             edges.append({
-                "id": f"e_{template_node_id}_sop0",
+                "id": f"e_{template_node_id}_{all_step_nodes[0]}",
                 "source": template_node_id,
-                "target": nodes[1]["id"] if len(nodes) > 1 else issue_node_id,
-                "type": "smoothstep"
+                "target": all_step_nodes[0],
+                "type": "smoothstep",
+                "style": {"strokeDasharray": "5,5"}
             })
+        template_x += H_SPACING
     
-    # Contract/Deliverable Nodes
-    last_x = 250 + (len(sops) * 250) if sops else 250
+    # ==================== CONTRACT/DELIVERABLE NODES (Bottom Row) ====================
+    contract_x = step_x - H_SPACING if step_x > 350 else 350
+    
     for idx, contract in enumerate(contracts):
+        contract_node_id = f"contract_{uuid.uuid4().hex[:8]}"
+        contract_type_emoji = "📋" if contract.get("contract_type") == "PROJECT" else "🔄"
+        nodes.append({
+            "id": contract_node_id,
+            "type": "custom",
+            "position": {"x": contract_x + (idx * H_SPACING), "y": DELIVERABLE_ROW},
+            "data": {
+                "label": f"{contract_type_emoji} {contract['name']}",
+                "node_type": "DELIVERABLE",
+                "description": f"{contract.get('description', '')}\nType: {contract.get('contract_type', 'PROJECT')}",
+                "contract_type": contract.get("contract_type", "PROJECT")
+            }
+        })
+        # Connect from last step to deliverables
+        edges.append({
+            "id": f"e_{prev_node_id}_{contract_node_id}",
+            "source": prev_node_id,
+            "target": contract_node_id,
+            "type": "smoothstep"
+        })
+    
+    # ==================== COMPLETION NODE ====================
+    completion_node_id = f"complete_{uuid.uuid4().hex[:8]}"
+    final_x = max(step_x, contract_x + (len(contracts) * H_SPACING)) + 100
+    nodes.append({
+        "id": completion_node_id,
+        "type": "custom",
+        "position": {"x": final_x, "y": MAIN_ROW},
+        "data": {
+            "label": "✅ Complete",
+            "node_type": "MILESTONE",
+            "description": f"Workflow complete for {issue['name']}"
+        }
+    })
+    
+    # Connect last items to completion
+    if contracts:
+        for idx, contract in enumerate(contracts):
+            contract_node_id = [n["id"] for n in nodes if n["data"].get("label", "").endswith(contract["name"])]
+            if contract_node_id:
+                edges.append({
+                    "id": f"e_{contract_node_id[0]}_{completion_node_id}",
+                    "source": contract_node_id[0],
+                    "target": completion_node_id,
+                    "type": "smoothstep"
+                })
+    else:
+        edges.append({
+            "id": f"e_{prev_node_id}_{completion_node_id}",
+            "source": prev_node_id,
+            "target": completion_node_id,
+            "type": "smoothstep"
+        })
         contract_node_id = f"contract_{uuid.uuid4().hex[:8]}"
         nodes.append({
             "id": contract_node_id,
