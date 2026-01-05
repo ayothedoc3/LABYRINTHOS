@@ -577,14 +577,31 @@ const LabyrinthBuilder = ({ onWorkflowCreated }) => {
                   Create Workflow
                 </Button>
               </>
-            ) : (
-              <Button onClick={() => {
-                setShowRenderDialog(false);
+            ) : renderResult.error ? (
+              <Button variant="outline" onClick={() => {
                 setRenderResult(null);
-                handleReset();
               }}>
-                Done
+                Try Again
               </Button>
+            ) : (
+              <div className="flex gap-2 w-full">
+                <Button variant="outline" onClick={() => {
+                  setShowRenderDialog(false);
+                  setRenderResult(null);
+                  handleReset();
+                }}>
+                  Create Another
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  setShowRenderDialog(false);
+                  if (onWorkflowCreated && renderResult.workflow_id) {
+                    onWorkflowCreated(renderResult.workflow_id);
+                  }
+                }}>
+                  <ArrowRight className="w-4 h-4 mr-2" />
+                  View in WorkflowViz
+                </Button>
+              </div>
             )}
           </DialogFooter>
         </DialogContent>
