@@ -1467,7 +1467,10 @@ function App() {
           </TabsContent>
 
           <TabsContent value="gates">
-            <GateConsole playbooks={playbooks} talents={talents} onRefresh={fetchData} />
+            <LabyrinthBuilder onWorkflowCreated={(workflowId) => {
+              // Switch to WorkflowViz tab with the new workflow
+              setActiveTab("workflowviz");
+            }} />
           </TabsContent>
 
           <TabsContent value="contracts">
