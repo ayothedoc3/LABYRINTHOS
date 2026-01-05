@@ -1127,6 +1127,7 @@ app.include_router(workflow_router)  # WorkflowViz routes
 app.include_router(settings_router, prefix="/api")  # Settings & BYOK routes
 app.include_router(ai_router, prefix="/api")  # AI Generation routes
 app.include_router(bulk_router, prefix="/api")  # Bulk Upload routes
+app.include_router(builder_router, prefix="/api")  # Labyrinth Builder routes
 
 # CORS middleware
 app.add_middleware(
