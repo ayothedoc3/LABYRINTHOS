@@ -1338,6 +1338,7 @@ function App() {
   const [kpis, setKPIs] = useState([]);
   const [contracts, setContracts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pendingWorkflowId, setPendingWorkflowId] = useState(null);
 
   // Update URL when tab changes
   const handleTabChange = useCallback((newTab) => {
