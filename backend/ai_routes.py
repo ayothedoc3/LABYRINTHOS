@@ -1,14 +1,17 @@
 """
-AI Generation Routes - Natural language content generation
+AI Generation Routes - Generate SOPs, Playbooks, Contracts in Markdown
 """
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from datetime import datetime, timezone
 import uuid
 
-from ai_service import generate_content, PROVIDERS
+from ai_service import (
+    generate_content, generate_playbook, generate_sop, generate_contract,
+    get_industry_suggestions, PROVIDERS, INDUSTRY_SAMPLES
+)
 from settings_routes import get_active_ai_config
 
 # AI router
@@ -25,25 +28,62 @@ def set_db(database):
 # ==================== MODELS ====================
 
 class GenerateRequest(BaseModel):
-    content_type: str = Field(..., description="Type: workflow, playbook, sop, talent, contract, gate")
-    description: str = Field(..., description="Natural language description of what to create")
-    provider: Optional[str] = Field(None, description="Override default provider")
-    model: Optional[str] = Field(None, description="Override default model")
+    content_type: str = Field(..., description="Type: playbook, sop, contract")
+    description: str = Field(..., description="What to generate - keywords, topic, or description")
+    industry: Optional[str] = Field(None, description="Industry context: sales, marketing, operations, hr, finance, customer_service, technology")
+    provider: Optional[str] = Field(None, description="LLM provider: openai, anthropic, gemini")
+    model: Optional[str] = Field(None, description="Specific model to use")
 
 
 class GenerateResponse(BaseModel):
     success: bool
     content_type: str
-    data: Dict[str, Any]
+    title: str
+    content: str  # Markdown content
+    format: str = "markdown"
+    industry: Optional[str] = None
     provider_used: str
     model_used: str
 
 
+class IndustrySuggestion(BaseModel):
+    industry: str
+    playbooks: List[str]
+    sops: List[str]
+
+
 # ==================== ROUTES ====================
+
+@ai_router.get("/providers")
+async def get_providers():
+    """Get available AI providers and models"""
+    return PROVIDERS
+
+
+@ai_router.get("/industries")
+async def get_industries():
+    """Get available industries with suggestions"""
+    return {
+        "industries": list(INDUSTRY_SAMPLES.keys()),
+        "suggestions": INDUSTRY_SAMPLES
+    }
+
+
+@ai_router.get("/industries/{industry}")
+async def get_industry_info(industry: str):
+    """Get suggestions for a specific industry"""
+    industry_lower = industry.lower()
+    if industry_lower not in INDUSTRY_SAMPLES:
+        raise HTTPException(status_code=404, detail=f"Industry '{industry}' not found. Available: {list(INDUSTRY_SAMPLES.keys())}")
+    return {
+        "industry": industry_lower,
+        "suggestions": INDUSTRY_SAMPLES[industry_lower]
+    }
+
 
 @ai_router.post("/generate", response_model=GenerateResponse)
 async def generate_from_description(request: GenerateRequest):
-    """Generate content from natural language description"""
+    """Generate content (playbook, SOP, or contract) from description"""
     
     # Get active AI configuration
     ai_config = await get_active_ai_config()
@@ -53,118 +93,42 @@ async def generate_from_description(request: GenerateRequest):
     model = request.model or ai_config.get("model")
     api_key = ai_config.get("api_key")  # May be None, will use Emergent key
     
+    if request.content_type not in ["playbook", "sop", "contract"]:
+        raise HTTPException(status_code=400, detail="content_type must be: playbook, sop, or contract")
+    
     try:
         data = await generate_content(
             content_type=request.content_type,
             description=request.description,
             provider=provider,
             api_key=api_key,
-            model=model
+            model=model,
+            industry=request.industry
         )
         
         return GenerateResponse(
             success=True,
             content_type=request.content_type,
-            data=data,
+            title=data.get("title", request.description),
+            content=data.get("content", ""),
+            format="markdown",
+            industry=request.industry,
             provider_used=provider,
-            model_used=model or PROVIDERS.get(provider, {}).get("default_model", "unknown")
+            model_used=model or PROVIDERS.get(provider, {}).get("default_model", "gpt-5.2")
         )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@ai_router.post("/generate/workflow")
-async def generate_workflow(description: str, provider: Optional[str] = None, model: Optional[str] = None):
-    """Generate a workflow from description and save it"""
-    
-    ai_config = await get_active_ai_config()
-    provider = provider or ai_config.get("provider", "openai")
-    model = model or ai_config.get("model")
-    api_key = ai_config.get("api_key")
-    
-    try:
-        workflow_data = await generate_content(
-            content_type="workflow",
-            description=description,
-            provider=provider,
-            api_key=api_key,
-            model=model
-        )
-        
-        # Create workflow in database
-        workflow_id = str(uuid.uuid4())
-        now = datetime.now(timezone.utc).isoformat()
-        
-        workflow = {
-            "id": workflow_id,
-            "name": workflow_data.get("name", "AI Generated Workflow"),
-            "description": workflow_data.get("description", ""),
-            "access_level": "PUBLIC",
-            "created_at": now,
-            "updated_at": now,
-            "ai_generated": True
-        }
-        
-        workflow_response = dict(workflow)
-        await db.workflows.insert_one(workflow)
-        
-        # Create nodes
-        nodes = workflow_data.get("nodes", [])
-        node_ids = []
-        for i, node_data in enumerate(nodes):
-            node_id = f"{workflow_id}-node-{i}"
-            node_ids.append(node_id)
-            
-            node = {
-                "id": node_id,
-                "workflow_id": workflow_id,
-                "type": "custom",
-                "position": node_data.get("position", {"x": i * 250, "y": (i % 3) * 150}),
-                "data": {
-                    "label": node_data.get("label", f"Node {i+1}"),
-                    "description": node_data.get("description", ""),
-                    "node_type": node_data.get("node_type", "ACTION"),
-                    "assignee_ids": []
-                },
-                "layer": "STRATEGIC",
-                "parent_node_id": None,
-                "created_at": now,
-                "updated_at": now
-            }
-            await db.workflow_nodes.insert_one(node)
-        
-        # Create edges from connections
-        connections = workflow_data.get("connections", [])
-        for j, conn in enumerate(connections):
-            from_idx = conn.get("from_index", 0)
-            to_idx = conn.get("to_index", 1)
-            
-            if from_idx < len(node_ids) and to_idx < len(node_ids):
-                edge = {
-                    "id": f"{workflow_id}-edge-{j}",
-                    "workflow_id": workflow_id,
-                    "source": node_ids[from_idx],
-                    "target": node_ids[to_idx],
-                    "type": "smoothstep",
-                    "layer": "STRATEGIC",
-                    "created_at": now
-                }
-                await db.workflow_edges.insert_one(edge)
-        
-        return {
-            "success": True,
-            "workflow_id": workflow_id,
-            "workflow": workflow_response,
-            "nodes_created": len(nodes),
-            "edges_created": len(connections)
-        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @ai_router.post("/generate/playbook")
-async def generate_playbook(description: str, provider: Optional[str] = None, model: Optional[str] = None):
-    """Generate a playbook from description and save it"""
+async def generate_playbook_endpoint(
+    description: str,
+    industry: Optional[str] = None,
+    provider: Optional[str] = None,
+    model: Optional[str] = None,
+    save: bool = False
+):
+    """Generate a playbook in Markdown format"""
     
     ai_config = await get_active_ai_config()
     provider = provider or ai_config.get("provider", "openai")
@@ -172,47 +136,50 @@ async def generate_playbook(description: str, provider: Optional[str] = None, mo
     api_key = ai_config.get("api_key")
     
     try:
-        playbook_data = await generate_content(
-            content_type="playbook",
+        data = await generate_playbook(
             description=description,
+            industry=industry,
             provider=provider,
             api_key=api_key,
             model=model
         )
         
-        playbook_id = str(uuid.uuid4())
-        now = datetime.now(timezone.utc).isoformat()
-        
-        playbook = {
-            "id": playbook_id,
-            "title": playbook_data.get("title", "AI Generated Playbook"),
-            "function": playbook_data.get("function", "SALES"),
-            "level": playbook_data.get("level", "ACQUIRE"),
-            "description": playbook_data.get("description", ""),
-            "objectives": playbook_data.get("objectives", []),
-            "strategies": playbook_data.get("strategies", []),
-            "kpi_targets": playbook_data.get("kpi_targets", {}),
-            "created_at": now,
-            "updated_at": now,
-            "ai_generated": True
-        }
-        
-        # Create a copy for response (before _id is added)
-        playbook_response = dict(playbook)
-        await db.playbooks.insert_one(playbook)
+        # Optionally save to database
+        if save and db:
+            playbook_doc = {
+                "id": str(uuid.uuid4()),
+                "title": data.get("title", description),
+                "content": data.get("content", ""),
+                "description": description,
+                "industry": industry,
+                "format": "markdown",
+                "ai_generated": True,
+                "provider": provider,
+                "model": model,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.ai_playbooks.insert_one(playbook_doc)
+            data["saved_id"] = playbook_doc["id"]
         
         return {
             "success": True,
-            "playbook_id": playbook_id,
-            "playbook": playbook_response
+            **data,
+            "provider_used": provider,
+            "model_used": model or PROVIDERS.get(provider, {}).get("default_model", "gpt-5.2")
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @ai_router.post("/generate/sop")
-async def generate_sop(description: str, provider: Optional[str] = None, model: Optional[str] = None):
-    """Generate an SOP from description and save it"""
+async def generate_sop_endpoint(
+    description: str,
+    industry: Optional[str] = None,
+    provider: Optional[str] = None,
+    model: Optional[str] = None,
+    save: bool = False
+):
+    """Generate an SOP in Markdown format"""
     
     ai_config = await get_active_ai_config()
     provider = provider or ai_config.get("provider", "openai")
@@ -220,96 +187,50 @@ async def generate_sop(description: str, provider: Optional[str] = None, model: 
     api_key = ai_config.get("api_key")
     
     try:
-        sop_data = await generate_content(
-            content_type="sop",
+        data = await generate_sop(
             description=description,
+            industry=industry,
             provider=provider,
             api_key=api_key,
             model=model
         )
         
-        sop_id = str(uuid.uuid4())
-        now = datetime.now(timezone.utc).isoformat()
-        
-        sop = {
-            "id": sop_id,
-            "title": sop_data.get("title", "AI Generated SOP"),
-            "function": sop_data.get("function", "OPERATIONS"),
-            "tier": sop_data.get("tier", 2),
-            "description": sop_data.get("description", ""),
-            "steps": sop_data.get("steps", []),
-            "tools_required": sop_data.get("tools_required", []),
-            "estimated_total_time": sop_data.get("estimated_total_time", "30 minutes"),
-            "created_at": now,
-            "updated_at": now,
-            "ai_generated": True
-        }
-        
-        sop_response = dict(sop)
-        await db.sops.insert_one(sop)
+        # Optionally save to database
+        if save and db:
+            sop_doc = {
+                "id": str(uuid.uuid4()),
+                "title": data.get("title", description),
+                "content": data.get("content", ""),
+                "description": description,
+                "industry": industry,
+                "format": "markdown",
+                "ai_generated": True,
+                "provider": provider,
+                "model": model,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.ai_sops.insert_one(sop_doc)
+            data["saved_id"] = sop_doc["id"]
         
         return {
             "success": True,
-            "sop_id": sop_id,
-            "sop": sop_response
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@ai_router.post("/generate/talent")
-async def generate_talent(description: str, provider: Optional[str] = None, model: Optional[str] = None):
-    """Generate a talent profile from description and save it"""
-    
-    ai_config = await get_active_ai_config()
-    provider = provider or ai_config.get("provider", "openai")
-    model = model or ai_config.get("model")
-    api_key = ai_config.get("api_key")
-    
-    try:
-        talent_data = await generate_content(
-            content_type="talent",
-            description=description,
-            provider=provider,
-            api_key=api_key,
-            model=model
-        )
-        
-        talent_id = str(uuid.uuid4())
-        now = datetime.now(timezone.utc).isoformat()
-        
-        talent = {
-            "id": talent_id,
-            "name": talent_data.get("name", "AI Generated Role"),
-            "function": talent_data.get("function", "OPERATIONS"),
-            "tier": talent_data.get("tier", 2),
-            "role": talent_data.get("role", ""),
-            "description": talent_data.get("description", ""),
-            "responsibilities": talent_data.get("responsibilities", []),
-            "competencies": talent_data.get("competencies", {}),
-            "skills_required": talent_data.get("skills_required", []),
-            "hourly_rate": talent_data.get("hourly_rate", 50),
-            "status": "AVAILABLE",
-            "created_at": now,
-            "updated_at": now,
-            "ai_generated": True
-        }
-        
-        talent_response = dict(talent)
-        await db.talents.insert_one(talent)
-        
-        return {
-            "success": True,
-            "talent_id": talent_id,
-            "talent": talent_response
+            **data,
+            "provider_used": provider,
+            "model_used": model or PROVIDERS.get(provider, {}).get("default_model", "gpt-5.2")
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @ai_router.post("/generate/contract")
-async def generate_contract(description: str, provider: Optional[str] = None, model: Optional[str] = None):
-    """Generate a contract from description and save it"""
+async def generate_contract_endpoint(
+    description: str,
+    industry: Optional[str] = None,
+    provider: Optional[str] = None,
+    model: Optional[str] = None,
+    save: bool = False
+):
+    """Generate a contract framework in Markdown format"""
     
     ai_config = await get_active_ai_config()
     provider = provider or ai_config.get("provider", "openai")
@@ -317,46 +238,88 @@ async def generate_contract(description: str, provider: Optional[str] = None, mo
     api_key = ai_config.get("api_key")
     
     try:
-        contract_data = await generate_content(
-            content_type="contract",
+        data = await generate_contract(
             description=description,
+            industry=industry,
             provider=provider,
             api_key=api_key,
             model=model
         )
         
-        contract_id = str(uuid.uuid4())
-        now = datetime.now(timezone.utc).isoformat()
-        
-        contract = {
-            "id": contract_id,
-            "title": contract_data.get("title", "AI Generated Contract"),
-            "client_name": contract_data.get("client_name", "Client"),
-            "package": contract_data.get("package", "SILVER"),
-            "description": contract_data.get("description", ""),
-            "boundaries": contract_data.get("boundaries", []),
-            "value": contract_data.get("value", 10000),
-            "duration_months": contract_data.get("duration_months", 12),
-            "terms": contract_data.get("terms", []),
-            "status": "DRAFT",
-            "created_at": now,
-            "updated_at": now,
-            "ai_generated": True
-        }
-        
-        contract_response = dict(contract)
-        await db.contracts.insert_one(contract)
+        # Optionally save to database
+        if save and db:
+            contract_doc = {
+                "id": str(uuid.uuid4()),
+                "title": data.get("title", description),
+                "content": data.get("content", ""),
+                "description": description,
+                "industry": industry,
+                "format": "markdown",
+                "ai_generated": True,
+                "provider": provider,
+                "model": model,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.ai_contracts.insert_one(contract_doc)
+            data["saved_id"] = contract_doc["id"]
         
         return {
             "success": True,
-            "contract_id": contract_id,
-            "contract": contract_response
+            **data,
+            "provider_used": provider,
+            "model_used": model or PROVIDERS.get(provider, {}).get("default_model", "gpt-5.2")
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@ai_router.get("/providers")
-async def list_providers():
-    """List available AI providers and their models"""
-    return PROVIDERS
+# ==================== SAVED CONTENT ROUTES ====================
+
+@ai_router.get("/saved/playbooks")
+async def get_saved_playbooks():
+    """Get all AI-generated playbooks"""
+    if not db:
+        return []
+    playbooks = await db.ai_playbooks.find({}, {"_id": 0}).to_list(100)
+    return playbooks
+
+
+@ai_router.get("/saved/sops")
+async def get_saved_sops():
+    """Get all AI-generated SOPs"""
+    if not db:
+        return []
+    sops = await db.ai_sops.find({}, {"_id": 0}).to_list(100)
+    return sops
+
+
+@ai_router.get("/saved/contracts")
+async def get_saved_contracts():
+    """Get all AI-generated contracts"""
+    if not db:
+        return []
+    contracts = await db.ai_contracts.find({}, {"_id": 0}).to_list(100)
+    return contracts
+
+
+@ai_router.delete("/saved/{content_type}/{content_id}")
+async def delete_saved_content(content_type: str, content_id: str):
+    """Delete a saved AI-generated content"""
+    if not db:
+        raise HTTPException(status_code=500, detail="Database not available")
+    
+    collection_map = {
+        "playbook": "ai_playbooks",
+        "sop": "ai_sops",
+        "contract": "ai_contracts"
+    }
+    
+    collection = collection_map.get(content_type)
+    if not collection:
+        raise HTTPException(status_code=400, detail="Invalid content type")
+    
+    result = await db[collection].delete_one({"id": content_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Content not found")
+    
+    return {"success": True, "deleted_id": content_id}
