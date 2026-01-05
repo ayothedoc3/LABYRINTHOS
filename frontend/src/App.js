@@ -1469,7 +1469,13 @@ function App() {
 
           <TabsContent value="gates">
             <LabyrinthBuilder onWorkflowCreated={(workflowId) => {
-              // Switch to WorkflowViz tab with the new workflow
+              // Set pending workflow ID and switch to WorkflowViz tab
+              setPendingWorkflowId(workflowId);
+              // Update URL with workflow ID so WorkflowViz picks it up
+              const url = new URL(window.location);
+              url.searchParams.set('workflow', workflowId);
+              url.searchParams.set('tab', 'workflowviz');
+              window.history.replaceState({}, '', url);
               setActiveTab("workflowviz");
             }} />
           </TabsContent>
