@@ -1389,14 +1389,11 @@ function App() {
   };
 
   const NAV_ITEMS = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { id: "workflowviz", label: "WorkflowViz", icon: Workflow },
-    { id: "playbooks", label: "Playbooks", icon: BookOpen },
-    { id: "sops", label: "SOPs", icon: FileText },
-    { id: "talents", label: "Talents", icon: Users },
-    { id: "kpis", label: "KPIs", icon: BarChart3 },
-    { id: "gates", label: "Labyrinth Builder", icon: Shield },
-    { id: "contracts", label: "Contracts", icon: FileCheck },
+    { id: "workflows", label: "Workflows", icon: Workflow },
+    { id: "library", label: "Library", icon: FolderOpen },
+    { id: "templates", label: "Templates", icon: FileText },
+    { id: "team", label: "Team", icon: Users },
+    { id: "analytics", label: "Analytics", icon: BarChart3 },
     { id: "settings", label: "Settings", icon: Settings }
   ];
 
