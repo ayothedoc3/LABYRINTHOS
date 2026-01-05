@@ -1319,15 +1319,15 @@ const SettingsView = ({ onSeed }) => {
 // ==================== MAIN APP ====================
 
 function App() {
-  // Initialize activeTab from URL or default to dashboard
+  // Initialize activeTab from URL or default to workflows
   const getInitialTab = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const tabFromUrl = urlParams.get('tab');
     const workflowFromUrl = urlParams.get('workflow');
-    // If workflow param exists, default to workflowviz tab
-    if (workflowFromUrl) return 'workflowviz';
+    // If workflow param exists, default to workflows tab
+    if (workflowFromUrl) return 'workflows';
     if (tabFromUrl) return tabFromUrl;
-    return 'dashboard';
+    return 'workflows';
   };
 
   const [activeTab, setActiveTab] = useState(getInitialTab);
