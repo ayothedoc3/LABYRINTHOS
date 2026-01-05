@@ -3,23 +3,33 @@ import ReactDOM from "react-dom/client";
 import "@/index.css";
 import App from "@/App";
 
-// Suppress ResizeObserver loop error - this is a known benign issue
-// that occurs with components that observe size changes (React Flow, etc.)
-const resizeObserverError = window.onerror;
-window.onerror = (message, ...args) => {
-  if (typeof message === 'string' && message.includes('ResizeObserver loop')) {
-    return true; // Suppress the error
-  }
-  return resizeObserverError ? resizeObserverError(message, ...args) : false;
-};
+// Fix ResizeObserver loop error - patch before any component renders
+// This is a known benign issue with React Flow and similar components
+if (typeof window !== 'undefined') {
+  const debounce = (fn, delay) => {
+    let timeoutId;
+    return (...args) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => fn(...args), delay);
+    };
+  };
 
-// Also handle unhandled promise rejections for ResizeObserver
-window.addEventListener('error', (event) => {
-  if (event.message && event.message.includes('ResizeObserver loop')) {
-    event.stopPropagation();
-    event.preventDefault();
-  }
-});
+  const OriginalResizeObserver = window.ResizeObserver;
+  window.ResizeObserver = class ResizeObserver extends OriginalResizeObserver {
+    constructor(callback) {
+      super(debounce(callback, 20));
+    }
+  };
+
+  // Suppress the error in error overlay
+  const originalError = console.error;
+  console.error = (...args) => {
+    if (args[0]?.toString().includes('ResizeObserver loop')) {
+      return;
+    }
+    originalError.apply(console, args);
+  };
+}
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
