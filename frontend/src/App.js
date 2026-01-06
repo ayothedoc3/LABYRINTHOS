@@ -627,6 +627,9 @@ const SOPsView = ({ sops, onRefresh }) => {
 const TalentsView = ({ talents, onRefresh }) => {
   const [filter, setFilter] = useState({ function: "all", tier: "all" });
   const [showCreate, setShowCreate] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const [newTalent, setNewTalent] = useState({
     name: "",
     email: "",
@@ -663,6 +666,21 @@ const TalentsView = ({ talents, onRefresh }) => {
       onRefresh();
     } catch (error) {
       console.error("Error creating talent:", error);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!itemToDelete) return;
+    setDeleting(true);
+    try {
+      await axios.delete(`${API}/talents/${itemToDelete.id}`);
+      onRefresh();
+      setDeleteDialogOpen(false);
+      setItemToDelete(null);
+    } catch (error) {
+      console.error('Error deleting talent:', error);
+    } finally {
+      setDeleting(false);
     }
   };
 
