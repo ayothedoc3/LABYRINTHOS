@@ -2284,7 +2284,7 @@ const WorkflowViz = () => {
               Delete Workflow
             </DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "<span className="font-medium">{workflowToDelete?.name}</span>"? 
+              Are you sure you want to delete &quot;<span className="font-medium">{workflowToDelete?.name}</span>&quot;? 
               This action cannot be undone and will remove all nodes and connections in this workflow.
             </DialogDescription>
           </DialogHeader>
