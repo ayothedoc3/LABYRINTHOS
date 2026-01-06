@@ -700,14 +700,15 @@ async def render_workflow(request: WorkflowRenderRequest):
         "data": {
             "label": "✅ Complete",
             "node_type": "MILESTONE",
-            "description": f"Workflow complete for {issue['name']}"
+            "description": f"Workflow complete for {issue_name}"
         }
     })
     
     # Connect last items to completion
     if contracts:
-        for idx, contract in enumerate(contracts):
-            contract_node_id = [n["id"] for n in nodes if n["data"].get("label", "").endswith(contract["name"])]
+        for contract in contracts:
+            contract_name = contract.get("name", "")
+            contract_node_id = [n["id"] for n in nodes if n["data"].get("label", "").endswith(contract_name)]
             if contract_node_id:
                 edges.append({
                     "id": f"e_{contract_node_id[0]}_{completion_node_id}",
@@ -725,6 +726,26 @@ async def render_workflow(request: WorkflowRenderRequest):
     
     # Create workflow in database
     workflow_id = str(uuid.uuid4())
+    
+    # Build selection data for storage
+    builder_selection = {}
+    if hasattr(request, 'selection') and request.selection and hasattr(request.selection, 'issue_id'):
+        sel = request.selection
+        builder_selection = {
+            "issue_id": sel.issue_id,
+            "campaign_id": sel.campaign_id,
+            "sprint_id": sel.sprint_id,
+            "playbook_id": sel.playbook_id
+        }
+    elif request.selection:
+        selection = request.selection
+        builder_selection = {
+            "issue_category": selection.issue_category.value if hasattr(selection.issue_category, 'value') else selection.issue_category,
+            "issue_type_id": selection.issue_type_id,
+            "sprint": selection.sprint.value if hasattr(selection.sprint, 'value') else selection.sprint,
+            "tier": selection.tier.value if hasattr(selection.tier, 'value') else selection.tier
+        }
+    
     workflow_data = {
         "id": workflow_id,
         "name": request.workflow_name,
@@ -735,12 +756,7 @@ async def render_workflow(request: WorkflowRenderRequest):
         "is_active": True,
         "version": 1,
         "builder_generated": True,
-        "builder_selection": {
-            "issue_category": selection.issue_category.value,
-            "issue_type_id": selection.issue_type_id,
-            "sprint": selection.sprint.value,
-            "tier": selection.tier.value
-        }
+        "builder_selection": builder_selection
     }
     
     await db.wf_workflows.insert_one(workflow_data)
@@ -765,16 +781,16 @@ async def render_workflow(request: WorkflowRenderRequest):
         }
         await db.wf_edges.insert_one(edge_data)
     
-    return WorkflowRenderResponse(
-        workflow_id=workflow_id,
-        name=request.workflow_name,
-        nodes=nodes,
-        edges=edges,
-        selection=selection,
-        sops=sops,
-        templates=templates,
-        contracts=contracts
-    )
+    # Return response (without response_model validation for flexibility)
+    return {
+        "workflow_id": workflow_id,
+        "name": request.workflow_name,
+        "nodes_created": len(nodes),
+        "edges_created": len(edges),
+        "sops": sops,
+        "templates": templates,
+        "contracts": contracts
+    }
 
 
 @builder_router.get("/preview")
