@@ -145,7 +145,7 @@ async def generate_playbook_endpoint(
         )
         
         # Auto-save to UNIFIED playbooks collection
-        if save and db:
+        if save and db is not None:
             playbook_id = f"PB-AI-{str(uuid.uuid4())[:8].upper()}"
             playbook_doc = {
                 "id": str(uuid.uuid4()),
@@ -205,7 +205,7 @@ async def generate_sop_endpoint(
         )
         
         # Auto-save to UNIFIED sops collection
-        if save and db:
+        if save and db is not None:
             sop_id = f"SOP-AI-{str(uuid.uuid4())[:8].upper()}"
             # Map industry to function type
             function_map = {
@@ -279,7 +279,7 @@ async def generate_contract_endpoint(
         )
         
         # Auto-save to UNIFIED contracts collection
-        if save and db:
+        if save and db is not None:
             contract_id = f"CNT-AI-{str(uuid.uuid4())[:8].upper()}"
             contract_doc = {
                 "id": str(uuid.uuid4()),
