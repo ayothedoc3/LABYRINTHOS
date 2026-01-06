@@ -223,6 +223,9 @@ const Dashboard = ({ stats, alerts, onRefresh }) => {
 const PlaybooksView = ({ playbooks, onRefresh }) => {
   const [filter, setFilter] = useState({ function: "all", level: "all" });
   const [showCreate, setShowCreate] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const [newPlaybook, setNewPlaybook] = useState({
     playbook_id: "",
     name: "",
@@ -253,6 +256,21 @@ const PlaybooksView = ({ playbooks, onRefresh }) => {
       onRefresh();
     } catch (error) {
       console.error("Error creating playbook:", error);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!itemToDelete) return;
+    setDeleting(true);
+    try {
+      await axios.delete(`${API}/playbooks/${itemToDelete.playbook_id || itemToDelete.id}`);
+      onRefresh();
+      setDeleteDialogOpen(false);
+      setItemToDelete(null);
+    } catch (error) {
+      console.error('Error deleting playbook:', error);
+    } finally {
+      setDeleting(false);
     }
   };
 
