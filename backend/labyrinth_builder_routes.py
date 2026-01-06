@@ -245,6 +245,208 @@ async def bulk_create_contracts(contracts: List[LabyrinthContract]):
     return {"created": len(created), "contracts": created}
 
 
+# ==================== NEW GATE CONSOLE ENDPOINTS ====================
+
+@builder_router.get("/issues")
+async def get_issues():
+    """Get all issues for the first dropdown"""
+    db = get_db()
+    # First check if we have issues in the database
+    db_issues = await db.builder_issues.find({}, {"_id": 0}).to_list(100)
+    if db_issues:
+        return db_issues
+    
+    # Fallback to predefined issues
+    return [
+        {"id": "operations", "name": "Operations", "description": "Operational challenges"},
+        {"id": "client_services", "name": "Client Services", "description": "Client-facing challenges"},
+        {"id": "sales", "name": "Sales", "description": "Sales pipeline challenges"},
+        {"id": "marketing", "name": "Marketing", "description": "Marketing and growth challenges"},
+        {"id": "development", "name": "Development", "description": "Product development challenges"},
+        {"id": "hr", "name": "HR & Recruiting", "description": "People and talent challenges"},
+        {"id": "finance", "name": "Finance", "description": "Financial and accounting challenges"},
+    ]
+
+
+@builder_router.get("/campaigns")
+async def get_campaigns(issue_id: Optional[str] = None):
+    """Get campaigns/types based on selected issue"""
+    db = get_db()
+    
+    # Check database first
+    query = {} if not issue_id else {"issue_id": issue_id}
+    db_campaigns = await db.builder_campaigns.find(query, {"_id": 0}).to_list(100)
+    if db_campaigns:
+        return db_campaigns
+    
+    # Fallback campaign options by issue
+    campaign_map = {
+        "operations": [
+            {"id": "trainings", "name": "Trainings", "description": "Training programs and onboarding"},
+            {"id": "process_improvement", "name": "Process Improvement", "description": "Optimizing workflows"},
+            {"id": "compliance", "name": "Compliance", "description": "Regulatory and policy compliance"},
+        ],
+        "client_services": [
+            {"id": "gold_package", "name": "Gold Package", "description": "Premium client services"},
+            {"id": "silver_package", "name": "Silver Package", "description": "Standard client services"},
+            {"id": "bronze_package", "name": "Bronze Package", "description": "Basic client services"},
+            {"id": "onboarding", "name": "Client Onboarding", "description": "New client setup"},
+        ],
+        "sales": [
+            {"id": "lead_gen", "name": "Lead Generation", "description": "New leads acquisition"},
+            {"id": "enterprise", "name": "Enterprise Sales", "description": "Large account deals"},
+            {"id": "renewals", "name": "Renewals", "description": "Contract renewals"},
+        ],
+        "marketing": [
+            {"id": "content", "name": "Content Marketing", "description": "Content creation campaigns"},
+            {"id": "paid_ads", "name": "Paid Advertising", "description": "PPC and paid media"},
+            {"id": "social", "name": "Social Media", "description": "Social media campaigns"},
+        ],
+        "development": [
+            {"id": "new_feature", "name": "New Feature", "description": "Building new features"},
+            {"id": "bug_fix", "name": "Bug Fix", "description": "Fixing issues"},
+            {"id": "refactor", "name": "Refactoring", "description": "Code improvements"},
+        ],
+        "hr": [
+            {"id": "recruiting", "name": "Recruiting", "description": "Talent acquisition"},
+            {"id": "performance", "name": "Performance Review", "description": "Team performance"},
+            {"id": "culture", "name": "Culture Building", "description": "Team culture initiatives"},
+        ],
+        "finance": [
+            {"id": "budgeting", "name": "Budgeting", "description": "Budget planning"},
+            {"id": "reporting", "name": "Financial Reporting", "description": "Financial reports"},
+            {"id": "forecasting", "name": "Forecasting", "description": "Revenue forecasting"},
+        ],
+    }
+    
+    if issue_id and issue_id in campaign_map:
+        return campaign_map[issue_id]
+    
+    # Return all campaigns if no issue selected
+    all_campaigns = []
+    for campaigns in campaign_map.values():
+        all_campaigns.extend(campaigns)
+    return all_campaigns
+
+
+@builder_router.get("/playbooks")
+async def get_playbooks_for_builder():
+    """Get playbooks for the builder dropdown"""
+    db = get_db()
+    
+    # Get from unified playbooks collection
+    playbooks = await db.playbooks.find({"is_active": True}, {"_id": 0}).to_list(100)
+    
+    if playbooks:
+        return [
+            {
+                "id": pb.get("playbook_id", pb.get("id", str(uuid.uuid4()))),
+                "name": pb.get("name", "Unnamed Playbook"),
+                "description": pb.get("description", ""),
+                "tier": pb.get("min_tier", 2),
+                "function": pb.get("function", "OPERATIONS")
+            }
+            for pb in playbooks
+        ]
+    
+    # Fallback playbooks
+    return [
+        {"id": "tier_1", "name": "Tier 1 - Executive", "tier": 1, "description": "Premium resources"},
+        {"id": "tier_2", "name": "Tier 2 - Professional", "tier": 2, "description": "Standard resources"},
+        {"id": "tier_3", "name": "Tier 3 - Entry", "tier": 3, "description": "Basic resources"},
+    ]
+
+
+@builder_router.get("/match")
+async def match_templates(
+    issue_id: str,
+    campaign_id: str,
+    sprint_id: str,
+    playbook_id: str
+):
+    """
+    Match templates based on configuration selections.
+    Returns SOPs, deliverables, project contracts, recurring contracts, and optimization plan.
+    """
+    db = get_db()
+    
+    # Determine tier from playbook
+    tier = "TIER_2"  # default
+    if "tier_1" in playbook_id.lower() or playbook_id == "1":
+        tier = "TIER_1"
+    elif "tier_3" in playbook_id.lower() or playbook_id == "3":
+        tier = "TIER_3"
+    
+    # Get SOPs that match the configuration
+    sop_query = {
+        "$or": [
+            {"issue_category": issue_id.upper()},
+            {"function": issue_id.upper()},
+            {"category": campaign_id},
+            {"issue_type_id": campaign_id},
+        ]
+    }
+    sops = await db.sops.find(sop_query, {"_id": 0}).to_list(20)
+    
+    # If no specific SOPs found, get general ones
+    if not sops:
+        sops = await db.sops.find({"is_active": True}, {"_id": 0}).to_list(10)
+    
+    # Get deliverable templates
+    templates = await db.templates.find(
+        {"is_active": True},
+        {"_id": 0}
+    ).to_list(10)
+    
+    # Get contracts and split into project-based vs recurring
+    all_contracts = await db.contracts.find(
+        {"is_active": True},
+        {"_id": 0}
+    ).to_list(20)
+    
+    # Split contracts
+    project_contracts = []
+    recurring_contracts = []
+    
+    for contract in all_contracts:
+        contract_type = contract.get("contract_type", "").lower()
+        if "recurring" in contract_type or "monthly" in contract_type or "retainer" in contract_type:
+            recurring_contracts.append({
+                "id": contract.get("id", contract.get("contract_id")),
+                "name": contract.get("name", contract.get("title", "Unnamed Contract")),
+                "frequency": "Monthly" if "monthly" in contract_type else "Recurring",
+                "type": contract.get("contract_type", "Recurring")
+            })
+        else:
+            project_contracts.append({
+                "id": contract.get("id", contract.get("contract_id")),
+                "name": contract.get("name", contract.get("title", "Unnamed Contract")),
+                "type": contract.get("contract_type", "Project-Based")
+            })
+    
+    # Format response
+    return {
+        "sops": [
+            {
+                "id": sop.get("id", sop.get("sop_id")),
+                "sop_id": sop.get("sop_id"),
+                "name": sop.get("name", "Unnamed SOP")
+            }
+            for sop in sops[:10]
+        ],
+        "deliverables": [
+            {
+                "id": t.get("id"),
+                "name": t.get("name", "Unnamed Template")
+            }
+            for t in templates[:8]
+        ],
+        "projectContracts": project_contracts[:5],
+        "recurringContracts": recurring_contracts[:5],
+        "optimizationPlan": None  # Placeholder for future implementation
+    }
+
+
 # ==================== WORKFLOW RENDER ENDPOINTS ====================
 
 @builder_router.post("/render-workflow", response_model=WorkflowRenderResponse)
