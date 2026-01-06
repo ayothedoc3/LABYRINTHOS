@@ -457,6 +457,7 @@ class BackendTester:
         self.test_workflowviz_apis()
         self.test_labyrinth_os_apis()
         self.test_template_creation()
+        self.test_data_unification_apis()  # Add data unification tests
         self.test_bulk_upload_apis()  # Add bulk upload tests
         
         # Summary
