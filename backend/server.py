@@ -247,16 +247,16 @@ async def delete_playbook(playbook_id: str):
 
 # ==================== SOP ENDPOINTS ====================
 
-@api_router.get("/sops", response_model=List[SOP])
+@api_router.get("/sops")
 async def get_sops_list(
-    function: Optional[FunctionType] = None,
+    function: Optional[str] = None,
     playbook_id: Optional[str] = None,
     is_active: Optional[bool] = True
 ):
-    """Get all SOPs with optional filtering"""
+    """Get all SOPs with optional filtering. Returns unified data from builder and original SOPs."""
     query = {}
     if function:
-        query["function"] = function.value
+        query["function"] = function
     if playbook_id:
         query["linked_playbook_ids"] = playbook_id
     if is_active is not None:
