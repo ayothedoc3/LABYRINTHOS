@@ -33,12 +33,7 @@ const WorkflowsPage = () => {
   const [workflowToDelete, setWorkflowToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  // Load saved workflows
-  useEffect(() => {
-    loadWorkflows();
-  }, []);
-
-  const loadWorkflows = async () => {
+  const loadWorkflows = useCallback(async () => {
     try {
       const response = await axios.get(`${API}/workflows`);
       setWorkflows(response.data);
@@ -46,7 +41,12 @@ const WorkflowsPage = () => {
       console.error("Error loading workflows:", error);
     }
     setLoading(false);
-  };
+  }, []);
+
+  // Load saved workflows
+  useEffect(() => {
+    loadWorkflows();
+  }, [loadWorkflows]);
 
   // When a workflow is created in Builder, switch to Canvas
   const handleWorkflowCreated = (workflowId) => {
