@@ -435,7 +435,7 @@ const PlaybooksView = ({ playbooks, onRefresh }) => {
               <Trash2 className="w-5 h-5" /> Delete Playbook
             </DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "<span className="font-medium">{itemToDelete?.name}</span>"? This action cannot be undone.
+              Are you sure you want to delete &quot;<span className="font-medium">{itemToDelete?.name}</span>&quot;? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -607,7 +607,7 @@ const SOPsView = ({ sops, onRefresh }) => {
               <Trash2 className="w-5 h-5" /> Delete SOP
             </DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "<span className="font-medium">{itemToDelete?.name}</span>"? This action cannot be undone.
+              Are you sure you want to delete &quot;<span className="font-medium">{itemToDelete?.name}</span>&quot;? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
