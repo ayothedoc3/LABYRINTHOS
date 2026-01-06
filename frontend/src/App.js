@@ -20,7 +20,7 @@ import {
   BarChart3, Shield, Settings, AlertTriangle, CheckCircle2, 
   XCircle, Clock, TrendingUp, TrendingDown, Play, RefreshCw,
   Plus, ChevronRight, Activity, Zap, Target, ArrowRight, Workflow, Sparkles,
-  FolderOpen, Library
+  FolderOpen, Library, Trash2
 } from "lucide-react";
 import WorkflowViz from "./WorkflowViz";
 import SettingsPage from "./Settings";
