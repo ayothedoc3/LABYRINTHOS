@@ -73,7 +73,6 @@ const LabyrinthBuilder = ({ onWorkflowCreated }) => {
   // Load campaigns based on issue selection
   useEffect(() => {
     if (!selectedIssue) {
-      setSelectedCampaign("");
       return;
     }
     
@@ -93,7 +92,6 @@ const LabyrinthBuilder = ({ onWorkflowCreated }) => {
   // Fetch matched templates when all 4 selections are made
   useEffect(() => {
     if (!selectedIssue || !selectedCampaign || !selectedSprint || !selectedPlaybook) {
-      setMatchedData(null);
       return;
     }
     
