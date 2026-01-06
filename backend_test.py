@@ -346,6 +346,215 @@ class BackendTester:
         except Exception as e:
             self.log_test("GET /api/playbooks", False, None, str(e))
 
+    def test_ai_generation_with_database_integration(self):
+        """Test AI Generation with Unified Database Collections Integration"""
+        print("\n=== Testing AI Generation with Database Integration ===")
+        
+        # Store initial counts for comparison
+        initial_counts = {}
+        
+        # Get initial counts
+        for content_type in ['sops', 'playbooks', 'contracts']:
+            try:
+                response = self.session.get(f"{self.base_url}/{content_type}", timeout=10)
+                if response.status_code == 200:
+                    data = response.json()
+                    initial_counts[content_type] = len(data)
+                else:
+                    initial_counts[content_type] = 0
+            except:
+                initial_counts[content_type] = 0
+        
+        print(f"Initial counts - SOPs: {initial_counts['sops']}, Playbooks: {initial_counts['playbooks']}, Contracts: {initial_counts['contracts']}")
+        
+        # Test 1: AI SOP Generation with auto-save
+        try:
+            response = self.session.post(
+                f"{self.base_url}/ai/generate/sop?description=Employee%20onboarding%20checklist&industry=hr",
+                timeout=45  # AI generation takes time
+            )
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ['success', 'sop_id', 'saved_id']
+                if all(field in data for field in required_fields):
+                    success = data.get('success', False)
+                    sop_id = data.get('sop_id', '')
+                    saved_id = data.get('saved_id', '')
+                    
+                    if success and sop_id.startswith('SOP-AI-') and saved_id:
+                        self.log_test("POST /api/ai/generate/sop", True, response.status_code, f"SOP generated: {sop_id}, saved: {saved_id}")
+                        
+                        # Verify SOP count increased
+                        try:
+                            count_response = self.session.get(f"{self.base_url}/sops", timeout=10)
+                            if count_response.status_code == 200:
+                                new_count = len(count_response.json())
+                                if new_count > initial_counts['sops']:
+                                    self.log_test("SOP Count Verification", True, 200, f"Count increased from {initial_counts['sops']} to {new_count}")
+                                else:
+                                    self.log_test("SOP Count Verification", False, 200, f"Count did not increase: {initial_counts['sops']} -> {new_count}")
+                        except Exception as e:
+                            self.log_test("SOP Count Verification", False, None, str(e))
+                    else:
+                        self.log_test("POST /api/ai/generate/sop", False, response.status_code, f"Invalid response: success={success}, sop_id={sop_id}, saved_id={saved_id}")
+                else:
+                    self.log_test("POST /api/ai/generate/sop", False, response.status_code, f"Missing required fields: {list(data.keys())}")
+            else:
+                self.log_test("POST /api/ai/generate/sop", False, response.status_code, response.text[:200])
+        except Exception as e:
+            self.log_test("POST /api/ai/generate/sop", False, None, str(e))
+        
+        # Test 2: AI Playbook Generation with auto-save
+        try:
+            response = self.session.post(
+                f"{self.base_url}/ai/generate/playbook?description=Sales%20lead%20qualification&industry=sales",
+                timeout=45  # AI generation takes time
+            )
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ['success', 'playbook_id', 'saved_id']
+                if all(field in data for field in required_fields):
+                    success = data.get('success', False)
+                    playbook_id = data.get('playbook_id', '')
+                    saved_id = data.get('saved_id', '')
+                    
+                    if success and playbook_id.startswith('PB-AI-') and saved_id:
+                        self.log_test("POST /api/ai/generate/playbook", True, response.status_code, f"Playbook generated: {playbook_id}, saved: {saved_id}")
+                        
+                        # Verify Playbook count increased
+                        try:
+                            count_response = self.session.get(f"{self.base_url}/playbooks", timeout=10)
+                            if count_response.status_code == 200:
+                                new_count = len(count_response.json())
+                                if new_count > initial_counts['playbooks']:
+                                    self.log_test("Playbook Count Verification", True, 200, f"Count increased from {initial_counts['playbooks']} to {new_count}")
+                                else:
+                                    self.log_test("Playbook Count Verification", False, 200, f"Count did not increase: {initial_counts['playbooks']} -> {new_count}")
+                        except Exception as e:
+                            self.log_test("Playbook Count Verification", False, None, str(e))
+                    else:
+                        self.log_test("POST /api/ai/generate/playbook", False, response.status_code, f"Invalid response: success={success}, playbook_id={playbook_id}, saved_id={saved_id}")
+                else:
+                    self.log_test("POST /api/ai/generate/playbook", False, response.status_code, f"Missing required fields: {list(data.keys())}")
+            else:
+                self.log_test("POST /api/ai/generate/playbook", False, response.status_code, response.text[:200])
+        except Exception as e:
+            self.log_test("POST /api/ai/generate/playbook", False, None, str(e))
+        
+        # Test 3: AI Contract Generation with auto-save
+        try:
+            response = self.session.post(
+                f"{self.base_url}/ai/generate/contract?description=Marketing%20retainer%20agreement&industry=marketing",
+                timeout=45  # AI generation takes time
+            )
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ['success', 'contract_id', 'saved_id']
+                if all(field in data for field in required_fields):
+                    success = data.get('success', False)
+                    contract_id = data.get('contract_id', '')
+                    saved_id = data.get('saved_id', '')
+                    
+                    if success and contract_id.startswith('CNT-AI-') and saved_id:
+                        self.log_test("POST /api/ai/generate/contract", True, response.status_code, f"Contract generated: {contract_id}, saved: {saved_id}")
+                        
+                        # Verify Contract count increased
+                        try:
+                            count_response = self.session.get(f"{self.base_url}/contracts", timeout=10)
+                            if count_response.status_code == 200:
+                                new_count = len(count_response.json())
+                                if new_count > initial_counts['contracts']:
+                                    self.log_test("Contract Count Verification", True, 200, f"Count increased from {initial_counts['contracts']} to {new_count}")
+                                else:
+                                    self.log_test("Contract Count Verification", False, 200, f"Count did not increase: {initial_counts['contracts']} -> {new_count}")
+                        except Exception as e:
+                            self.log_test("Contract Count Verification", False, None, str(e))
+                    else:
+                        self.log_test("POST /api/ai/generate/contract", False, response.status_code, f"Invalid response: success={success}, contract_id={contract_id}, saved_id={saved_id}")
+                else:
+                    self.log_test("POST /api/ai/generate/contract", False, response.status_code, f"Missing required fields: {list(data.keys())}")
+            else:
+                self.log_test("POST /api/ai/generate/contract", False, response.status_code, response.text[:200])
+        except Exception as e:
+            self.log_test("POST /api/ai/generate/contract", False, None, str(e))
+        
+        # Test 4: Query AI-generated items
+        try:
+            response = self.session.get(f"{self.base_url}/ai/saved/sops", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                ai_sops = [s for s in data if s.get('ai_generated') == True]
+                self.log_test("GET /api/ai/saved/sops", True, response.status_code, f"Found {len(ai_sops)} AI-generated SOPs")
+            else:
+                self.log_test("GET /api/ai/saved/sops", False, response.status_code, response.text[:100])
+        except Exception as e:
+            self.log_test("GET /api/ai/saved/sops", False, None, str(e))
+        
+        try:
+            response = self.session.get(f"{self.base_url}/ai/saved/playbooks", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                ai_playbooks = [p for p in data if p.get('ai_generated') == True]
+                self.log_test("GET /api/ai/saved/playbooks", True, response.status_code, f"Found {len(ai_playbooks)} AI-generated playbooks")
+            else:
+                self.log_test("GET /api/ai/saved/playbooks", False, response.status_code, response.text[:100])
+        except Exception as e:
+            self.log_test("GET /api/ai/saved/playbooks", False, None, str(e))
+        
+        try:
+            response = self.session.get(f"{self.base_url}/ai/saved/contracts", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                ai_contracts = [c for c in data if c.get('ai_generated') == True]
+                self.log_test("GET /api/ai/saved/contracts", True, response.status_code, f"Found {len(ai_contracts)} AI-generated contracts")
+            else:
+                self.log_test("GET /api/ai/saved/contracts", False, response.status_code, response.text[:100])
+        except Exception as e:
+            self.log_test("GET /api/ai/saved/contracts", False, None, str(e))
+        
+        # Test 5: Verify unified data - AI-generated items should appear in main endpoints
+        try:
+            response = self.session.get(f"{self.base_url}/sops", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                ai_sops_in_main = [s for s in data if s.get('ai_generated') == True]
+                if len(ai_sops_in_main) > 0:
+                    self.log_test("Unified SOPs Verification", True, response.status_code, f"Found {len(ai_sops_in_main)} AI-generated SOPs in main /api/sops endpoint")
+                else:
+                    self.log_test("Unified SOPs Verification", False, response.status_code, "No AI-generated SOPs found in main endpoint")
+            else:
+                self.log_test("Unified SOPs Verification", False, response.status_code, response.text[:100])
+        except Exception as e:
+            self.log_test("Unified SOPs Verification", False, None, str(e))
+        
+        try:
+            response = self.session.get(f"{self.base_url}/playbooks", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                ai_playbooks_in_main = [p for p in data if p.get('ai_generated') == True]
+                if len(ai_playbooks_in_main) > 0:
+                    self.log_test("Unified Playbooks Verification", True, response.status_code, f"Found {len(ai_playbooks_in_main)} AI-generated playbooks in main /api/playbooks endpoint")
+                else:
+                    self.log_test("Unified Playbooks Verification", False, response.status_code, "No AI-generated playbooks found in main endpoint")
+            else:
+                self.log_test("Unified Playbooks Verification", False, response.status_code, response.text[:100])
+        except Exception as e:
+            self.log_test("Unified Playbooks Verification", False, None, str(e))
+        
+        try:
+            response = self.session.get(f"{self.base_url}/contracts", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                ai_contracts_in_main = [c for c in data if c.get('ai_generated') == True]
+                if len(ai_contracts_in_main) > 0:
+                    self.log_test("Unified Contracts Verification", True, response.status_code, f"Found {len(ai_contracts_in_main)} AI-generated contracts in main /api/contracts endpoint")
+                else:
+                    self.log_test("Unified Contracts Verification", False, response.status_code, "No AI-generated contracts found in main endpoint")
+            else:
+                self.log_test("Unified Contracts Verification", False, response.status_code, response.text[:100])
+        except Exception as e:
+            self.log_test("Unified Contracts Verification", False, None, str(e))
+
     def test_bulk_upload_apis(self):
         """Test Bulk Upload APIs"""
         print("\n=== Testing Bulk Upload APIs ===")
