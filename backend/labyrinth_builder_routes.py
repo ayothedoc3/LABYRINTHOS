@@ -370,12 +370,12 @@ async def match_templates(
     """
     db = get_db()
     
-    # Determine tier from playbook
-    tier = "TIER_2"  # default
+    # Determine playbook tier from playbook_id
+    playbook_tier = "TIER_2"  # default
     if "tier_1" in playbook_id.lower() or playbook_id == "1":
-        tier = "TIER_1"
+        playbook_tier = "TIER_1"
     elif "tier_3" in playbook_id.lower() or playbook_id == "3":
-        tier = "TIER_3"
+        playbook_tier = "TIER_3"
     
     # Get SOPs that match the configuration
     sop_query = {
