@@ -76,7 +76,7 @@ const GlobalSearch = ({ onNavigate }) => {
     setLoading(true);
     try {
       const [workflowsRes, sopsRes, playbooksRes, templatesRes, contractsRes] = await Promise.all([
-        axios.get(`${API}/workflows`),
+        axios.get(`${API}/workflowviz/workflows`),
         axios.get(`${API}/sops`),
         axios.get(`${API}/playbooks`),
         axios.get(`${API}/builder/templates`),
