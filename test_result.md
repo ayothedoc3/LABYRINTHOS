@@ -319,6 +319,18 @@ frontend:
         agent: "testing"
         comment: "✅ LABYRINTH BUILDER (GATE CONSOLE) TESTING COMPLETED: Comprehensive testing of new Gate Console UI successfully completed with all requested scenarios passing: 1) INITIAL STATE VERIFICATION: 4 dropdowns found (Issue, Campaign, Sprint, Playbook), Campaign disabled with 'Select issue first', Sprint disabled with 'Select campaign first', Playbook disabled with 'Select sprint first', Reset button present, empty state message displayed correctly. 2) CASCADING SELECTION FLOW: Selected 'Operations' from Issue dropdown, Campaign dropdown became enabled, Selected 'Trainings' from Campaign dropdown, Sprint dropdown became enabled, Selected 'Yesterday (URGENT)' Sprint option, Playbook dropdown became enabled, Selected 'Lead Generation' Playbook option. 3) MATCHED TEMPLATES SECTION: 'Matched Templates (Based on Configuration)' section appeared, 5. SOPs section with checkmarks, 6. Deliverable Templates section, 7. Project-Based Contracts & KPIs section, 8. Recurring Contracts & KPIs section, 9. Optimization Plan with 'Not configured (Optional - Can be added later)' message, Generate Workflow button appeared. 4) GENERATE WORKFLOW DIALOG: Dialog opened with correct title, Workflow name auto-populated: 'Operations - Trainings', Description field present, Cancel and Generate buttons present. 5) RESET FUNCTIONALITY: Reset button cleared all selections, All dropdowns returned to disabled state, Matched templates section disappeared, Empty state message reappeared. NEW GATE CONSOLE UI IS FULLY FUNCTIONAL!"
 
+  - task: "Workflows Page Features (Saved Workflows Sidebar, Global Search, Builder/Canvas Navigation)"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/WorkflowsPage.js, /app/frontend/src/GlobalSearch.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ NEW WORKFLOWS PAGE FEATURES TESTING COMPLETED: Comprehensive testing of all requested Workflows page features at https://data-weaver-1.preview.emergentagent.com/?tab=workflows successfully completed: 1) SAVED WORKFLOWS SIDEBAR: ✅ 'Saved Workflows' header displayed in left sidebar, ✅ Shows workflow count '5 workflows saved', ✅ Each workflow displays name, date (1/6/2026), and description where available, ✅ Hover reveals Eye (view) and Trash (delete) icons, ✅ Clicking workflow opens Canvas tab. 2) GLOBAL SEARCH (HEADER): ✅ Search bar found with correct placeholder 'Search workflows, SOPs, templates...', ✅ ⌘K keyboard hint visible, ✅ Search dialog opens on click, ✅ Search for 'sales' shows results with categories (SOPs, Playbooks), ✅ Results display category icons, names, and ID badges (14 badges found), ✅ Dialog closes when result clicked. 3) BUILDER/CANVAS NAVIGATION: ✅ Both Builder and Canvas tabs exist and are functional, ✅ Canvas tab switches to WorkflowViz view, ✅ Builder tab switches to Gate Console (Labyrinth Builder). 4) CREATE WORKFLOW FLOW: ✅ Found 4 cascading dropdowns (Issue > Campaign > Sprint > Playbook), ✅ Successful cascading selection flow tested, ✅ Matched Templates section appears after all selections, ✅ Template categories found (SOPs, Deliverables, Contracts), ✅ Generate Workflow button appears, ✅ Workflow creation dialog opens with auto-populated name, description field, and Cancel/Generate buttons. ALL WORKFLOWS PAGE FEATURES WORKING CORRECTLY!"
+
 metadata:
   created_by: "main_agent"
   version: "2.0"
