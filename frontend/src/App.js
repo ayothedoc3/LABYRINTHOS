@@ -396,11 +396,29 @@ const PlaybooksView = ({ playbooks, onRefresh }) => {
 const SOPsView = ({ sops, onRefresh }) => {
   const [filter, setFilter] = useState({ function: "all" });
   const [expandedSOP, setExpandedSOP] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const filteredSOPs = sops?.filter(sop => {
     if (filter.function !== "all" && sop.function !== filter.function) return false;
     return true;
   }) || [];
+
+  const handleDelete = async () => {
+    if (!itemToDelete) return;
+    setDeleting(true);
+    try {
+      await axios.delete(`${API}/sops/${itemToDelete.sop_id || itemToDelete.id}`);
+      onRefresh();
+      setDeleteDialogOpen(false);
+      setItemToDelete(null);
+    } catch (error) {
+      console.error('Error deleting SOP:', error);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   return (
     <div className="space-y-6" data-testid="sops-view">
@@ -435,66 +453,112 @@ const SOPsView = ({ sops, onRefresh }) => {
       {/* SOPs List */}
       <div className="space-y-4">
         {filteredSOPs.map((sop) => (
-          <Card key={sop.sop_id} className={expandedSOP === sop.sop_id ? "ring-2 ring-primary" : ""}>
+          <Card key={sop.sop_id || sop.id} className={expandedSOP === sop.sop_id ? "ring-2 ring-primary" : ""}>
             <CardHeader className="cursor-pointer" onClick={() => setExpandedSOP(expandedSOP === sop.sop_id ? null : sop.sop_id)}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Badge variant="outline" className="font-mono">{sop.sop_id}</Badge>
                   <CardTitle className="text-lg">{sop.name}</CardTitle>
+                  {sop.ai_generated && (
+                    <Tooltip>
+                      <TooltipTrigger><Sparkles className="w-4 h-4 text-primary" /></TooltipTrigger>
+                      <TooltipContent>AI Generated</TooltipContent>
+                    </Tooltip>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <FunctionBadge func={sop.function} />
                   <Badge variant="secondary">
                     <Clock className="w-3 h-3 mr-1" />
-                    {sop.estimated_time_minutes} min
+                    {sop.estimated_time_minutes || 30} min
                   </Badge>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setItemToDelete(sop);
+                      setDeleteDialogOpen(true);
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                   <ChevronRight className={`w-5 h-5 transition-transform ${expandedSOP === sop.sop_id ? "rotate-90" : ""}`} />
                 </div>
               </div>
-              <CardDescription>Template: {sop.template_required}</CardDescription>
+              <CardDescription>Template: {sop.template_required || 'N/A'}</CardDescription>
             </CardHeader>
             {expandedSOP === sop.sop_id && (
               <CardContent>
                 <div className="space-y-4">
-                  <div>
-                    <Label className="text-sm font-medium">Linked Playbooks:</Label>
-                    <div className="flex gap-2 mt-1">
-                      {sop.linked_playbook_ids?.map(pbId => (
-                        <Badge key={pbId} variant="outline">{pbId}</Badge>
-                      ))}
+                  {sop.content ? (
+                    <div className="prose prose-sm max-w-none">
+                      <pre className="whitespace-pre-wrap bg-muted/50 p-4 rounded-lg text-sm">{sop.content}</pre>
                     </div>
-                  </div>
-                  <Separator />
-                  <div>
-                    <Label className="text-sm font-medium mb-2 block">Steps ({sop.steps?.length || 0})</Label>
-                    <div className="space-y-3">
-                      {sop.steps?.map((step, idx) => (
-                        <div key={idx} className="p-3 bg-muted/50 rounded-lg">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Badge>{step.step_number}</Badge>
-                            <span className="font-medium">{step.title}</span>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-2">{step.description}</p>
-                          {step.checklist_items?.length > 0 && (
-                            <div className="space-y-1">
-                              {step.checklist_items.map((item, i) => (
-                                <div key={i} className="flex items-center gap-2 text-sm">
-                                  <CheckCircle2 className="w-4 h-4 text-muted-foreground" />
-                                  {item}
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                  ) : (
+                    <>
+                      <div>
+                        <Label className="text-sm font-medium">Linked Playbooks:</Label>
+                        <div className="flex gap-2 mt-1">
+                          {sop.linked_playbook_ids?.map(pbId => (
+                            <Badge key={pbId} variant="outline">{pbId}</Badge>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  </div>
+                      </div>
+                      <Separator />
+                      <div>
+                        <Label className="text-sm font-medium mb-2 block">Steps ({sop.steps?.length || 0})</Label>
+                        <div className="space-y-3">
+                          {sop.steps?.map((step, idx) => (
+                            <div key={idx} className="p-3 bg-muted/50 rounded-lg">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge>{step.step_number || step.step}</Badge>
+                                <span className="font-medium">{step.title}</span>
+                              </div>
+                              <p className="text-sm text-muted-foreground mb-2">{step.description}</p>
+                              {step.checklist_items?.length > 0 && (
+                                <div className="space-y-1">
+                                  {step.checklist_items.map((item, i) => (
+                                    <div key={i} className="flex items-center gap-2 text-sm">
+                                      <CheckCircle2 className="w-4 h-4 text-muted-foreground" />
+                                      {item}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </CardContent>
             )}
           </Card>
         ))}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="w-5 h-5" /> Delete SOP
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "<span className="font-medium">{itemToDelete?.name}</span>"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={deleting}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" /> Deleting...</> : <><Trash2 className="w-4 h-4 mr-2" /> Delete</>}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
