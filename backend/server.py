@@ -434,18 +434,18 @@ async def recalculate_talent_tier(talent_id: str):
 
 # ==================== CONTRACT ENDPOINTS ====================
 
-@api_router.get("/contracts", response_model=List[Contract])
+@api_router.get("/contracts")
 async def get_contracts_list(
     talent_id: Optional[str] = None,
-    client_package: Optional[ClientPackage] = None,
+    client_package: Optional[str] = None,
     is_active: Optional[bool] = True
 ):
-    """Get all contracts with optional filtering"""
+    """Get all contracts with optional filtering. Returns unified data from builder and original contracts."""
     query = {}
     if talent_id:
         query["talent_id"] = talent_id
     if client_package:
-        query["client_package"] = client_package.value
+        query["client_package"] = client_package
     if is_active is not None:
         query["is_active"] = is_active
     
