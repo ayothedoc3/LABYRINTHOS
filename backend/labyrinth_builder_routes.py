@@ -542,7 +542,6 @@ async def render_workflow(request: WorkflowRenderRequest):
     
     # Layout configuration
     H_SPACING = 280
-    V_SPACING = 150
     RESOURCE_ROW = 50
     MAIN_ROW = 250
     DELIVERABLE_ROW = 450
