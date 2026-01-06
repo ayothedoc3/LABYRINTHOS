@@ -69,7 +69,7 @@ const WorkflowsPage = () => {
     if (!workflowToDelete) return;
     setDeleting(true);
     try {
-      await axios.delete(`${API}/workflows/${workflowToDelete.id}`);
+      await axios.delete(`${API}/workflowviz/workflows/${workflowToDelete.id}`);
       await loadWorkflows();
       setDeleteDialogOpen(false);
       setWorkflowToDelete(null);
