@@ -162,18 +162,37 @@ class LabyrinthContract(BaseModel):
 
 
 class BuilderSelection(BaseModel):
-    """User's selections in the builder"""
+    """User's selections in the builder (legacy format)"""
     issue_category: IssueCategory
     issue_type_id: str
     sprint: SprintTimeline
     tier: PlaybookTier
 
 
+class NewBuilderSelection(BaseModel):
+    """User's selections in the new Gate Console format"""
+    issue_id: str
+    campaign_id: str
+    sprint_id: str
+    playbook_id: str
+
+
 class WorkflowRenderRequest(BaseModel):
     """Request to render a workflow from selections"""
-    selection: BuilderSelection
+    selection: Optional[BuilderSelection] = None
+    new_selection: Optional[NewBuilderSelection] = None
     workflow_name: str
     description: str = ""
+    
+    def __init__(self, **data):
+        # Handle both old and new selection formats
+        if 'selection' in data and isinstance(data['selection'], dict):
+            sel = data['selection']
+            # Check if it's the new format
+            if 'issue_id' in sel:
+                data['new_selection'] = NewBuilderSelection(**sel)
+                data['selection'] = None
+        super().__init__(**data)
 
 
 class WorkflowRenderResponse(BaseModel):
