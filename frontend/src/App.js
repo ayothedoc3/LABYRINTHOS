@@ -1124,6 +1124,9 @@ const GateConsole = ({ playbooks, talents, onRefresh }) => {
 
 const ContractsView = ({ contracts, talents, playbooks, onRefresh }) => {
   const [showCreate, setShowCreate] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const [newContract, setNewContract] = useState({
     talent_id: "",
     client_name: "",
@@ -1152,6 +1155,21 @@ const ContractsView = ({ contracts, talents, playbooks, onRefresh }) => {
       onRefresh();
     } catch (error) {
       console.error("Error creating contract:", error);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!itemToDelete) return;
+    setDeleting(true);
+    try {
+      await axios.delete(`${API}/contracts/${itemToDelete.contract_id || itemToDelete.id}`);
+      onRefresh();
+      setDeleteDialogOpen(false);
+      setItemToDelete(null);
+    } catch (error) {
+      console.error('Error deleting contract:', error);
+    } finally {
+      setDeleting(false);
     }
   };
 
