@@ -394,3 +394,35 @@ agent_communication:
 - Minor Pydantic validation warnings (non-blocking)
 - Service healthy and stable
 
+
+## Upcoming Tasks Verification - 2026-01-06
+
+### P1: AI Generation with Database Integration
+**Status: ✅ COMPLETED**
+- Modified ai_routes.py to save AI-generated content to UNIFIED collections:
+  - Playbooks → db.playbooks
+  - SOPs → db.sops
+  - Contracts → db.contracts
+- Auto-save enabled by default (save=True)
+- Fixed db boolean check issue (db is not None)
+- Added proper field mapping for each content type
+- AI-generated items can be queried via /api/ai/saved/* endpoints
+
+### P2: Bulk Upload Feature
+**Status: ✅ ALREADY IMPLEMENTED**
+- Full wizard UI (4-step process)
+- Supports Playbooks, SOPs, Talents, Contracts, KPIs
+- Supports CSV, JSON, Excel formats
+- Template download with sample data
+- Preview before import with validation
+- Drag-and-drop file upload
+
+### P3: Library Page
+**Status: ✅ ALREADY IMPLEMENTED**
+- Full workflow library view
+- Left sidebar with saved workflows list
+- Center canvas with WorkflowViz
+- Right sidebar with workflow templates
+- Generate with AI button
+- All features working: node display, layer navigation, minimap
+
