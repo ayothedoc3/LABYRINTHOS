@@ -554,9 +554,9 @@ async def render_workflow(request: WorkflowRenderRequest):
         "type": "custom",
         "position": {"x": 50, "y": MAIN_ROW},
         "data": {
-            "label": f"📋 {issue['name']}",
+            "label": f"📋 {issue_name}",
             "node_type": "ISSUE",
-            "description": f"Challenge: {issue['description']}\nSprint: {sprint_config.get('label', 'N/A')}\nTier: {selection.tier.value.replace('_', ' ')}"
+            "description": f"Campaign: {campaign_name}\nSprint: {sprint_config.get('label', 'N/A')}\nTier: {tier.replace('_', ' ')}"
         }
     })
     
@@ -567,21 +567,23 @@ async def render_workflow(request: WorkflowRenderRequest):
     # Collect all steps from all SOPs
     step_x = 350
     for sop in sops:
+        sop_name = sop.get("name", "SOP")
         steps = sop.get("steps", [])
-        for step in steps:
+        
+        # If no steps, create a single node for the SOP itself
+        if not steps:
             step_node_id = f"step_{uuid.uuid4().hex[:8]}"
             nodes.append({
                 "id": step_node_id,
                 "type": "custom",
                 "position": {"x": step_x, "y": MAIN_ROW},
                 "data": {
-                    "label": f"⚡ {step.get('title', 'Step')}",
+                    "label": f"⚡ {sop_name}",
                     "node_type": "ACTION",
-                    "description": step.get('description', ''),
-                    "sop_name": sop["name"]
+                    "description": sop.get("description", ""),
+                    "sop_name": sop_name
                 }
             })
-            # Connect to previous node
             edges.append({
                 "id": f"e_{prev_node_id}_{step_node_id}",
                 "source": prev_node_id,
@@ -591,6 +593,29 @@ async def render_workflow(request: WorkflowRenderRequest):
             prev_node_id = step_node_id
             all_step_nodes.append(step_node_id)
             step_x += H_SPACING
+        else:
+            for step in steps:
+                step_node_id = f"step_{uuid.uuid4().hex[:8]}"
+                nodes.append({
+                    "id": step_node_id,
+                    "type": "custom",
+                    "position": {"x": step_x, "y": MAIN_ROW},
+                    "data": {
+                        "label": f"⚡ {step.get('title', 'Step')}",
+                        "node_type": "ACTION",
+                        "description": step.get('description', ''),
+                        "sop_name": sop_name
+                    }
+                })
+                edges.append({
+                    "id": f"e_{prev_node_id}_{step_node_id}",
+                    "source": prev_node_id,
+                    "target": step_node_id,
+                    "type": "smoothstep"
+                })
+                prev_node_id = step_node_id
+                all_step_nodes.append(step_node_id)
+                step_x += H_SPACING
     
     # If no SOPs, create placeholder
     if not sops:
