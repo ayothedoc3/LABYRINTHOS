@@ -663,6 +663,7 @@ class BackendTester:
         # Run all test suites
         self.test_health_and_core_apis()
         self.test_ai_generation_apis()
+        self.test_ai_generation_with_database_integration()  # Add new AI generation with DB integration tests
         self.test_workflowviz_apis()
         self.test_labyrinth_os_apis()
         self.test_template_creation()
