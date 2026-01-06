@@ -126,9 +126,9 @@ async def generate_playbook_endpoint(
     industry: Optional[str] = None,
     provider: Optional[str] = None,
     model: Optional[str] = None,
-    save: bool = False
+    save: bool = True  # Changed to True by default - auto-save to unified collection
 ):
-    """Generate a playbook in Markdown format"""
+    """Generate a playbook in Markdown format and save to unified collection"""
     
     ai_config = await get_active_ai_config()
     provider = provider or ai_config.get("provider", "openai")
@@ -144,22 +144,31 @@ async def generate_playbook_endpoint(
             model=model
         )
         
-        # Optionally save to database
+        # Auto-save to UNIFIED playbooks collection
         if save and db:
+            playbook_id = f"PB-AI-{str(uuid.uuid4())[:8].upper()}"
             playbook_doc = {
                 "id": str(uuid.uuid4()),
-                "title": data.get("title", description),
-                "content": data.get("content", ""),
+                "playbook_id": playbook_id,
+                "name": data.get("title", description),
                 "description": description,
+                "content": data.get("content", ""),
+                "function": industry.upper() if industry else "OPERATIONS",
+                "level": "ACQUIRE",
+                "min_tier": 2,
+                "linked_sop_ids": [],
                 "industry": industry,
                 "format": "markdown",
                 "ai_generated": True,
                 "provider": provider,
                 "model": model,
-                "created_at": datetime.now(timezone.utc).isoformat()
+                "is_active": True,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat()
             }
-            await db.ai_playbooks.insert_one(playbook_doc)
+            await db.playbooks.insert_one(playbook_doc)  # Save to UNIFIED collection
             data["saved_id"] = playbook_doc["id"]
+            data["playbook_id"] = playbook_id
         
         return {
             "success": True,
@@ -177,9 +186,9 @@ async def generate_sop_endpoint(
     industry: Optional[str] = None,
     provider: Optional[str] = None,
     model: Optional[str] = None,
-    save: bool = False
+    save: bool = True  # Changed to True by default - auto-save to unified collection
 ):
-    """Generate an SOP in Markdown format"""
+    """Generate an SOP in Markdown format and save to unified collection"""
     
     ai_config = await get_active_ai_config()
     provider = provider or ai_config.get("provider", "openai")
@@ -195,22 +204,45 @@ async def generate_sop_endpoint(
             model=model
         )
         
-        # Optionally save to database
+        # Auto-save to UNIFIED sops collection
         if save and db:
+            sop_id = f"SOP-AI-{str(uuid.uuid4())[:8].upper()}"
+            # Map industry to function type
+            function_map = {
+                "sales": "SALES",
+                "marketing": "MARKETING",
+                "operations": "OPERATIONS",
+                "hr": "OPERATIONS",
+                "finance": "FINANCE",
+                "customer_service": "OPERATIONS",
+                "technology": "DEVELOPMENT"
+            }
+            function_type = function_map.get(industry.lower() if industry else "", "OPERATIONS")
+            
             sop_doc = {
                 "id": str(uuid.uuid4()),
-                "title": data.get("title", description),
-                "content": data.get("content", ""),
+                "sop_id": sop_id,
+                "name": data.get("title", description),
                 "description": description,
+                "content": data.get("content", ""),
+                "function": function_type,
+                "category": industry or "general",
+                "linked_playbook_ids": [],
+                "template_required": "General Template",
+                "steps": [],  # Markdown content has the steps
+                "estimated_time_minutes": 30,
                 "industry": industry,
                 "format": "markdown",
                 "ai_generated": True,
                 "provider": provider,
                 "model": model,
-                "created_at": datetime.now(timezone.utc).isoformat()
+                "is_active": True,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat()
             }
-            await db.ai_sops.insert_one(sop_doc)
+            await db.sops.insert_one(sop_doc)  # Save to UNIFIED collection
             data["saved_id"] = sop_doc["id"]
+            data["sop_id"] = sop_id
         
         return {
             "success": True,
@@ -228,9 +260,9 @@ async def generate_contract_endpoint(
     industry: Optional[str] = None,
     provider: Optional[str] = None,
     model: Optional[str] = None,
-    save: bool = False
+    save: bool = True  # Changed to True by default - auto-save to unified collection
 ):
-    """Generate a contract framework in Markdown format"""
+    """Generate a contract framework in Markdown format and save to unified collection"""
     
     ai_config = await get_active_ai_config()
     provider = provider or ai_config.get("provider", "openai")
@@ -246,22 +278,40 @@ async def generate_contract_endpoint(
             model=model
         )
         
-        # Optionally save to database
+        # Auto-save to UNIFIED contracts collection
         if save and db:
+            contract_id = f"CNT-AI-{str(uuid.uuid4())[:8].upper()}"
             contract_doc = {
                 "id": str(uuid.uuid4()),
+                "contract_id": contract_id,
                 "title": data.get("title", description),
-                "content": data.get("content", ""),
+                "name": data.get("title", description),
+                "client_name": "TBD",
+                "package": industry.upper() if industry else "GENERAL",
                 "description": description,
+                "content": data.get("content", ""),
+                "boundaries": {
+                    "max_hours_per_week": 40,
+                    "response_time_hours": 24,
+                    "deliverable_quality_min": 3.5,
+                    "escalation_threshold_days": 3
+                },
+                "value": 0,
+                "duration_months": 12,
+                "terms": data.get("content", "")[:500],  # First 500 chars as summary
+                "status": "TEMPLATE",
                 "industry": industry,
                 "format": "markdown",
                 "ai_generated": True,
                 "provider": provider,
                 "model": model,
-                "created_at": datetime.now(timezone.utc).isoformat()
+                "is_active": True,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat()
             }
-            await db.ai_contracts.insert_one(contract_doc)
+            await db.contracts.insert_one(contract_doc)  # Save to UNIFIED collection
             data["saved_id"] = contract_doc["id"]
+            data["contract_id"] = contract_id
         
         return {
             "success": True,
