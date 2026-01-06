@@ -1938,6 +1938,40 @@ const WorkflowViz = () => {
     }
   };
 
+  // Delete workflow handler
+  const handleDeleteWorkflow = async () => {
+    if (!workflowToDelete) return;
+    
+    setDeleting(true);
+    try {
+      await axios.delete(`${API}/workflows/${workflowToDelete.id}`);
+      
+      // Refresh the list
+      await refreshWorkflows();
+      
+      // Clear selection if deleted workflow was selected
+      if (selectedWorkflow?.id === workflowToDelete.id) {
+        setSelectedWorkflow(null);
+        setCurrentLayer('STRATEGIC');
+        setParentNodeId(null);
+        setBreadcrumb([]);
+      }
+      
+      setDeleteDialogOpen(false);
+      setWorkflowToDelete(null);
+    } catch (error) {
+      console.error('Error deleting workflow:', error);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const confirmDeleteWorkflow = (e, workflow) => {
+    e.stopPropagation(); // Prevent selecting the workflow
+    setWorkflowToDelete(workflow);
+    setDeleteDialogOpen(true);
+  };
+
   // Handle AI generated workflow
   const handleAIWorkflowGenerated = async (result) => {
     if (result?.success && result?.workflow_id) {
