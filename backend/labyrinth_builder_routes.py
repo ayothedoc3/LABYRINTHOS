@@ -449,74 +449,103 @@ async def match_templates(
 
 # ==================== WORKFLOW RENDER ENDPOINTS ====================
 
-@builder_router.post("/render-workflow", response_model=WorkflowRenderResponse)
+@builder_router.post("/render-workflow")
 async def render_workflow(request: WorkflowRenderRequest):
     """
     Render a workflow from builder selections.
+    Supports both old and new selection formats.
     Creates nodes and edges based on:
     - Issue (Challenge) -> Starting point
-    - Sprint (Timeline) -> Urgency indicator
-    - Tier (Resources) -> Determines SOPs
+    - Campaign/Sprint -> Timeline
+    - Playbook/Tier (Resources) -> Determines SOPs
     - SOPs -> Action nodes
     - Templates -> Resource nodes
     - Contracts -> Deliverable nodes
     """
     db = get_db()
-    selection = request.selection
     
-    # Get issue details
-    issue_types = ISSUE_TYPES.get(selection.issue_category, [])
-    issue = next((i for i in issue_types if i["id"] == selection.issue_type_id), None)
-    if not issue:
-        raise HTTPException(status_code=404, detail="Issue type not found")
+    # Handle new format (Gate Console)
+    if hasattr(request, 'selection') and request.selection and hasattr(request.selection, 'issue_id'):
+        sel = request.selection
+        issue_id = sel.issue_id
+        campaign_id = sel.campaign_id
+        sprint_id = sel.sprint_id
+        playbook_id = sel.playbook_id
+        
+        # Get issue name
+        issue_name = issue_id.replace("_", " ").title()
+        campaign_name = campaign_id.replace("_", " ").title()
+        
+        # Determine tier from playbook
+        tier = "TIER_2"
+        if "tier_1" in playbook_id.lower():
+            tier = "TIER_1"
+        elif "tier_3" in playbook_id.lower():
+            tier = "TIER_3"
+        
+        # Get matched data
+        match_response = await match_templates(issue_id, campaign_id, sprint_id, playbook_id)
+        sops = match_response.get("sops", [])
+        templates = match_response.get("deliverables", [])
+        contracts = match_response.get("projectContracts", []) + match_response.get("recurringContracts", [])
+        
+        # Sprint config fallback
+        sprint_config = {"label": sprint_id.replace("_", " ").title(), "color": "#F97316"}
+        
+    # Handle old format (legacy)
+    elif request.selection:
+        selection = request.selection
+        
+        # Get issue details
+        issue_types = ISSUE_TYPES.get(selection.issue_category, [])
+        issue = next((i for i in issue_types if i["id"] == selection.issue_type_id), None)
+        if not issue:
+            raise HTTPException(status_code=404, detail="Issue type not found")
+        
+        issue_name = issue['name']
+        campaign_name = selection.issue_type_id.replace("_", " ").title()
+        tier = selection.tier.value
+        
+        # Get sprint config
+        sprint_config = SPRINT_CONFIG.get(selection.sprint, {"label": "1 Week", "color": "#F97316"})
+        
+        # Get SOPs for this selection (from unified collection)
+        sops_db = await db.sops.find({
+            "issue_category": selection.issue_category.value,
+            "issue_type_id": selection.issue_type_id,
+            "tier": selection.tier.value
+        }, {"_id": 0}).to_list(100)
+        
+        sops = [{"id": s.get("id"), "name": s.get("name", "SOP")} for s in sops_db]
+        
+        # Get templates and contracts
+        category_template_map = {
+            "CLIENT_SERVICES": ["Client Welcome Packet", "Service Agreement Template", "Onboarding Checklist"],
+            "OPERATIONS": ["Job Description Template", "Training Materials Template", "SOP Template"],
+            "CONSULTATION": ["Strategy Presentation", "Financial Analysis Report"],
+            "CRISIS_MANAGEMENT": ["Incident Report Form", "Crisis Communication Template"],
+            "APP_DEVELOPMENT": ["PRD Template", "Technical Spec Template"],
+        }
+        
+        template_names = category_template_map.get(selection.issue_category.value, [])[:3]
+        templates_db = await db.templates.find({"name": {"$in": template_names}}, {"_id": 0}).to_list(10)
+        templates = [{"id": t.get("id"), "name": t.get("name", "Template")} for t in templates_db]
+        
+        contracts_db = await db.contracts.find({"is_active": True}, {"_id": 0}).to_list(5)
+        contracts = [{"id": c.get("id"), "name": c.get("name", c.get("title", "Contract"))} for c in contracts_db]
+    else:
+        raise HTTPException(status_code=400, detail="Invalid selection format")
     
-    # Get sprint config
-    sprint_config = SPRINT_CONFIG.get(selection.sprint, {})
-    
-    # Get SOPs for this selection (from unified collection)
-    sops = await db.sops.find({
-        "issue_category": selection.issue_category.value,
-        "issue_type_id": selection.issue_type_id,
-        "tier": selection.tier.value
-    }, {"_id": 0}).to_list(100)
-    
-    # Get templates and contracts by category fallback (from unified collections)
-    category_template_map = {
-        "CLIENT_SERVICES": ["Client Welcome Packet", "Service Agreement Template", "Onboarding Checklist", "Client Portal Guide", "Success Plan Template"],
-        "OPERATIONS": ["Job Description Template", "Interview Scorecard", "Training Materials Template", "SOP Template", "Meeting Agenda Template"],
-        "CONSULTATION": ["Strategy Presentation", "Financial Analysis Report", "Market Analysis Report", "Recommendation Report"],
-        "CRISIS_MANAGEMENT": ["Incident Report Form", "Crisis Communication Template", "Emergency Contact List", "Business Continuity Plan", "Post-Mortem Template"],
-        "APP_DEVELOPMENT": ["PRD Template", "Technical Spec Template", "Test Plan Template", "Release Notes Template", "User Guide Template"],
-    }
-    
-    category_contract_map = {
-        "CLIENT_SERVICES": ["Gold Service Agreement", "Monthly Retainer"],
-        "OPERATIONS": ["Employment Contract", "Contractor Agreement"],
-        "CONSULTATION": ["Consulting Engagement", "Advisory Retainer"],
-        "CRISIS_MANAGEMENT": ["Business Continuity Plan"],
-        "APP_DEVELOPMENT": ["Contractor Agreement", "NDA Template"],
-    }
-    
-    template_names = category_template_map.get(selection.issue_category.value, [])[:3]
-    contract_names = category_contract_map.get(selection.issue_category.value, [])[:2]
-    
-    templates = await db.templates.find({"name": {"$in": template_names}}, {"_id": 0}).to_list(10)
-    contracts = await db.contracts.find({"name": {"$in": contract_names}}, {"_id": 0}).to_list(10)
-    
-    # Generate workflow nodes - Create a proper visual workflow
+    # Generate workflow nodes
     nodes = []
     edges = []
     
     # Layout configuration
-    NODE_WIDTH = 200
-    NODE_HEIGHT = 80
-    H_SPACING = 280  # Horizontal spacing between nodes
-    V_SPACING = 150  # Vertical spacing between rows
-    
-    # Row positions
-    RESOURCE_ROW = 50      # Top row for resources/templates
-    MAIN_ROW = 250         # Middle row for main workflow
-    DELIVERABLE_ROW = 450  # Bottom row for deliverables/contracts
+    H_SPACING = 280
+    V_SPACING = 150
+    RESOURCE_ROW = 50
+    MAIN_ROW = 250
+    DELIVERABLE_ROW = 450
     
     # ==================== ISSUE NODE (Start) ====================
     issue_node_id = f"issue_{uuid.uuid4().hex[:8]}"
