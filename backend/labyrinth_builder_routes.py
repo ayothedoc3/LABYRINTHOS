@@ -687,9 +687,9 @@ async def seed_builder_data():
     ]
     
     for sop in sample_sops:
-        existing = await db.builder_sops.find_one({"name": sop["name"]})
+        existing = await db.sops.find_one({"name": sop["name"]})
         if not existing:
-            await db.builder_sops.insert_one(sop)
+            await db.sops.insert_one(sop)
             results["sops"] += 1
     
     # Sample Templates
@@ -721,9 +721,9 @@ async def seed_builder_data():
     ]
     
     for template in sample_templates:
-        existing = await db.builder_templates.find_one({"name": template["name"]})
+        existing = await db.templates.find_one({"name": template["name"]})
         if not existing:
-            await db.builder_templates.insert_one(template)
+            await db.templates.insert_one(template)
             results["templates"] += 1
     
     # Sample Contracts
@@ -749,9 +749,9 @@ async def seed_builder_data():
     ]
     
     for contract in sample_contracts:
-        existing = await db.builder_contracts.find_one({"name": contract["name"]})
+        existing = await db.contracts.find_one({"name": contract["name"]})
         if not existing:
-            await db.builder_contracts.insert_one(contract)
+            await db.contracts.insert_one(contract)
             results["contracts"] += 1
     
     return {"message": "Builder data seeded", "created": results}
