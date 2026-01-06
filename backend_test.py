@@ -232,6 +232,120 @@ class BackendTester:
         except Exception as e:
             self.log_test("POST /api/workflowviz/templates", False, None, str(e))
     
+    def test_data_unification_apis(self):
+        """Test Data Unification Feature - 'One Labyrinth' principle"""
+        print("\n=== Testing Data Unification APIs ===")
+        
+        # Test 1: GET /api/sops - Should return all 169 SOPs from unified collection
+        try:
+            response = self.session.get(f"{self.base_url}/sops", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                sop_count = len(data)
+                if sop_count == 169:
+                    # Check for mixed data schemas - original seed data and builder data
+                    original_sops = [s for s in data if s.get('sop_id', '').startswith('SOP-')]
+                    builder_sops = [s for s in data if 'issue_category' in s and 'tier' in s]
+                    self.log_test("GET /api/sops", True, response.status_code, f"Found {sop_count} SOPs (Original: {len(original_sops)}, Builder: {len(builder_sops)})")
+                else:
+                    self.log_test("GET /api/sops", False, response.status_code, f"Expected 169 SOPs, found {sop_count}")
+            else:
+                self.log_test("GET /api/sops", False, response.status_code, response.text[:100])
+        except Exception as e:
+            self.log_test("GET /api/sops", False, None, str(e))
+        
+        # Test 2: GET /api/contracts - Should return all 15 contracts from unified collection
+        try:
+            response = self.session.get(f"{self.base_url}/contracts", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                contract_count = len(data)
+                if contract_count == 15:
+                    # Check for mixed data - AI-generated and builder contracts
+                    ai_contracts = [c for c in data if c.get('generated_by') == 'ai']
+                    builder_contracts = [c for c in data if 'linked_sop_ids' in c]
+                    self.log_test("GET /api/contracts", True, response.status_code, f"Found {contract_count} contracts (AI: {len(ai_contracts)}, Builder: {len(builder_contracts)})")
+                else:
+                    self.log_test("GET /api/contracts", False, response.status_code, f"Expected 15 contracts, found {contract_count}")
+            else:
+                self.log_test("GET /api/contracts", False, response.status_code, response.text[:100])
+        except Exception as e:
+            self.log_test("GET /api/contracts", False, None, str(e))
+        
+        # Test 3: GET /api/builder/preview - Test unified data query
+        try:
+            params = {
+                "issue_category": "CLIENT_SERVICES",
+                "issue_type_id": "gold",
+                "sprint": "ONE_WEEK",
+                "tier": "TIER_1"
+            }
+            response = self.session.get(f"{self.base_url}/builder/preview", params=params, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                summary = data.get('summary', {})
+                sop_count = summary.get('sop_count', 0)
+                template_count = summary.get('template_count', 0)
+                contract_count = summary.get('contract_count', 0)
+                
+                # Verify counts are reasonable (should find data from unified collections)
+                if sop_count > 0 and template_count > 0 and contract_count > 0:
+                    self.log_test("GET /api/builder/preview", True, response.status_code, f"Preview counts - SOPs: {sop_count}, Templates: {template_count}, Contracts: {contract_count}")
+                else:
+                    self.log_test("GET /api/builder/preview", False, response.status_code, f"Preview returned zero counts - SOPs: {sop_count}, Templates: {template_count}, Contracts: {contract_count}")
+            else:
+                self.log_test("GET /api/builder/preview", False, response.status_code, response.text[:100])
+        except Exception as e:
+            self.log_test("GET /api/builder/preview", False, None, str(e))
+        
+        # Test 4: POST /api/builder/render-workflow - Test workflow rendering with unified data
+        try:
+            workflow_data = {
+                "selection": {
+                    "issue_category": "CLIENT_SERVICES",
+                    "issue_type_id": "gold",
+                    "sprint": "ONE_WEEK",
+                    "tier": "TIER_1"
+                },
+                "workflow_name": "Test Unified Workflow",
+                "description": "Testing data unification"
+            }
+            response = self.session.post(
+                f"{self.base_url}/builder/render-workflow",
+                json=workflow_data,
+                headers={"Content-Type": "application/json"},
+                timeout=15
+            )
+            if response.status_code == 200:
+                data = response.json()
+                workflow_id = data.get('workflow_id')
+                nodes = data.get('nodes', [])
+                edges = data.get('edges', [])
+                sops = data.get('sops', [])
+                templates = data.get('templates', [])
+                contracts = data.get('contracts', [])
+                
+                if workflow_id and len(nodes) > 0 and len(edges) > 0:
+                    self.log_test("POST /api/builder/render-workflow", True, response.status_code, f"Workflow created: {workflow_id}, Nodes: {len(nodes)}, Edges: {len(edges)}, SOPs: {len(sops)}, Templates: {len(templates)}, Contracts: {len(contracts)}")
+                else:
+                    self.log_test("POST /api/builder/render-workflow", False, response.status_code, "Workflow creation failed - missing nodes/edges")
+            else:
+                self.log_test("POST /api/builder/render-workflow", False, response.status_code, response.text[:100])
+        except Exception as e:
+            self.log_test("POST /api/builder/render-workflow", False, None, str(e))
+        
+        # Test 5: GET /api/playbooks - Verify playbooks endpoint still works
+        try:
+            response = self.session.get(f"{self.base_url}/playbooks", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                playbook_count = len(data)
+                self.log_test("GET /api/playbooks", True, response.status_code, f"Playbooks endpoint working: {playbook_count} playbooks")
+            else:
+                self.log_test("GET /api/playbooks", False, response.status_code, response.text[:100])
+        except Exception as e:
+            self.log_test("GET /api/playbooks", False, None, str(e))
+
     def test_bulk_upload_apis(self):
         """Test Bulk Upload APIs"""
         print("\n=== Testing Bulk Upload APIs ===")
