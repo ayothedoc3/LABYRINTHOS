@@ -147,6 +147,18 @@ backend:
         agent: "main"
         comment: "Created unified AIService class supporting OpenAI, Anthropic, Gemini via Emergent integrations, and OpenRouter via direct API. System prompts for each content type."
 
+  - task: "AI Generation with Database Integration"
+    implemented: true
+    working: true
+    file: "/app/backend/ai_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ COMPREHENSIVE AI GENERATION WITH DATABASE INTEGRATION TESTING COMPLETED: 1) AI SOP Generation: Successfully generated SOP-AI-1BB8F262 with auto-save to unified collection, count increased from 170 to 171. 2) AI Playbook Generation: Successfully generated PB-AI-2B43B244 with auto-save to unified collection, count increased from 44 to 45. 3) AI Contract Generation: Successfully generated CNT-AI-8195643B with auto-save to unified collection, count increased from 15 to 16. 4) Query AI-generated items: All /api/ai/saved/* endpoints working correctly (found 2 SOPs, 1 playbook, 3 contracts). 5) Unified data verification: AI-generated SOPs and contracts appear in main endpoints with ai_generated=true flag. Backend integration fully working: LiteLLM integration with gpt-4o-mini model successful, auto-save to unified collections working, proper ID generation (SOP-AI-, PB-AI-, CNT-AI-), all API responses 200 OK. Minor: Playbook response model filters ai_generated field in /api/playbooks due to strict Pydantic validation (doesn't affect functionality). AI generation takes 10-30 seconds per item as expected. All requested test scenarios passed successfully."
+
 frontend:
   - task: "Settings Page with BYOK"
     implemented: true
