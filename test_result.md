@@ -327,8 +327,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "AI Generation with Database Integration"
-  stuck_tasks: []
+    - "WorkflowViz Layer Guide Bubble Feature"
+  stuck_tasks: 
+    - "WorkflowViz Layer Guide Bubble Feature"
   test_all: false
   test_priority: "high_first"
 
