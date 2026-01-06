@@ -35,7 +35,7 @@ const WorkflowsPage = () => {
 
   const loadWorkflows = useCallback(async () => {
     try {
-      const response = await axios.get(`${API}/workflows`);
+      const response = await axios.get(`${API}/workflowviz/workflows`);
       setWorkflows(response.data);
     } catch (error) {
       console.error("Error loading workflows:", error);
