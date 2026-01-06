@@ -2060,12 +2060,12 @@ const WorkflowViz = () => {
               <div
                 key={wf.id}
                 className={`
-                  p-3 rounded-lg cursor-pointer transition-colors
+                  p-3 rounded-lg cursor-pointer transition-colors group relative
                   ${selectedWorkflow?.id === wf.id ? 'bg-primary/10 border border-primary' : 'hover:bg-muted'}
                 `}
                 onClick={() => selectWorkflow(wf)}
               >
-                <div className="font-medium text-sm flex items-center gap-2">
+                <div className="font-medium text-sm flex items-center gap-2 pr-8">
                   {wf.name}
                   {wf.ai_generated && (
                     <Tooltip>
@@ -2079,6 +2079,15 @@ const WorkflowViz = () => {
                 <div className="text-xs text-muted-foreground">
                   Updated {new Date(wf.updated_at).toLocaleDateString()}
                 </div>
+                {/* Delete button - appears on hover */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity"
+                  onClick={(e) => confirmDeleteWorkflow(e, wf)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
             ))}
             {workflows.length === 0 && (
