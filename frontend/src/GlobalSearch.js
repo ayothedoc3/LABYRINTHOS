@@ -122,7 +122,7 @@ const GlobalSearch = ({ onNavigate }) => {
       query,
       category,
       item: { id: item.id, name: item.name || item.title },
-      timestamp: Date.now()
+      timestamp: new Date().toISOString()
     };
     const newRecent = [searchEntry, ...recentSearches.filter(r => r.item.id !== item.id)].slice(0, 5);
     setRecentSearches(newRecent);
