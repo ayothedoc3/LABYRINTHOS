@@ -14,7 +14,8 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   AlertTriangle, CheckCircle2, ChevronRight, ArrowRight, Zap,
   FileText, Clock, Users, Package, Play, RefreshCw, Layers,
-  Target, Sparkles, ListChecks, FileCheck, ScrollText
+  Target, Sparkles, ListChecks, FileCheck, ScrollText, Info,
+  Loader2, BookOpen, Briefcase, Settings2, TrendingUp
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -22,20 +23,20 @@ const API = `${BACKEND_URL}/api`;
 
 const LabyrinthBuilder = ({ onWorkflowCreated }) => {
   // Data from API
-  const [issueCategories, setIssueCategories] = useState([]);
-  const [issueTypes, setIssueTypes] = useState([]);
+  const [issues, setIssues] = useState([]);
+  const [campaigns, setCampaigns] = useState([]);
   const [sprints, setSprints] = useState([]);
-  const [tiers, setTiers] = useState([]);
+  const [playbooks, setPlaybooks] = useState([]);
   
-  // User selections
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedIssueType, setSelectedIssueType] = useState("");
+  // User selections (4 dropdown inputs)
+  const [selectedIssue, setSelectedIssue] = useState("");
+  const [selectedCampaign, setSelectedCampaign] = useState("");
   const [selectedSprint, setSelectedSprint] = useState("");
-  const [selectedTier, setSelectedTier] = useState("");
+  const [selectedPlaybook, setSelectedPlaybook] = useState("");
   
-  // Preview data
-  const [preview, setPreview] = useState(null);
-  const [previewLoading, setPreviewLoading] = useState(false);
+  // Matched templates (auto-fetched based on selections)
+  const [matchedData, setMatchedData] = useState(null);
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
   
   // Render dialog
   const [showRenderDialog, setShowRenderDialog] = useState(false);
@@ -51,14 +52,16 @@ const LabyrinthBuilder = ({ onWorkflowCreated }) => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [categoriesRes, sprintsRes, tiersRes] = await Promise.all([
-          axios.get(`${API}/builder/issues/categories`),
+        const [issuesRes, campaignsRes, sprintsRes, playbooksRes] = await Promise.all([
+          axios.get(`${API}/builder/issues`),
+          axios.get(`${API}/builder/campaigns`),
           axios.get(`${API}/builder/sprints`),
-          axios.get(`${API}/builder/tiers`),
+          axios.get(`${API}/builder/playbooks`),
         ]);
-        setIssueCategories(categoriesRes.data);
+        setIssues(issuesRes.data);
+        setCampaigns(campaignsRes.data);
         setSprints(sprintsRes.data);
-        setTiers(tiersRes.data);
+        setPlaybooks(playbooksRes.data);
       } catch (error) {
         console.error("Error loading builder data:", error);
       }
@@ -67,68 +70,60 @@ const LabyrinthBuilder = ({ onWorkflowCreated }) => {
     loadData();
   }, []);
 
-  // Load issue types when category changes
+  // Load campaigns based on issue selection
   useEffect(() => {
-    if (!selectedCategory) {
-      setIssueTypes([]);
-      setSelectedIssueType("");
+    if (!selectedIssue) {
+      setSelectedCampaign("");
       return;
     }
     
-    const loadIssueTypes = async () => {
+    const loadCampaigns = async () => {
       try {
-        const response = await axios.get(`${API}/builder/issues/types/${selectedCategory}`);
-        setIssueTypes(response.data);
-        setSelectedIssueType("");
+        const response = await axios.get(`${API}/builder/campaigns`, {
+          params: { issue_id: selectedIssue }
+        });
+        setCampaigns(response.data);
       } catch (error) {
-        console.error("Error loading issue types:", error);
+        console.error("Error loading campaigns:", error);
       }
     };
-    loadIssueTypes();
-  }, [selectedCategory]);
+    loadCampaigns();
+  }, [selectedIssue]);
 
-  // Load preview when all selections are made
+  // Fetch matched templates when all 4 selections are made
   useEffect(() => {
-    if (!selectedCategory || !selectedIssueType || !selectedSprint || !selectedTier) {
-      setPreview(null);
+    if (!selectedIssue || !selectedCampaign || !selectedSprint || !selectedPlaybook) {
+      setMatchedData(null);
       return;
     }
     
-    const loadPreview = async () => {
-      setPreviewLoading(true);
+    const fetchMatchedTemplates = async () => {
+      setLoadingTemplates(true);
       try {
-        const response = await axios.get(`${API}/builder/preview`, {
+        const response = await axios.get(`${API}/builder/match`, {
           params: {
-            issue_category: selectedCategory,
-            issue_type_id: selectedIssueType,
-            sprint: selectedSprint,
-            tier: selectedTier,
+            issue_id: selectedIssue,
+            campaign_id: selectedCampaign,
+            sprint_id: selectedSprint,
+            playbook_id: selectedPlaybook,
           }
         });
-        setPreview(response.data);
+        setMatchedData(response.data);
         
-        // Auto-generate workflow name from selections
-        const issueName = response.data.issue?.name || selectedIssueType;
-        const sprintLabel = response.data.sprint?.label || selectedSprint;
-        const tierLabel = selectedTier.replace("_", " ");
-        const autoName = `${issueName} - ${sprintLabel} - ${tierLabel}`;
-        setWorkflowName(autoName);
+        // Auto-generate workflow name
+        const issueName = issues.find(i => i.id === selectedIssue)?.name || selectedIssue;
+        const campaignName = campaigns.find(c => c.id === selectedCampaign)?.name || selectedCampaign;
+        setWorkflowName(`${issueName} - ${campaignName}`);
       } catch (error) {
-        console.error("Error loading preview:", error);
+        console.error("Error fetching matched templates:", error);
       }
-      setPreviewLoading(false);
+      setLoadingTemplates(false);
     };
-    loadPreview();
-  }, [selectedCategory, selectedIssueType, selectedSprint, selectedTier]);
+    fetchMatchedTemplates();
+  }, [selectedIssue, selectedCampaign, selectedSprint, selectedPlaybook, issues, campaigns]);
 
-  // Get current step
-  const getCurrentStep = () => {
-    if (!selectedCategory) return 1;
-    if (!selectedIssueType) return 2;
-    if (!selectedSprint) return 3;
-    if (!selectedTier) return 4;
-    return 5; // Preview ready
-  };
+  // Check if all selections are complete
+  const isConfigComplete = selectedIssue && selectedCampaign && selectedSprint && selectedPlaybook;
 
   // Handle render workflow
   const handleRenderWorkflow = async () => {
@@ -138,10 +133,10 @@ const LabyrinthBuilder = ({ onWorkflowCreated }) => {
     try {
       const response = await axios.post(`${API}/builder/render-workflow`, {
         selection: {
-          issue_category: selectedCategory,
-          issue_type_id: selectedIssueType,
-          sprint: selectedSprint,
-          tier: selectedTier,
+          issue_id: selectedIssue,
+          campaign_id: selectedCampaign,
+          sprint_id: selectedSprint,
+          playbook_id: selectedPlaybook,
         },
         workflow_name: workflowName,
         description: workflowDescription,
@@ -161,17 +156,15 @@ const LabyrinthBuilder = ({ onWorkflowCreated }) => {
 
   // Reset selections
   const handleReset = () => {
-    setSelectedCategory("");
-    setSelectedIssueType("");
+    setSelectedIssue("");
+    setSelectedCampaign("");
     setSelectedSprint("");
-    setSelectedTier("");
-    setPreview(null);
+    setSelectedPlaybook("");
+    setMatchedData(null);
     setRenderResult(null);
     setWorkflowName("");
     setWorkflowDescription("");
   };
-
-  const currentStep = getCurrentStep();
 
   if (loading) {
     return (
@@ -182,18 +175,18 @@ const LabyrinthBuilder = ({ onWorkflowCreated }) => {
   }
 
   return (
-    <div className="space-y-6" data-testid="labyrinth-builder">
-      {/* Header */}
-      <Card className="border-primary/20">
+    <div className="max-w-4xl mx-auto" data-testid="labyrinth-builder">
+      {/* Header Card */}
+      <Card className="border-primary/20 mb-6">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-xl">
                 <Layers className="w-5 h-5 text-primary" />
                 Labyrinth Builder
               </CardTitle>
               <CardDescription className="mt-1">
-                Build workflows from your operational framework. Select your challenge, timeline, and resources.
+                Configure your workflow inputs and see matched templates automatically
               </CardDescription>
             </div>
             <Button variant="outline" size="sm" onClick={handleReset}>
@@ -203,461 +196,391 @@ const LabyrinthBuilder = ({ onWorkflowCreated }) => {
         </CardHeader>
       </Card>
 
-      {/* Progress Indicator */}
-      <div className="flex items-center justify-between px-4">
-        {[
-          { step: 1, label: "Issue", icon: AlertTriangle },
-          { step: 2, label: "Type", icon: Target },
-          { step: 3, label: "Sprint", icon: Clock },
-          { step: 4, label: "Tier", icon: Users },
-          { step: 5, label: "Render", icon: Sparkles },
-        ].map((item, idx) => (
-          <React.Fragment key={item.step}>
-            <div className={`flex flex-col items-center ${currentStep >= item.step ? 'text-primary' : 'text-muted-foreground'}`}>
-              <div className={`
-                w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors
-                ${currentStep > item.step ? 'bg-primary border-primary text-white' : 
-                  currentStep === item.step ? 'border-primary bg-primary/10' : 'border-muted'}
-              `}>
-                {currentStep > item.step ? (
-                  <CheckCircle2 className="w-5 h-5" />
-                ) : (
-                  <item.icon className="w-5 h-5" />
-                )}
+      {/* Main Content */}
+      <Card>
+        <CardContent className="pt-6">
+          {/* Section: Configuration Inputs */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Settings2 className="w-5 h-5 text-primary" />
+              Configuration Inputs
+            </h3>
+            <Separator className="mb-6" />
+            
+            <div className="space-y-6">
+              {/* 1. Issue */}
+              <div>
+                <Label className="text-sm font-medium mb-2 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xs font-bold">1</span>
+                  Issue
+                </Label>
+                <Select value={selectedIssue} onValueChange={setSelectedIssue}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select issue..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {issues.map(issue => (
+                      <SelectItem key={issue.id} value={issue.id}>
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4 text-red-500" />
+                          {issue.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <span className="text-xs mt-1 font-medium">{item.label}</span>
-            </div>
-            {idx < 4 && (
-              <div className={`flex-1 h-0.5 mx-2 ${currentStep > item.step ? 'bg-primary' : 'bg-muted'}`} />
-            )}
-          </React.Fragment>
-        ))}
-      </div>
 
-      {/* Selection Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Step 1: Issue Category */}
-        <Card className={currentStep === 1 ? "ring-2 ring-primary" : ""}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-red-500" />
-              1. Challenge Category
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select category..." />
-              </SelectTrigger>
-              <SelectContent>
-                {issueCategories.map(cat => (
-                  <SelectItem key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
-
-        {/* Step 2: Issue Type */}
-        <Card className={currentStep === 2 ? "ring-2 ring-primary" : ""}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <Target className="w-4 h-4 text-orange-500" />
-              2. Specific Issue
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Select 
-              value={selectedIssueType} 
-              onValueChange={setSelectedIssueType}
-              disabled={!selectedCategory}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={selectedCategory ? "Select issue..." : "Select category first"} />
-              </SelectTrigger>
-              <SelectContent>
-                {issueTypes.map(type => (
-                  <SelectItem key={type.id} value={type.id}>
-                    {type.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
-
-        {/* Step 3: Sprint Timeline */}
-        <Card className={currentStep === 3 ? "ring-2 ring-primary" : ""}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <Clock className="w-4 h-4 text-yellow-500" />
-              3. Sprint Timeline
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Select 
-              value={selectedSprint} 
-              onValueChange={setSelectedSprint}
-              disabled={!selectedIssueType}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={selectedIssueType ? "Select timeline..." : "Select issue first"} />
-              </SelectTrigger>
-              <SelectContent>
-                {sprints.map(sprint => (
-                  <SelectItem key={sprint.id} value={sprint.id}>
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className="w-3 h-3 rounded-full" 
-                        style={{ backgroundColor: sprint.color }}
-                      />
-                      {sprint.label}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
-
-        {/* Step 4: Tier Selection */}
-        <Card className={currentStep === 4 ? "ring-2 ring-primary" : ""}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <Users className="w-4 h-4 text-purple-500" />
-              4. Resource Tier
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Select 
-              value={selectedTier} 
-              onValueChange={setSelectedTier}
-              disabled={!selectedSprint}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={selectedSprint ? "Select tier..." : "Select sprint first"} />
-              </SelectTrigger>
-              <SelectContent>
-                {tiers.map(tier => (
-                  <SelectItem key={tier.id} value={tier.id}>
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className="w-3 h-3 rounded-full" 
-                        style={{ backgroundColor: tier.color }}
-                      />
-                      {tier.name}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Preview Section */}
-      {currentStep >= 5 && (
-        <Card className="border-green-500/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-green-500" />
-              Workflow Preview
-            </CardTitle>
-            <CardDescription>
-              Based on your selections, here's what will be included in your workflow
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {previewLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+              {/* 2. Campaign */}
+              <div>
+                <Label className="text-sm font-medium mb-2 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs font-bold">2</span>
+                  Campaign
+                </Label>
+                <Select 
+                  value={selectedCampaign} 
+                  onValueChange={setSelectedCampaign}
+                  disabled={!selectedIssue}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={selectedIssue ? "Select campaign..." : "Select issue first"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {campaigns.map(campaign => (
+                      <SelectItem key={campaign.id} value={campaign.id}>
+                        <div className="flex items-center gap-2">
+                          <Target className="w-4 h-4 text-orange-500" />
+                          {campaign.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            ) : preview ? (
-              <div className="space-y-6">
-                {/* Selection Summary */}
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline" className="text-red-600 border-red-300">
-                    <AlertTriangle className="w-3 h-3 mr-1" />
-                    {preview.issue?.name}
-                  </Badge>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground self-center" />
-                  <Badge variant="outline" style={{ borderColor: preview.sprint?.color, color: preview.sprint?.color }}>
-                    <Clock className="w-3 h-3 mr-1" />
-                    {preview.sprint?.label}
-                  </Badge>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground self-center" />
-                  <Badge variant="outline" className="text-purple-600 border-purple-300">
-                    <Users className="w-3 h-3 mr-1" />
-                    {preview.tier?.replace("_", " ")}
-                  </Badge>
-                </div>
 
-                <Separator />
+              {/* 3. Sprint */}
+              <div>
+                <Label className="text-sm font-medium mb-2 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center text-xs font-bold">3</span>
+                  Sprint
+                </Label>
+                <Select 
+                  value={selectedSprint} 
+                  onValueChange={setSelectedSprint}
+                  disabled={!selectedCampaign}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={selectedCampaign ? "Select sprint..." : "Select campaign first"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sprints.map(sprint => (
+                      <SelectItem key={sprint.id} value={sprint.id}>
+                        <div className="flex items-center gap-2">
+                          <div 
+                            className="w-3 h-3 rounded-full" 
+                            style={{ backgroundColor: sprint.color || '#FFA500' }}
+                          />
+                          <Clock className="w-4 h-4 text-yellow-500" />
+                          {sprint.label || sprint.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-                {/* Content Counts */}
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-3xl font-bold text-blue-600">{preview.summary?.sop_count || 0}</div>
-                    <div className="text-sm text-blue-700 flex items-center justify-center gap-1">
-                      <ListChecks className="w-4 h-4" /> SOPs
-                    </div>
-                  </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-3xl font-bold text-green-600">{preview.summary?.template_count || 0}</div>
-                    <div className="text-sm text-green-700 flex items-center justify-center gap-1">
-                      <FileText className="w-4 h-4" /> Templates
-                    </div>
-                  </div>
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <div className="text-3xl font-bold text-purple-600">{preview.summary?.contract_count || 0}</div>
-                    <div className="text-sm text-purple-700 flex items-center justify-center gap-1">
-                      <ScrollText className="w-4 h-4" /> Contracts
-                    </div>
-                  </div>
-                </div>
-
-                {/* SOPs List */}
-                {preview.sops?.length > 0 && (
-                  <div>
-                    <h4 className="font-medium mb-2 flex items-center gap-2">
-                      <Zap className="w-4 h-4 text-blue-500" />
-                      SOPs (Actions)
-                    </h4>
-                    <div className="space-y-2">
-                      {preview.sops.map((sop, idx) => (
-                        <div key={sop.id || idx} className="flex items-center gap-2 p-2 bg-blue-50 rounded">
-                          <Badge className="bg-blue-100 text-blue-700">{idx + 1}</Badge>
-                          <span className="font-medium">{sop.name}</span>
-                          {sop.description && (
-                            <span className="text-sm text-muted-foreground">- {sop.description}</span>
+              {/* 4. Playbook */}
+              <div>
+                <Label className="text-sm font-medium mb-2 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-bold">4</span>
+                  Playbook
+                </Label>
+                <Select 
+                  value={selectedPlaybook} 
+                  onValueChange={setSelectedPlaybook}
+                  disabled={!selectedSprint}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={selectedSprint ? "Select playbook..." : "Select sprint first"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {playbooks.map(playbook => (
+                      <SelectItem key={playbook.id} value={playbook.id}>
+                        <div className="flex items-center gap-2">
+                          <BookOpen className="w-4 h-4 text-purple-500" />
+                          {playbook.name}
+                          {playbook.tier && (
+                            <Badge variant="outline" className="text-xs ml-2">
+                              Tier {playbook.tier}
+                            </Badge>
                           )}
                         </div>
-                      ))}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          {/* Section: Matched Templates (only show when all selections are made) */}
+          {isConfigComplete && (
+            <div className="mt-8 border-t pt-8">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-green-500" />
+                Matched Templates (Based on Configuration)
+              </h3>
+              <Separator className="mb-6" />
+
+              {loadingTemplates ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  <span className="ml-3 text-muted-foreground">Loading matched templates...</span>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {/* 5. SOPs */}
+                  <div>
+                    <Label className="text-sm font-medium mb-2 flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">5</span>
+                      SOPs
+                    </Label>
+                    <div className="border rounded-lg p-4 bg-slate-50">
+                      {matchedData?.sops?.length > 0 ? (
+                        <ul className="space-y-2">
+                          {matchedData.sops.map((sop, idx) => (
+                            <li key={sop.id || idx} className="flex items-center gap-2">
+                              <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" />
+                              <span className="text-sm">{sop.name}</span>
+                              {sop.sop_id && (
+                                <Badge variant="outline" className="text-xs">{sop.sop_id}</Badge>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div className="flex items-center gap-2 text-amber-600">
+                          <AlertTriangle className="h-4 w-4" />
+                          <span className="text-sm">No SOPs found for this configuration</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                )}
 
-                {/* Templates List */}
-                {preview.templates?.length > 0 && (
+                  {/* 6. Deliverable Templates */}
                   <div>
-                    <h4 className="font-medium mb-2 flex items-center gap-2">
-                      <Package className="w-4 h-4 text-green-500" />
+                    <Label className="text-sm font-medium mb-2 flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs font-bold">6</span>
                       Deliverable Templates
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {preview.templates.map((template, idx) => (
-                        <Badge key={template.id || idx} variant="outline" className="bg-green-50">
-                          {template.name}
-                        </Badge>
-                      ))}
+                    </Label>
+                    <div className="border rounded-lg p-4 bg-slate-50">
+                      {matchedData?.deliverables?.length > 0 ? (
+                        <ul className="space-y-2">
+                          {matchedData.deliverables.map((template, idx) => (
+                            <li key={template.id || idx} className="flex items-center gap-2">
+                              <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" />
+                              <span className="text-sm">{template.name}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div className="flex items-center gap-2 text-amber-600">
+                          <AlertTriangle className="h-4 w-4" />
+                          <span className="text-sm">No deliverable templates found</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                )}
 
-                {/* Contracts List */}
-                {preview.contracts?.length > 0 && (
+                  {/* 7. Project-Based Contracts & KPIs */}
                   <div>
-                    <h4 className="font-medium mb-2 flex items-center gap-2">
-                      <FileCheck className="w-4 h-4 text-purple-500" />
-                      Contracts
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {preview.contracts.map((contract, idx) => (
-                        <Badge key={contract.id || idx} variant="outline" className="bg-purple-50">
-                          {contract.name} ({contract.contract_type})
-                        </Badge>
-                      ))}
+                    <Label className="text-sm font-medium mb-2 flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">7</span>
+                      Project-Based Contracts & KPIs
+                    </Label>
+                    <div className="border rounded-lg p-4 bg-slate-50">
+                      {matchedData?.projectContracts?.length > 0 ? (
+                        <ul className="space-y-2">
+                          {matchedData.projectContracts.map((contract, idx) => (
+                            <li key={contract.id || idx} className="flex items-center gap-2">
+                              <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" />
+                              <span className="text-sm">{contract.name}</span>
+                              {contract.type && (
+                                <Badge variant="secondary" className="text-xs">{contract.type}</Badge>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div className="flex items-center gap-2 text-amber-600">
+                          <AlertTriangle className="h-4 w-4" />
+                          <span className="text-sm">No project contracts found</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                )}
 
-                {/* No data warning */}
-                {preview.summary?.sop_count === 0 && (
-                  <Alert>
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertTitle>No SOPs configured</AlertTitle>
-                    <AlertDescription>
-                      No SOPs are configured for this Issue + Tier combination yet. 
-                      The workflow will be created with placeholder nodes.
-                    </AlertDescription>
-                  </Alert>
-                )}
+                  {/* 8. Recurring Contracts & KPIs */}
+                  <div>
+                    <Label className="text-sm font-medium mb-2 flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center text-xs font-bold">8</span>
+                      Recurring Contracts & KPIs
+                    </Label>
+                    <div className="border rounded-lg p-4 bg-slate-50">
+                      {matchedData?.recurringContracts?.length > 0 ? (
+                        <ul className="space-y-2">
+                          {matchedData.recurringContracts.map((contract, idx) => (
+                            <li key={contract.id || idx} className="flex items-center gap-2">
+                              <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" />
+                              <span className="text-sm">{contract.name}</span>
+                              {contract.frequency && (
+                                <Badge variant="secondary" className="text-xs">{contract.frequency}</Badge>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div className="flex items-center gap-2 text-amber-600">
+                          <AlertTriangle className="h-4 w-4" />
+                          <span className="text-sm">No recurring contracts found</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
 
-                <Separator />
+                  {/* 9. Optimization Plan */}
+                  <div>
+                    <Label className="text-sm font-medium mb-2 flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center text-xs font-bold">9</span>
+                      Optimization Plan
+                    </Label>
+                    <div className="border rounded-lg p-4 bg-slate-50">
+                      {matchedData?.optimizationPlan ? (
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                          <span className="text-sm">{matchedData.optimizationPlan.name}</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 text-gray-500">
+                          <Info className="h-4 w-4" />
+                          <span className="text-sm">Not configured (Optional - Can be added later)</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
 
-                {/* Render Button */}
-                <Button 
-                  size="lg" 
-                  className="w-full"
-                  onClick={() => setShowRenderDialog(true)}
-                >
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  Render Workflow to Canvas
-                </Button>
+                  <Separator className="my-6" />
+
+                  {/* Generate Workflow Button */}
+                  <Button 
+                    size="lg" 
+                    className="w-full"
+                    onClick={() => setShowRenderDialog(true)}
+                    disabled={loadingTemplates}
+                  >
+                    <Sparkles className="w-5 h-5 mr-2" />
+                    Generate Workflow
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Empty state when not all selections made */}
+          {!isConfigComplete && (
+            <div className="mt-8 border-t pt-8">
+              <div className="text-center text-muted-foreground py-12">
+                <Settings2 className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                <p className="text-sm">Complete all 4 configuration inputs above to see matched templates</p>
               </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                Loading preview...
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Render Dialog */}
       <Dialog open={showRenderDialog} onOpenChange={setShowRenderDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />
-              Render Workflow
+              Generate Workflow
             </DialogTitle>
             <DialogDescription>
-              Name your workflow and it will be created in WorkflowViz
+              Create a visual workflow on the canvas based on your configuration
             </DialogDescription>
           </DialogHeader>
           
-          {!renderResult ? (
+          {renderResult ? (
+            renderResult.error ? (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{renderResult.error}</AlertDescription>
+              </Alert>
+            ) : (
+              <Alert className="border-green-500">
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                <AlertTitle>Workflow Created!</AlertTitle>
+                <AlertDescription>
+                  Created workflow with {renderResult.nodes_created} nodes and {renderResult.edges_created} connections.
+                </AlertDescription>
+              </Alert>
+            )
+          ) : (
             <div className="space-y-4">
               <div>
                 <Label>Workflow Name</Label>
-                <Input
-                  value={workflowName}
+                <Input 
+                  value={workflowName} 
                   onChange={(e) => setWorkflowName(e.target.value)}
-                  placeholder="e.g., Gold Client Onboarding - Tier 1"
+                  placeholder="Enter workflow name..."
                 />
               </div>
               <div>
                 <Label>Description (optional)</Label>
-                <Textarea
-                  value={workflowDescription}
+                <Textarea 
+                  value={workflowDescription} 
                   onChange={(e) => setWorkflowDescription(e.target.value)}
-                  placeholder="Brief description of this workflow..."
+                  placeholder="Describe this workflow..."
                   rows={3}
                 />
               </div>
             </div>
-          ) : renderResult.error ? (
-            <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{renderResult.error}</AlertDescription>
-            </Alert>
-          ) : (
-            <div className="space-y-4">
-              <Alert className="border-green-500 bg-green-50">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                <AlertTitle className="text-green-700">Workflow Created!</AlertTitle>
-                <AlertDescription className="text-green-600">
-                  "{renderResult.name}" has been created with {renderResult.nodes?.length || 0} nodes.
-                </AlertDescription>
-              </Alert>
-              
-              <div className="text-sm text-muted-foreground">
-                <p>Included in workflow:</p>
-                <ul className="list-disc ml-4 mt-1">
-                  <li>{renderResult.sops?.length || 0} SOPs</li>
-                  <li>{renderResult.templates?.length || 0} Templates</li>
-                  <li>{renderResult.contracts?.length || 0} Contracts</li>
-                </ul>
-              </div>
-            </div>
           )}
-
+          
           <DialogFooter>
-            {!renderResult ? (
+            {renderResult ? (
+              <Button onClick={() => {
+                setShowRenderDialog(false);
+                setRenderResult(null);
+                handleReset();
+              }}>
+                Close & Start New
+              </Button>
+            ) : (
               <>
                 <Button variant="outline" onClick={() => setShowRenderDialog(false)}>
                   Cancel
                 </Button>
-                <Button 
-                  onClick={handleRenderWorkflow}
-                  disabled={!workflowName.trim() || rendering}
-                >
+                <Button onClick={handleRenderWorkflow} disabled={rendering || !workflowName.trim()}>
                   {rendering ? (
-                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Generating...
+                    </>
                   ) : (
-                    <Play className="w-4 h-4 mr-2" />
+                    <>
+                      <Play className="w-4 h-4 mr-2" />
+                      Generate
+                    </>
                   )}
-                  Create Workflow
                 </Button>
               </>
-            ) : renderResult.error ? (
-              <Button variant="outline" onClick={() => {
-                setRenderResult(null);
-              }}>
-                Try Again
-              </Button>
-            ) : (
-              <div className="flex gap-2 w-full">
-                <Button variant="outline" onClick={() => {
-                  setShowRenderDialog(false);
-                  setRenderResult(null);
-                  handleReset();
-                }}>
-                  Create Another
-                </Button>
-                <Button className="flex-1" onClick={() => {
-                  setShowRenderDialog(false);
-                  if (onWorkflowCreated && renderResult.workflow_id) {
-                    onWorkflowCreated(renderResult.workflow_id);
-                  }
-                }}>
-                  <ArrowRight className="w-4 h-4 mr-2" />
-                  View in WorkflowViz
-                </Button>
-              </div>
             )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Legend / Help Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">How It Works</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { 
-                icon: AlertTriangle, 
-                color: "text-red-500", 
-                title: "Issue (Challenge)", 
-                desc: "What's the challenge at hand? Client service, operations, crisis, etc." 
-              },
-              { 
-                icon: Clock, 
-                color: "text-yellow-500", 
-                title: "Sprint (Timeline)", 
-                desc: "How urgent? Red = 1-3 days, Purple = 6+ weeks" 
-              },
-              { 
-                icon: Users, 
-                color: "text-purple-500", 
-                title: "Playbook (Tier)", 
-                desc: "Level of resources: Tier 1 = Best, Tier 3 = Basic" 
-              },
-              { 
-                icon: Sparkles, 
-                color: "text-primary", 
-                title: "Render", 
-                desc: "Auto-generates workflow with SOPs, templates & contracts" 
-              },
-            ].map((item, idx) => (
-              <div key={idx} className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
-                <item.icon className={`w-5 h-5 mt-0.5 ${item.color}`} />
-                <div>
-                  <div className="font-medium text-sm">{item.title}</div>
-                  <div className="text-xs text-muted-foreground">{item.desc}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
