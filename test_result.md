@@ -333,3 +333,22 @@ agent_communication:
     message: "LAYER GUIDE BUBBLE FEATURE TESTING FAILED ❌ Unable to complete comprehensive testing due to Playwright script execution issues. CODE ANALYSIS FINDINGS: 1) LayerGuide component properly implemented in /app/frontend/src/components/LayerGuide.js with all required features: Strategic/Tactical/Execution layer content, step navigation (Next/Back buttons), minimize/expand functionality, dismiss with X button, localStorage persistence for completion/dismissal states. 2) Component correctly integrated into WorkflowViz.js at line 1649-1654 with bottom-left positioning. 3) Layer-specific content properly defined with 3 steps each, appropriate icons, colors, and hints. CRITICAL ISSUE: Could not verify if guide actually appears on workflow load during automated testing - may be timing issue, localStorage state conflict, or component rendering problem. RECOMMENDATION: Manual browser verification needed to confirm guide visibility and all interactive functionality (step navigation, minimize/expand, dismiss, layer change updates). All code implementation appears correct but runtime behavior needs validation."
   - agent: "main"
     message: "Implemented new Layer Guide bubble feature in WorkflowViz. Please test the following scenarios: 1) Navigate to WorkflowViz tab and select 'Client Onboarding Process' workflow. 2) Verify guide bubble appears in bottom-left corner with '🏔️ Strategic Layer' title and 'You're at the Top Level' step. 3) Test step navigation with Next/Back buttons through all 3 steps. 4) Verify guide minimizes to icon after clicking 'Got it!' and can be expanded again. 5) Test dismiss functionality with X button - guide should not appear again. 6) Double-click ACTION node to drill down and verify guide updates to show '⚔️ Tactical Layer' with different content. Component files: /app/frontend/src/components/LayerGuide.js, /app/frontend/src/WorkflowViz.js"
+## Data Unification Testing - $(date +%Y-%m-%d)
+
+### Changes Made:
+1. Fixed seed function in labyrinth_builder_routes.py to use unified collections (sops, templates, contracts) instead of old builder_* collections
+2. Added is_active=True to 123 SOPs, 15 Contracts, and 26 Templates that were missing this field
+3. Removed strict response_model validation from /api/sops and /api/contracts endpoints to support mixed data schemas
+
+### Test Results:
+- /api/sops: Returns 169 SOPs (was 46 before fix due to missing is_active field)
+- /api/contracts: Returns 15 contracts (was 0 before fix)
+- /api/builder/preview: Returns correct counts from unified data (SOPs: 1, Templates: 5, Contracts: 7)
+- Templates tab: Shows 169 SOPs, 15 Contracts
+- Builder Preview: Shows correct unified data
+
+### Test Status:
+- Backend API: ✅ PASSED
+- Frontend Templates Tab: ✅ PASSED
+- Labyrinth Builder Preview: ✅ PASSED
+
