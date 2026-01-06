@@ -795,7 +795,7 @@ const TalentsView = ({ talents, onRefresh }) => {
       {/* Talents Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredTalents.map((talent) => (
-          <Card key={talent.id} className="hover:shadow-lg transition-shadow">
+          <Card key={talent.id} className="hover:shadow-lg transition-shadow group relative">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -807,7 +807,20 @@ const TalentsView = ({ talents, onRefresh }) => {
                     <CardDescription className="text-xs">{talent.email}</CardDescription>
                   </div>
                 </div>
-                <TierBadge tier={talent.current_tier} />
+                <div className="flex items-center gap-2">
+                  <TierBadge tier={talent.current_tier} />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity"
+                    onClick={() => {
+                      setItemToDelete(talent);
+                      setDeleteDialogOpen(true);
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -833,6 +846,26 @@ const TalentsView = ({ talents, onRefresh }) => {
           </Card>
         ))}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="w-5 h-5" /> Remove Team Member
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to remove &quot;<span className="font-medium">{itemToDelete?.name}</span>&quot; from the team? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={deleting}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" /> Removing...</> : <><Trash2 className="w-4 h-4 mr-2" /> Remove</>}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
