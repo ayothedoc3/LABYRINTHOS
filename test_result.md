@@ -426,3 +426,36 @@ agent_communication:
 - Generate with AI button
 - All features working: node display, layer navigation, minimap
 
+## AI Generation with Database Integration Testing - 2026-01-06 11:02
+
+### Test Results Summary:
+✅ **AI SOP Generation with auto-save**: Successfully generated SOP-AI-1BB8F262, saved to unified collection, count increased from 170 to 171
+✅ **AI Playbook Generation with auto-save**: Successfully generated PB-AI-2B43B244, saved to unified collection, count increased from 44 to 45  
+✅ **AI Contract Generation with auto-save**: Successfully generated CNT-AI-8195643B, saved to unified collection, count increased from 15 to 16
+✅ **Query AI-generated items**: All /api/ai/saved/* endpoints working correctly (2 SOPs, 1 playbook, 3 contracts found)
+✅ **Unified data verification**: AI-generated SOPs and contracts appear in main endpoints with ai_generated=true flag
+
+### Backend Integration Status:
+- **AI Generation API**: ✅ WORKING - All 3 content types (SOP, Playbook, Contract) generate successfully
+- **Database Auto-save**: ✅ WORKING - Items automatically saved to unified collections (db.sops, db.playbooks, db.contracts)
+- **ID Generation**: ✅ WORKING - Proper ID prefixes (SOP-AI-, PB-AI-, CNT-AI-) generated
+- **LiteLLM Integration**: ✅ WORKING - Backend logs show successful completion calls with gpt-4o-mini model
+- **Unified Collections**: ✅ WORKING - AI-generated content appears in main collection endpoints
+
+### Minor Issues Identified:
+- **Playbook Response Model**: Minor schema issue where /api/playbooks endpoint filters out ai_generated field due to strict Pydantic model validation, while /api/ai/saved/playbooks works correctly. This doesn't affect functionality - just a display inconsistency.
+
+### Test Coverage:
+- ✅ POST /api/ai/generate/sop with auto-save and count verification
+- ✅ POST /api/ai/generate/playbook with auto-save and count verification  
+- ✅ POST /api/ai/generate/contract with auto-save and count verification
+- ✅ GET /api/ai/saved/sops - Returns AI-generated SOPs with ai_generated=true
+- ✅ GET /api/ai/saved/playbooks - Returns AI-generated playbooks
+- ✅ GET /api/ai/saved/contracts - Returns AI-generated contracts
+- ✅ Unified data verification in main endpoints (/api/sops, /api/contracts)
+
+### Performance Notes:
+- AI generation takes 10-30 seconds per item as expected
+- All API calls completed successfully with 200 OK responses
+- Backend service healthy and stable throughout testing
+
