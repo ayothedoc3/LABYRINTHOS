@@ -15,6 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
   LayoutDashboard, BookOpen, FileText, Users, FileCheck, 
   BarChart3, Shield, Settings, AlertTriangle, CheckCircle2, 
