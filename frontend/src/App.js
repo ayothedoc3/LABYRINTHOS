@@ -1674,6 +1674,12 @@ function App() {
                 <p className="text-xs text-muted-foreground">7-Gate Constraint System</p>
               </div>
             </div>
+            
+            {/* Global Search */}
+            <div className="flex-1 max-w-lg mx-8">
+              <GlobalSearch onNavigate={handleSearchNavigate} />
+            </div>
+            
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="sm" onClick={fetchData} data-testid="refresh-btn">
                 <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
