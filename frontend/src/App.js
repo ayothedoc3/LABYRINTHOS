@@ -381,11 +381,31 @@ const PlaybooksView = ({ playbooks, onRefresh }) => {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {pbs.map((pb) => (
-                  <Card key={pb.playbook_id} className="bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer">
+                  <Card key={pb.playbook_id || pb.id} className="bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer group relative">
                     <CardHeader className="pb-2">
                       <div className="flex items-center justify-between">
                         <Badge variant="outline" className="font-mono text-xs">{pb.playbook_id}</Badge>
-                        <TierBadge tier={pb.min_tier} />
+                        <div className="flex items-center gap-2">
+                          {pb.ai_generated && (
+                            <Tooltip>
+                              <TooltipTrigger><Sparkles className="w-3 h-3 text-primary" /></TooltipTrigger>
+                              <TooltipContent>AI Generated</TooltipContent>
+                            </Tooltip>
+                          )}
+                          <TierBadge tier={pb.min_tier} />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setItemToDelete(pb);
+                              setDeleteDialogOpen(true);
+                            }}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
                       </div>
                       <CardTitle className="text-lg">{pb.name}</CardTitle>
                     </CardHeader>
@@ -405,6 +425,26 @@ const PlaybooksView = ({ playbooks, onRefresh }) => {
           </Card>
         ))}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="w-5 h-5" /> Delete Playbook
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "<span className="font-medium">{itemToDelete?.name}</span>"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={deleting}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" /> Deleting...</> : <><Trash2 className="w-4 h-4 mr-2" /> Delete</>}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
