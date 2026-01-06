@@ -303,7 +303,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "WorkflowViz Layer Guide Bubble Feature"
+    - "AI Generation with Database Integration"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
