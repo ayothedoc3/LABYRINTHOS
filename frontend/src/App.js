@@ -1629,6 +1629,27 @@ function App() {
     }
   };
 
+  // Handle search navigation
+  const handleSearchNavigate = (category, item) => {
+    // Map category to tab and handle navigation
+    const categoryToTab = {
+      workflows: "workflows",
+      sops: "templates",
+      playbooks: "templates",
+      templates: "templates",
+      contracts: "templates",
+    };
+    const targetTab = categoryToTab[category] || "templates";
+    handleTabChange(targetTab);
+    
+    // If it's a workflow, we could set the workflow ID in URL
+    if (category === "workflows" && item.id) {
+      const url = new URL(window.location);
+      url.searchParams.set('workflow', item.id);
+      window.history.replaceState({}, '', url);
+    }
+  };
+
   const NAV_ITEMS = [
     { id: "workflows", label: "Workflows", icon: Workflow },
     { id: "library", label: "Library", icon: FolderOpen },
