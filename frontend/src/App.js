@@ -1247,11 +1247,32 @@ const ContractsView = ({ contracts, talents, playbooks, onRefresh }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {contracts?.map(contract => (
-          <Card key={contract.id}>
+          <Card key={contract.id} className="group relative">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>{contract.client_name}</CardTitle>
-                <Badge className={contract.is_active ? "bg-green-500" : "bg-gray-500"}>{contract.is_active ? "Active" : "Inactive"}</Badge>
+                <div className="flex items-center gap-2">
+                  <CardTitle>{contract.client_name || contract.name || contract.title || 'Unnamed Contract'}</CardTitle>
+                  {contract.ai_generated && (
+                    <Tooltip>
+                      <TooltipTrigger><Sparkles className="w-4 h-4 text-primary" /></TooltipTrigger>
+                      <TooltipContent>AI Generated</TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge className={contract.is_active ? "bg-green-500" : "bg-gray-500"}>{contract.is_active ? "Active" : "Inactive"}</Badge>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                    onClick={() => {
+                      setItemToDelete(contract);
+                      setDeleteDialogOpen(true);
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
               <CardDescription>Talent: {getTalentName(contract.talent_id)}</CardDescription>
             </CardHeader>
@@ -1259,11 +1280,11 @@ const ContractsView = ({ contracts, talents, playbooks, onRefresh }) => {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span>Package:</span>
-                  <Badge variant="outline">{contract.client_package}</Badge>
+                  <Badge variant="outline">{contract.client_package || contract.package || 'N/A'}</Badge>
                 </div>
                 <div className="flex justify-between">
                   <span>Start Date:</span>
-                  <span>{new Date(contract.start_date).toLocaleDateString()}</span>
+                  <span>{contract.start_date ? new Date(contract.start_date).toLocaleDateString() : 'N/A'}</span>
                 </div>
                 {contract.hourly_rate > 0 && (
                   <div className="flex justify-between">
@@ -1277,11 +1298,36 @@ const ContractsView = ({ contracts, talents, playbooks, onRefresh }) => {
                     <span>${contract.monthly_retainer}/mo</span>
                   </div>
                 )}
+                {contract.content && (
+                  <div className="mt-3 pt-3 border-t">
+                    <p className="text-xs text-muted-foreground line-clamp-3">{contract.content.slice(0, 200)}...</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="w-5 h-5" /> Delete Contract
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this contract? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={deleting}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? <><RefreshCw className="w-4 h-4 mr-2 animate-spin" /> Deleting...</> : <><Trash2 className="w-4 h-4 mr-2" /> Delete</>}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
