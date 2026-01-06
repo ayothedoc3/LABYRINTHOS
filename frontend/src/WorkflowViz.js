@@ -1790,6 +1790,11 @@ const WorkflowViz = () => {
   // Sidebar collapse state
   const [leftSidebarCollapsed, setLeftSidebarCollapsed] = useState(false);
   const [rightSidebarCollapsed, setRightSidebarCollapsed] = useState(false);
+  
+  // Delete confirmation state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [workflowToDelete, setWorkflowToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Update URL when workflow selection changes
   useEffect(() => {
