@@ -85,3 +85,7 @@ android-sdk/
 
 # Snyk Security Extension - AI Rules (auto-generated)
 .github/instructions/snyk_rules.instructions.md
+-e 
+# Environment files
+*.env
+*.env.*
