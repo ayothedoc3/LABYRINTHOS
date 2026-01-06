@@ -327,49 +327,50 @@ async def generate_contract_endpoint(
 
 @ai_router.get("/saved/playbooks")
 async def get_saved_playbooks():
-    """Get all AI-generated playbooks"""
-    if not db:
+    """Get all AI-generated playbooks from unified collection"""
+    if db is None:
         return []
-    playbooks = await db.ai_playbooks.find({}, {"_id": 0}).to_list(100)
+    playbooks = await db.playbooks.find({"ai_generated": True}, {"_id": 0}).to_list(100)
     return playbooks
 
 
 @ai_router.get("/saved/sops")
 async def get_saved_sops():
-    """Get all AI-generated SOPs"""
-    if not db:
+    """Get all AI-generated SOPs from unified collection"""
+    if db is None:
         return []
-    sops = await db.ai_sops.find({}, {"_id": 0}).to_list(100)
+    sops = await db.sops.find({"ai_generated": True}, {"_id": 0}).to_list(100)
     return sops
 
 
 @ai_router.get("/saved/contracts")
 async def get_saved_contracts():
-    """Get all AI-generated contracts"""
-    if not db:
+    """Get all AI-generated contracts from unified collection"""
+    if db is None:
         return []
-    contracts = await db.ai_contracts.find({}, {"_id": 0}).to_list(100)
+    contracts = await db.contracts.find({"ai_generated": True}, {"_id": 0}).to_list(100)
     return contracts
 
 
 @ai_router.delete("/saved/{content_type}/{content_id}")
 async def delete_saved_content(content_type: str, content_id: str):
-    """Delete a saved AI-generated content"""
-    if not db:
+    """Delete a saved AI-generated content from unified collection"""
+    if db is None:
         raise HTTPException(status_code=500, detail="Database not available")
     
     collection_map = {
-        "playbook": "ai_playbooks",
-        "sop": "ai_sops",
-        "contract": "ai_contracts"
+        "playbook": "playbooks",
+        "sop": "sops",
+        "contract": "contracts"
     }
     
     collection = collection_map.get(content_type)
     if not collection:
         raise HTTPException(status_code=400, detail="Invalid content type")
     
-    result = await db[collection].delete_one({"id": content_id})
+    # Only delete if AI-generated
+    result = await db[collection].delete_one({"id": content_id, "ai_generated": True})
     if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Content not found")
+        raise HTTPException(status_code=404, detail="Content not found or not AI-generated")
     
     return {"success": True, "deleted_id": content_id}
