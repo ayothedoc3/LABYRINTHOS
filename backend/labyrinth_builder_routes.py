@@ -728,8 +728,8 @@ async def render_workflow(request: WorkflowRenderRequest):
     
     # Build selection data for storage
     builder_selection = {}
-    if hasattr(request, 'selection') and request.selection and hasattr(request.selection, 'issue_id'):
-        sel = request.selection
+    if request.new_selection:
+        sel = request.new_selection
         builder_selection = {
             "issue_id": sel.issue_id,
             "campaign_id": sel.campaign_id,
