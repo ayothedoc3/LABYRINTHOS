@@ -1,965 +1,161 @@
-<analysis>**original_problem_statement:**
-The initial request was to build a Labyrinth Operating System based on a detailed specification. This system is a 7-step guided constraint system for managing business functions like Sales, Marketing, and Development, involving Playbooks, SOPs, KPIs, and Talent Tiers.
+<analysis>**original_problem_statement:** The user's goal evolved from simple UI tweaks to a complete pivot of the application's purpose. The core requirement is to build a Labyrinth Builder (also referred to as Gate Console), a questionnaire-style tool that generates complex visual workflows based on a series of cascading user selections ( ->  ->  -> ).
 
-Subsequently, the user provided a new, extensive Product Requirements Document (PRD) for a feature called WorkflowViz. The user clarified that this should be **added as a new feature** to the existing application, not replace it. WorkflowViz is a hierarchical workflow visualization system with a canvas-based UI (similar to Milanote), allowing users to build and manage complex workflows across strategic, tactical, and execution layers.
-
-The most recent user request was to change the visual design of the nodes in WorkflowViz to a Milanote style, featuring clean, card-based designs with colored accents.
+**PRODUCT REQUIREMENTS:**
+1.  **Labyrinth Builder/Gate Console:** An interface for users to define workflow parameters through a series of dropdowns.
+2.  **Dynamic Preview:** As the user makes selections, the UI must show a preview of the , , and  that will be included in the workflow.
+3.  **Workflow Rendering:** A Generate Workflow button must take the user's selections and automatically render a visual diagram on a canvas, with distinct nodes for each component.
+4.  **Unified Data Model (One Labyrinth):** All data (SOPs, Templates, Contracts, Playbooks, etc.) must come from a single, unified source of truth in the database. Data added in one part of the app (e.g., Templates tab) must be immediately available in the builder.
+5.  **AI Content Generation:** The ability to generate SOPs, Playbooks, and Contracts using AI and save them to the unified database.
+6.  **UI/Navigation:** A restructured top-level navigation: , , , , , .
+7.  **CRUD Functionality:** The ability to delete items like workflows, SOPs, contracts, and team members.
+8.  **Search & Discovery:** A global search function and a way to view saved/rendered workflows.
+9.  **Demo Data:** The application must be pre-seeded with comprehensive data for end-to-end testing.
 
 **User's preferred language**: English
 
 **what currently exists?**
-A full-stack application with a FastAPI backend and a React frontend. The application contains two primary features:
+The application has been successfully transformed to meet the user's new vision. The Labyrinth Builder has been built and then redesigned to the user's exact visual specifications. It features cascading dropdowns and a dynamic preview section that fetches matching templates. The Generate Workflow function is working and correctly renders a visual graph on the canvas.
 
-1.  **Labyrinth OS:** A fully implemented feature with a dashboard to view and manage Playbooks, SOPs, KPIs, and Talent. It includes a Gate Console for simulating the 7-gate workflow logic. The backend models, APIs, and seed data are complete for this feature.
-2.  **WorkflowViz:** A new feature, added as a tab in the UI. It includes:
-    *   **Backend:** Separate data models (), API routes (), and seed data for workflows, nodes, templates, and team members. All backend APIs are functional.
-    *   **Frontend:** A component () using the  library to render an interactive canvas. Users can create workflows, and the canvas displays nodes and their connections. Basic functionality like a minimap, zoom controls, and side panels for templates are in place. Auto-saving of node/edge positions is implemented.
+A major data unification effort was completed, merging multiple disparate collections into a single source of truth. All relevant backend routes (, , ) have been updated to use these unified collections (, , , ). The AI generation feature now correctly saves new content into these unified collections.
+
+The UI now includes full delete functionality for all major data types (Workflows, SOPs, Playbooks, Contracts, Talents). The Team and Analytics pages have been fleshed out with seed data and are fully functional. A global search bar is present in the header, and a list of saved workflows is visible in the Workflows tab.
+
+All known deployment issues have been resolved, and the application is seeded with comprehensive demo data for testing.
 
 **Last working item**:
-*   **Last item agent was working:** Redesigning the UI of the nodes on the WorkflowViz canvas to match a Milanote style. This involved creating a card-based design with a colored left border indicating the node type (e.g., red for Issue, blue for Action).
-*   **Status:** IN PROGRESS
-*   **Agent Testing Done:** N
-*   **Which testing method agent to use?** screenshot tool
+*   **Last item agent was working:** Fixing a bug where the Generate Workflow button on the redesigned Labyrinth Builder was throwing an Invalid selection format error. The agent updated the backend route () to correctly parse the new payload format sent by the redesigned frontend.
+*   **Status:** USER VERIFICATION PENDING
+*   **Agent Testing Done:** Y
+*   **Which testing method agent to use?** Frontend testing agent
 *   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-*   **Issue 1:** The visual state of the Milanote-style node redesign has not been verified. (Priority: P0)
-*   **Issue 2:** The currently selected workflow in WorkflowViz is not persisted on page refresh, forcing the user to re-select it to view the canvas. (Priority: P1)
+*   None.
 
 **Issues Detail:**
-*   **Issue 1: Verify Milanote-style Node Redesign**
-    *   **Attempted fixes:** The agent has edited  to change the CSS classes and structure of the  component and centralized style configurations in a  object.
-    *   **Next debug checklist:**
-        1.  Restart the frontend service: frontend: ERROR (not running)
-frontend: started.
-        2.  Use the screenshot tool to navigate to the WorkflowViz tab.
-        3.  Create or select a workflow with several different node types.
-        4.  Verify that the nodes appear as clean cards with colored left borders and improved text hierarchy, matching the Milanote aesthetic.
-        5.  Confirm that the MiniMap and the Selected Node panel also use the new color scheme for consistency.
-    *   **Why fix this issue and what will be achieved with the fix?** To fulfill the user's explicit design request and improve the UI/UX of the WorkflowViz feature.
-    *   **Status:** IN PROGRESS
-    *   **Is recurring issue?** N
-    *   **Should Test frontend/backend/both after fix?** Frontend
-
-*   **Issue 2: WorkflowViz State Lost on Refresh**
-    *   **Attempted fixes:** None. The agent observed this behavior but did not address it.
-    *   **Next debug checklist:**
-        1.  In , modify the logic for selecting a workflow.
-        2.  When a user clicks on a workflow from the list, store its ID in the URL as a query parameter (e.g., ).
-        3.  In the main  hook, check for this query parameter on component load.
-        4.  If the parameter exists, automatically fetch and display that workflow's data.
-    *   **Why fix this issue and what will be achieved with the fix?** This will significantly improve the user experience by maintaining the user's context across page reloads.
-    *   **Status:** NOT STARTED
-    *   **Is recurring issue?** Y
-    *   **Should Test frontend/backend/both after fix?** Frontend
+*   None.
 
 **In progress Task List**:
-*   **Task 1: Finalize and Test Milanote Node Redesign** (Priority: P0)
-    *   **Where to resume:** The code has been written in . The next step is to restart the frontend service and visually verify the changes using the screenshot tool.
-    *   **What will be achieved with this?** A visually appealing and user-approved node design for the WorkflowViz canvas.
-    *   **Status:** IN PROGRESS
+*   None.
 
 **Upcoming and Future Tasks**
-*   **Upcoming Tasks (High Priority):**
-    *   **Implement 3-Layer Hierarchy (P0):** Add logic to drill down from a Strategic node to a Tactical canvas, and from a Tactical node to an Execution canvas. This is a core requirement from the PRD. (File: , )
-    *   **Implement Partial Template Saving (P1):** Allow users to select multiple nodes on the canvas and save that selection (including connections and relative positions) as a reusable template. (File: , )
-    *   **Implement People & Software Assignment (P1):** Create people/software pickers to assign team members and tools to nodes, as specified in the PRD. (File: )
+*   **Upcoming Tasks:**
+    *   **(P0) User Verification:** User needs to test the end-to-end Generate Workflow functionality from the redesigned Labyrinth Builder to ensure the recent bug fix is working correctly on the deployed version. User should also verify the newly added delete functionalities.
+    *   **(P1) Implement Optimization Plan:** The final preview step in the Labyrinth Builder, Optimization Plan, is currently a static placeholder. This feature needs to be implemented. (Files: , ).
 
-*   **Future Tasks (Lower Priority):**
-    *   Implement full integrations with ClickUp, Manatal, and n8n.
-    *   Add Role-Based Access Control (RBAC) for workflows.
-    *   Implement real-time collaboration using WebSockets.
-    *   Add version history for workflows.
-    *   Implement Export to PDF/JSON and Import from JSON functionality.
+*   **Future Tasks:**
+    *   **(P2) Refine Data Quality in UI:** Some items in the Templates tab (specifically contracts) display empty names or Invalid Date due to data schema mismatches. This requires a data cleanup pass or making the UI components more robust to handle varied data formats. (File:  - ).
+    - **(P3) Consolidate Seeding Scripts:** Refactor the various data seeding logic (e.g., , , and other scripts run via ) into a single, idempotent seeding function for better maintainability.
 
 **Completed work in this session**
-*   **Labyrinth OS Feature (DONE):**
-    *   Backend: Created all data models, APIs, and seeding logic for Playbooks, SOPs, KPIs, Talents, and the 7-gate system.
-    *   Frontend: Built a comprehensive dashboard with views for all Labyrinth OS components and a functional Gate Console for testing workflows.
-*   **WorkflowViz Feature (Initial Implementation DONE):**
-    *   Backend: Established data models and API endpoints for managing workflows, nodes, edges, and templates.
-    *   Frontend: Integrated a new WorkflowViz tab with a React Flow canvas. Implemented core functionalities like creating workflows, adding/connecting nodes, and auto-saving the canvas state to the backend.
-*   **Code Quality (DONE):**
-    *   Resolved all initial ./backend/gate_logic.py:7:1: F401 'datetime.datetime' imported but unused
-./backend/gate_logic.py:7:1: F401 'datetime.timezone' imported but unused
-./backend/gate_logic.py:8:1: F401 'models.Alert' imported but unused
-./backend/gate_logic.py:10:80: E501 line too long (81 > 79 characters)
-./backend/gate_logic.py:13:1: F401 'uuid' imported but unused
-./backend/gate_logic.py:18:80: E501 line too long (84 > 79 characters)
-./backend/gate_logic.py:21:1: W293 blank line contains whitespace
-./backend/gate_logic.py:32:1: W293 blank line contains whitespace
-./backend/gate_logic.py:40:1: W293 blank line contains whitespace
-./backend/gate_logic.py:43:1: W293 blank line contains whitespace
-./backend/gate_logic.py:53:1: W293 blank line contains whitespace
-./backend/gate_logic.py:55:1: W293 blank line contains whitespace
-./backend/gate_logic.py:67:1: W293 blank line contains whitespace
-./backend/gate_logic.py:75:1: W293 blank line contains whitespace
-./backend/gate_logic.py:87:1: W293 blank line contains whitespace
-./backend/gate_logic.py:89:1: W293 blank line contains whitespace
-./backend/gate_logic.py:102:1: W293 blank line contains whitespace
-./backend/gate_logic.py:107:80: E501 line too long (105 > 79 characters)
-./backend/gate_logic.py:108:80: E501 line too long (120 > 79 characters)
-./backend/gate_logic.py:114:1: W293 blank line contains whitespace
-./backend/gate_logic.py:125:1: W293 blank line contains whitespace
-./backend/gate_logic.py:127:1: W293 blank line contains whitespace
-./backend/gate_logic.py:141:1: W293 blank line contains whitespace
-./backend/gate_logic.py:143:80: E501 line too long (123 > 79 characters)
-./backend/gate_logic.py:144:1: W293 blank line contains whitespace
-./backend/gate_logic.py:146:80: E501 line too long (126 > 79 characters)
-./backend/gate_logic.py:147:1: W293 blank line contains whitespace
-./backend/gate_logic.py:150:1: W293 blank line contains whitespace
-./backend/gate_logic.py:162:1: W293 blank line contains whitespace
-./backend/gate_logic.py:175:1: W293 blank line contains whitespace
-./backend/gate_logic.py:176:80: E501 line too long (82 > 79 characters)
-./backend/gate_logic.py:177:1: W293 blank line contains whitespace
-./backend/gate_logic.py:191:1: W293 blank line contains whitespace
-./backend/gate_logic.py:195:1: W293 blank line contains whitespace
-./backend/gate_logic.py:203:80: E501 line too long (141 > 79 characters)
-./backend/gate_logic.py:213:80: E501 line too long (111 > 79 characters)
-./backend/gate_logic.py:216:1: W293 blank line contains whitespace
-./backend/gate_logic.py:220:80: E501 line too long (140 > 79 characters)
-./backend/gate_logic.py:221:80: E501 line too long (111 > 79 characters)
-./backend/gate_logic.py:233:1: W293 blank line contains whitespace
-./backend/gate_logic.py:241:80: E501 line too long (121 > 79 characters)
-./backend/gate_logic.py:247:80: E501 line too long (95 > 79 characters)
-./backend/gate_logic.py:248:1: W293 blank line contains whitespace
-./backend/gate_logic.py:252:80: E501 line too long (92 > 79 characters)
-./backend/gate_logic.py:263:1: W293 blank line contains whitespace
-./backend/gate_logic.py:265:1: W293 blank line contains whitespace
-./backend/gate_logic.py:278:1: W293 blank line contains whitespace
-./backend/gate_logic.py:282:1: W293 blank line contains whitespace
-./backend/gate_logic.py:284:1: W293 blank line contains whitespace
-./backend/gate_logic.py:300:1: W293 blank line contains whitespace
-./backend/gate_logic.py:313:1: W293 blank line contains whitespace
-./backend/gate_logic.py:317:80: E501 line too long (82 > 79 characters)
-./backend/gate_logic.py:322:80: E501 line too long (88 > 79 characters)
-./backend/gate_logic.py:326:1: W293 blank line contains whitespace
-./backend/gate_logic.py:328:1: W293 blank line contains whitespace
-./backend/gate_logic.py:342:1: W293 blank line contains whitespace
-./backend/gate_logic.py:349:80: E501 line too long (91 > 79 characters)
-./backend/gate_logic.py:355:1: W293 blank line contains whitespace
-./backend/gate_logic.py:360:80: E501 line too long (83 > 79 characters)
-./backend/gate_logic.py:366:1: W293 blank line contains whitespace
-./backend/gate_logic.py:376:1: W293 blank line contains whitespace
-./backend/gate_logic.py:385:80: E501 line too long (104 > 79 characters)
-./backend/gate_logic.py:391:1: W293 blank line contains whitespace
-./backend/gate_logic.py:404:1: W293 blank line contains whitespace
-./backend/gate_logic.py:406:1: W293 blank line contains whitespace
-./backend/gate_logic.py:422:1: W293 blank line contains whitespace
-./backend/gate_logic.py:424:1: W293 blank line contains whitespace
-./backend/gate_logic.py:429:1: W293 blank line contains whitespace
-./backend/gate_logic.py:432:1: W293 blank line contains whitespace
-./backend/gate_logic.py:443:1: W293 blank line contains whitespace
-./backend/gate_logic.py:452:1: W293 blank line contains whitespace
-./backend/gate_logic.py:459:80: E501 line too long (114 > 79 characters)
-./backend/gate_logic.py:469:1: W293 blank line contains whitespace
-./backend/gate_logic.py:473:1: W293 blank line contains whitespace
-./backend/gate_logic.py:476:1: W293 blank line contains whitespace
-./backend/gate_logic.py:482:1: W293 blank line contains whitespace
-./backend/gate_logic.py:490:80: E501 line too long (86 > 79 characters)
-./backend/gate_logic.py:491:80: E501 line too long (88 > 79 characters)
-./backend/gate_logic.py:492:80: E501 line too long (81 > 79 characters)
-./backend/gate_logic.py:495:1: W293 blank line contains whitespace
-./backend/gate_logic.py:497:1: W293 blank line contains whitespace
-./backend/gate_logic.py:498:80: E501 line too long (94 > 79 characters)
-./backend/gate_logic.py:508:1: W293 blank line contains whitespace
-./backend/gate_logic.py:510:1: W293 blank line contains whitespace
-./backend/gate_logic.py:517:1: W293 blank line contains whitespace
-./backend/gate_logic.py:519:1: W293 blank line contains whitespace
-./backend/gate_logic.py:537:1: W293 blank line contains whitespace
-./backend/models.py:84:80: E501 line too long (84 > 79 characters)
-./backend/models.py:85:80: E501 line too long (84 > 79 characters)
-./backend/models.py:115:80: E501 line too long (84 > 79 characters)
-./backend/models.py:116:80: E501 line too long (84 > 79 characters)
-./backend/models.py:138:80: E501 line too long (81 > 79 characters)
-./backend/models.py:153:80: E501 line too long (84 > 79 characters)
-./backend/models.py:154:80: E501 line too long (84 > 79 characters)
-./backend/models.py:156:1: W293 blank line contains whitespace
-./backend/models.py:160:80: E501 line too long (88 > 79 characters)
-./backend/models.py:161:80: E501 line too long (81 > 79 characters)
-./backend/models.py:202:80: E501 line too long (84 > 79 characters)
-./backend/models.py:203:80: E501 line too long (84 > 79 characters)
-./backend/models.py:233:80: E501 line too long (84 > 79 characters)
-./backend/models.py:234:80: E501 line too long (84 > 79 characters)
-./backend/models.py:246:80: E501 line too long (85 > 79 characters)
-./backend/models.py:291:80: E501 line too long (85 > 79 characters)
-./backend/models.py:307:80: E501 line too long (84 > 79 characters)
-./backend/models.py:330:80: E501 line too long (84 > 79 characters)
-./backend/models.py:331:80: E501 line too long (84 > 79 characters)
-./backend/models.py:351:80: E501 line too long (84 > 79 characters)
-./backend/seed_data.py:15:80: E501 line too long (230 > 79 characters)
-./backend/seed_data.py:16:80: E501 line too long (231 > 79 characters)
-./backend/seed_data.py:17:80: E501 line too long (256 > 79 characters)
-./backend/seed_data.py:18:80: E501 line too long (237 > 79 characters)
-./backend/seed_data.py:19:80: E501 line too long (235 > 79 characters)
-./backend/seed_data.py:20:80: E501 line too long (226 > 79 characters)
-./backend/seed_data.py:21:80: E501 line too long (231 > 79 characters)
-./backend/seed_data.py:22:1: W293 blank line contains whitespace
-./backend/seed_data.py:24:80: E501 line too long (250 > 79 characters)
-./backend/seed_data.py:25:80: E501 line too long (233 > 79 characters)
-./backend/seed_data.py:26:80: E501 line too long (226 > 79 characters)
-./backend/seed_data.py:27:80: E501 line too long (235 > 79 characters)
-./backend/seed_data.py:28:80: E501 line too long (233 > 79 characters)
-./backend/seed_data.py:29:80: E501 line too long (232 > 79 characters)
-./backend/seed_data.py:30:80: E501 line too long (228 > 79 characters)
-./backend/seed_data.py:31:1: W293 blank line contains whitespace
-./backend/seed_data.py:33:80: E501 line too long (222 > 79 characters)
-./backend/seed_data.py:34:80: E501 line too long (231 > 79 characters)
-./backend/seed_data.py:35:80: E501 line too long (226 > 79 characters)
-./backend/seed_data.py:36:80: E501 line too long (235 > 79 characters)
-./backend/seed_data.py:37:80: E501 line too long (225 > 79 characters)
-./backend/seed_data.py:38:80: E501 line too long (230 > 79 characters)
-./backend/seed_data.py:39:80: E501 line too long (227 > 79 characters)
-./backend/seed_data.py:40:80: E501 line too long (221 > 79 characters)
-./backend/seed_data.py:41:1: W293 blank line contains whitespace
-./backend/seed_data.py:43:80: E501 line too long (233 > 79 characters)
-./backend/seed_data.py:44:80: E501 line too long (231 > 79 characters)
-./backend/seed_data.py:45:80: E501 line too long (226 > 79 characters)
-./backend/seed_data.py:46:80: E501 line too long (225 > 79 characters)
-./backend/seed_data.py:47:80: E501 line too long (231 > 79 characters)
-./backend/seed_data.py:48:80: E501 line too long (235 > 79 characters)
-./backend/seed_data.py:49:80: E501 line too long (216 > 79 characters)
-./backend/seed_data.py:50:1: W293 blank line contains whitespace
-./backend/seed_data.py:52:80: E501 line too long (228 > 79 characters)
-./backend/seed_data.py:53:80: E501 line too long (233 > 79 characters)
-./backend/seed_data.py:54:80: E501 line too long (237 > 79 characters)
-./backend/seed_data.py:55:80: E501 line too long (239 > 79 characters)
-./backend/seed_data.py:56:80: E501 line too long (238 > 79 characters)
-./backend/seed_data.py:57:80: E501 line too long (233 > 79 characters)
-./backend/seed_data.py:58:80: E501 line too long (233 > 79 characters)
-./backend/seed_data.py:59:1: W293 blank line contains whitespace
-./backend/seed_data.py:61:80: E501 line too long (226 > 79 characters)
-./backend/seed_data.py:62:80: E501 line too long (240 > 79 characters)
-./backend/seed_data.py:63:80: E501 line too long (223 > 79 characters)
-./backend/seed_data.py:64:80: E501 line too long (229 > 79 characters)
-./backend/seed_data.py:65:80: E501 line too long (227 > 79 characters)
-./backend/seed_data.py:66:80: E501 line too long (229 > 79 characters)
-./backend/seed_data.py:67:80: E501 line too long (237 > 79 characters)
-./backend/seed_data.py:68:80: E501 line too long (227 > 79 characters)
-./backend/seed_data.py:75:80: E501 line too long (208 > 79 characters)
-./backend/seed_data.py:77:80: E501 line too long (233 > 79 characters)
-./backend/seed_data.py:78:80: E501 line too long (220 > 79 characters)
-./backend/seed_data.py:79:80: E501 line too long (171 > 79 characters)
-./backend/seed_data.py:81:80: E501 line too long (223 > 79 characters)
-./backend/seed_data.py:83:80: E501 line too long (209 > 79 characters)
-./backend/seed_data.py:84:80: E501 line too long (168 > 79 characters)
-./backend/seed_data.py:85:80: E501 line too long (203 > 79 characters)
-./backend/seed_data.py:86:80: E501 line too long (172 > 79 characters)
-./backend/seed_data.py:88:80: E501 line too long (206 > 79 characters)
-./backend/seed_data.py:90:80: E501 line too long (192 > 79 characters)
-./backend/seed_data.py:91:80: E501 line too long (191 > 79 characters)
-./backend/seed_data.py:92:80: E501 line too long (181 > 79 characters)
-./backend/seed_data.py:93:80: E501 line too long (182 > 79 characters)
-./backend/seed_data.py:95:80: E501 line too long (211 > 79 characters)
-./backend/seed_data.py:97:80: E501 line too long (200 > 79 characters)
-./backend/seed_data.py:98:80: E501 line too long (163 > 79 characters)
-./backend/seed_data.py:99:80: E501 line too long (186 > 79 characters)
-./backend/seed_data.py:101:80: E501 line too long (212 > 79 characters)
-./backend/seed_data.py:103:80: E501 line too long (184 > 79 characters)
-./backend/seed_data.py:104:80: E501 line too long (167 > 79 characters)
-./backend/seed_data.py:105:80: E501 line too long (178 > 79 characters)
-./backend/seed_data.py:107:80: E501 line too long (209 > 79 characters)
-./backend/seed_data.py:109:80: E501 line too long (203 > 79 characters)
-./backend/seed_data.py:110:80: E501 line too long (186 > 79 characters)
-./backend/seed_data.py:111:80: E501 line too long (162 > 79 characters)
-./backend/seed_data.py:113:80: E501 line too long (217 > 79 characters)
-./backend/seed_data.py:115:80: E501 line too long (177 > 79 characters)
-./backend/seed_data.py:116:80: E501 line too long (181 > 79 characters)
-./backend/seed_data.py:117:80: E501 line too long (167 > 79 characters)
-./backend/seed_data.py:119:80: E501 line too long (211 > 79 characters)
-./backend/seed_data.py:121:80: E501 line too long (180 > 79 characters)
-./backend/seed_data.py:122:80: E501 line too long (185 > 79 characters)
-./backend/seed_data.py:123:80: E501 line too long (177 > 79 characters)
-./backend/seed_data.py:125:1: W293 blank line contains whitespace
-./backend/seed_data.py:127:80: E501 line too long (217 > 79 characters)
-./backend/seed_data.py:129:80: E501 line too long (179 > 79 characters)
-./backend/seed_data.py:130:80: E501 line too long (171 > 79 characters)
-./backend/seed_data.py:131:80: E501 line too long (184 > 79 characters)
-./backend/seed_data.py:133:80: E501 line too long (217 > 79 characters)
-./backend/seed_data.py:135:80: E501 line too long (199 > 79 characters)
-./backend/seed_data.py:136:80: E501 line too long (179 > 79 characters)
-./backend/seed_data.py:137:80: E501 line too long (172 > 79 characters)
-./backend/seed_data.py:139:80: E501 line too long (223 > 79 characters)
-./backend/seed_data.py:141:80: E501 line too long (161 > 79 characters)
-./backend/seed_data.py:142:80: E501 line too long (163 > 79 characters)
-./backend/seed_data.py:143:80: E501 line too long (165 > 79 characters)
-./backend/seed_data.py:145:80: E501 line too long (217 > 79 characters)
-./backend/seed_data.py:147:80: E501 line too long (183 > 79 characters)
-./backend/seed_data.py:148:80: E501 line too long (168 > 79 characters)
-./backend/seed_data.py:149:80: E501 line too long (175 > 79 characters)
-./backend/seed_data.py:151:80: E501 line too long (214 > 79 characters)
-./backend/seed_data.py:153:80: E501 line too long (177 > 79 characters)
-./backend/seed_data.py:154:80: E501 line too long (166 > 79 characters)
-./backend/seed_data.py:155:80: E501 line too long (168 > 79 characters)
-./backend/seed_data.py:157:80: E501 line too long (216 > 79 characters)
-./backend/seed_data.py:159:80: E501 line too long (172 > 79 characters)
-./backend/seed_data.py:160:80: E501 line too long (178 > 79 characters)
-./backend/seed_data.py:161:80: E501 line too long (179 > 79 characters)
-./backend/seed_data.py:163:80: E501 line too long (211 > 79 characters)
-./backend/seed_data.py:165:80: E501 line too long (185 > 79 characters)
-./backend/seed_data.py:166:80: E501 line too long (169 > 79 characters)
-./backend/seed_data.py:167:80: E501 line too long (171 > 79 characters)
-./backend/seed_data.py:169:80: E501 line too long (200 > 79 characters)
-./backend/seed_data.py:171:80: E501 line too long (179 > 79 characters)
-./backend/seed_data.py:172:80: E501 line too long (172 > 79 characters)
-./backend/seed_data.py:173:80: E501 line too long (159 > 79 characters)
-./backend/seed_data.py:175:1: W293 blank line contains whitespace
-./backend/seed_data.py:177:80: E501 line too long (203 > 79 characters)
-./backend/seed_data.py:179:80: E501 line too long (170 > 79 characters)
-./backend/seed_data.py:180:80: E501 line too long (150 > 79 characters)
-./backend/seed_data.py:181:80: E501 line too long (172 > 79 characters)
-./backend/seed_data.py:183:80: E501 line too long (216 > 79 characters)
-./backend/seed_data.py:185:80: E501 line too long (175 > 79 characters)
-./backend/seed_data.py:186:80: E501 line too long (173 > 79 characters)
-./backend/seed_data.py:187:80: E501 line too long (166 > 79 characters)
-./backend/seed_data.py:189:80: E501 line too long (210 > 79 characters)
-./backend/seed_data.py:191:80: E501 line too long (169 > 79 characters)
-./backend/seed_data.py:192:80: E501 line too long (160 > 79 characters)
-./backend/seed_data.py:193:80: E501 line too long (162 > 79 characters)
-./backend/seed_data.py:195:80: E501 line too long (209 > 79 characters)
-./backend/seed_data.py:197:80: E501 line too long (164 > 79 characters)
-./backend/seed_data.py:198:80: E501 line too long (159 > 79 characters)
-./backend/seed_data.py:199:80: E501 line too long (158 > 79 characters)
-./backend/seed_data.py:201:80: E501 line too long (208 > 79 characters)
-./backend/seed_data.py:203:80: E501 line too long (164 > 79 characters)
-./backend/seed_data.py:204:80: E501 line too long (161 > 79 characters)
-./backend/seed_data.py:205:80: E501 line too long (150 > 79 characters)
-./backend/seed_data.py:207:80: E501 line too long (207 > 79 characters)
-./backend/seed_data.py:209:80: E501 line too long (187 > 79 characters)
-./backend/seed_data.py:210:80: E501 line too long (169 > 79 characters)
-./backend/seed_data.py:211:80: E501 line too long (154 > 79 characters)
-./backend/seed_data.py:213:80: E501 line too long (216 > 79 characters)
-./backend/seed_data.py:215:80: E501 line too long (176 > 79 characters)
-./backend/seed_data.py:216:80: E501 line too long (147 > 79 characters)
-./backend/seed_data.py:217:80: E501 line too long (175 > 79 characters)
-./backend/seed_data.py:219:80: E501 line too long (208 > 79 characters)
-./backend/seed_data.py:221:80: E501 line too long (170 > 79 characters)
-./backend/seed_data.py:222:80: E501 line too long (158 > 79 characters)
-./backend/seed_data.py:223:80: E501 line too long (158 > 79 characters)
-./backend/seed_data.py:225:1: W293 blank line contains whitespace
-./backend/seed_data.py:227:80: E501 line too long (203 > 79 characters)
-./backend/seed_data.py:229:80: E501 line too long (165 > 79 characters)
-./backend/seed_data.py:230:80: E501 line too long (157 > 79 characters)
-./backend/seed_data.py:231:80: E501 line too long (149 > 79 characters)
-./backend/seed_data.py:233:80: E501 line too long (212 > 79 characters)
-./backend/seed_data.py:235:80: E501 line too long (162 > 79 characters)
-./backend/seed_data.py:236:80: E501 line too long (156 > 79 characters)
-./backend/seed_data.py:237:80: E501 line too long (137 > 79 characters)
-./backend/seed_data.py:239:80: E501 line too long (211 > 79 characters)
-./backend/seed_data.py:241:80: E501 line too long (162 > 79 characters)
-./backend/seed_data.py:242:80: E501 line too long (157 > 79 characters)
-./backend/seed_data.py:243:80: E501 line too long (171 > 79 characters)
-./backend/seed_data.py:245:80: E501 line too long (206 > 79 characters)
-./backend/seed_data.py:247:80: E501 line too long (156 > 79 characters)
-./backend/seed_data.py:248:80: E501 line too long (154 > 79 characters)
-./backend/seed_data.py:249:80: E501 line too long (155 > 79 characters)
-./backend/seed_data.py:251:80: E501 line too long (207 > 79 characters)
-./backend/seed_data.py:253:80: E501 line too long (167 > 79 characters)
-./backend/seed_data.py:254:80: E501 line too long (157 > 79 characters)
-./backend/seed_data.py:255:80: E501 line too long (151 > 79 characters)
-./backend/seed_data.py:257:80: E501 line too long (214 > 79 characters)
-./backend/seed_data.py:259:80: E501 line too long (173 > 79 characters)
-./backend/seed_data.py:260:80: E501 line too long (158 > 79 characters)
-./backend/seed_data.py:261:80: E501 line too long (156 > 79 characters)
-./backend/seed_data.py:263:80: E501 line too long (210 > 79 characters)
-./backend/seed_data.py:265:80: E501 line too long (176 > 79 characters)
-./backend/seed_data.py:266:80: E501 line too long (170 > 79 characters)
-./backend/seed_data.py:267:80: E501 line too long (157 > 79 characters)
-./backend/seed_data.py:269:1: W293 blank line contains whitespace
-./backend/seed_data.py:271:80: E501 line too long (218 > 79 characters)
-./backend/seed_data.py:273:80: E501 line too long (158 > 79 characters)
-./backend/seed_data.py:274:80: E501 line too long (153 > 79 characters)
-./backend/seed_data.py:275:80: E501 line too long (162 > 79 characters)
-./backend/seed_data.py:277:80: E501 line too long (213 > 79 characters)
-./backend/seed_data.py:279:80: E501 line too long (169 > 79 characters)
-./backend/seed_data.py:280:80: E501 line too long (163 > 79 characters)
-./backend/seed_data.py:281:80: E501 line too long (160 > 79 characters)
-./backend/seed_data.py:283:80: E501 line too long (218 > 79 characters)
-./backend/seed_data.py:285:80: E501 line too long (158 > 79 characters)
-./backend/seed_data.py:286:80: E501 line too long (144 > 79 characters)
-./backend/seed_data.py:287:80: E501 line too long (159 > 79 characters)
-./backend/seed_data.py:289:80: E501 line too long (217 > 79 characters)
-./backend/seed_data.py:291:80: E501 line too long (177 > 79 characters)
-./backend/seed_data.py:292:80: E501 line too long (157 > 79 characters)
-./backend/seed_data.py:293:80: E501 line too long (160 > 79 characters)
-./backend/seed_data.py:295:80: E501 line too long (202 > 79 characters)
-./backend/seed_data.py:297:80: E501 line too long (164 > 79 characters)
-./backend/seed_data.py:298:80: E501 line too long (142 > 79 characters)
-./backend/seed_data.py:299:80: E501 line too long (147 > 79 characters)
-./backend/seed_data.py:301:80: E501 line too long (222 > 79 characters)
-./backend/seed_data.py:303:80: E501 line too long (180 > 79 characters)
-./backend/seed_data.py:304:80: E501 line too long (165 > 79 characters)
-./backend/seed_data.py:305:80: E501 line too long (155 > 79 characters)
-./backend/seed_data.py:307:80: E501 line too long (220 > 79 characters)
-./backend/seed_data.py:309:80: E501 line too long (161 > 79 characters)
-./backend/seed_data.py:310:80: E501 line too long (161 > 79 characters)
-./backend/seed_data.py:311:80: E501 line too long (162 > 79 characters)
-./backend/seed_data.py:313:1: W293 blank line contains whitespace
-./backend/seed_data.py:315:80: E501 line too long (204 > 79 characters)
-./backend/seed_data.py:317:80: E501 line too long (160 > 79 characters)
-./backend/seed_data.py:318:80: E501 line too long (153 > 79 characters)
-./backend/seed_data.py:319:80: E501 line too long (144 > 79 characters)
-./backend/seed_data.py:321:80: E501 line too long (210 > 79 characters)
-./backend/seed_data.py:323:80: E501 line too long (155 > 79 characters)
-./backend/seed_data.py:324:80: E501 line too long (156 > 79 characters)
-./backend/seed_data.py:325:80: E501 line too long (154 > 79 characters)
-./backend/seed_data.py:327:80: E501 line too long (209 > 79 characters)
-./backend/seed_data.py:329:80: E501 line too long (154 > 79 characters)
-./backend/seed_data.py:330:80: E501 line too long (142 > 79 characters)
-./backend/seed_data.py:331:80: E501 line too long (147 > 79 characters)
-./backend/seed_data.py:333:80: E501 line too long (205 > 79 characters)
-./backend/seed_data.py:335:80: E501 line too long (155 > 79 characters)
-./backend/seed_data.py:336:80: E501 line too long (157 > 79 characters)
-./backend/seed_data.py:337:80: E501 line too long (154 > 79 characters)
-./backend/seed_data.py:339:80: E501 line too long (215 > 79 characters)
-./backend/seed_data.py:341:80: E501 line too long (162 > 79 characters)
-./backend/seed_data.py:342:80: E501 line too long (165 > 79 characters)
-./backend/seed_data.py:343:80: E501 line too long (158 > 79 characters)
-./backend/seed_data.py:345:80: E501 line too long (213 > 79 characters)
-./backend/seed_data.py:347:80: E501 line too long (168 > 79 characters)
-./backend/seed_data.py:348:80: E501 line too long (163 > 79 characters)
-./backend/seed_data.py:349:80: E501 line too long (153 > 79 characters)
-./backend/seed_data.py:351:80: E501 line too long (218 > 79 characters)
-./backend/seed_data.py:353:80: E501 line too long (168 > 79 characters)
-./backend/seed_data.py:354:80: E501 line too long (159 > 79 characters)
-./backend/seed_data.py:355:80: E501 line too long (158 > 79 characters)
-./backend/seed_data.py:357:80: E501 line too long (213 > 79 characters)
-./backend/seed_data.py:359:80: E501 line too long (154 > 79 characters)
-./backend/seed_data.py:360:80: E501 line too long (152 > 79 characters)
-./backend/seed_data.py:361:80: E501 line too long (153 > 79 characters)
-./backend/seed_data.py:369:80: E501 line too long (211 > 79 characters)
-./backend/seed_data.py:370:80: E501 line too long (107 > 79 characters)
-./backend/seed_data.py:371:80: E501 line too long (232 > 79 characters)
-./backend/seed_data.py:372:80: E501 line too long (106 > 79 characters)
-./backend/seed_data.py:373:80: E501 line too long (208 > 79 characters)
-./backend/seed_data.py:374:80: E501 line too long (106 > 79 characters)
-./backend/seed_data.py:375:80: E501 line too long (210 > 79 characters)
-./backend/seed_data.py:376:80: E501 line too long (106 > 79 characters)
-./backend/seed_data.py:377:80: E501 line too long (203 > 79 characters)
-./backend/seed_data.py:378:80: E501 line too long (107 > 79 characters)
-./backend/seed_data.py:379:1: W293 blank line contains whitespace
-./backend/seed_data.py:381:80: E501 line too long (176 > 79 characters)
-./backend/seed_data.py:382:80: E501 line too long (109 > 79 characters)
-./backend/seed_data.py:383:80: E501 line too long (193 > 79 characters)
-./backend/seed_data.py:384:80: E501 line too long (108 > 79 characters)
-./backend/seed_data.py:385:80: E501 line too long (204 > 79 characters)
-./backend/seed_data.py:386:80: E501 line too long (105 > 79 characters)
-./backend/seed_data.py:387:80: E501 line too long (209 > 79 characters)
-./backend/seed_data.py:388:80: E501 line too long (104 > 79 characters)
-./backend/seed_data.py:389:80: E501 line too long (203 > 79 characters)
-./backend/seed_data.py:390:80: E501 line too long (103 > 79 characters)
-./backend/seed_data.py:391:1: W293 blank line contains whitespace
-./backend/seed_data.py:393:80: E501 line too long (200 > 79 characters)
-./backend/seed_data.py:394:80: E501 line too long (107 > 79 characters)
-./backend/seed_data.py:395:80: E501 line too long (208 > 79 characters)
-./backend/seed_data.py:396:80: E501 line too long (107 > 79 characters)
-./backend/seed_data.py:397:80: E501 line too long (215 > 79 characters)
-./backend/seed_data.py:398:80: E501 line too long (105 > 79 characters)
-./backend/seed_data.py:399:80: E501 line too long (205 > 79 characters)
-./backend/seed_data.py:400:80: E501 line too long (103 > 79 characters)
-./backend/seed_data.py:401:80: E501 line too long (193 > 79 characters)
-./backend/seed_data.py:402:80: E501 line too long (112 > 79 characters)
-./backend/seed_data.py:403:1: W293 blank line contains whitespace
-./backend/seed_data.py:405:80: E501 line too long (215 > 79 characters)
-./backend/seed_data.py:406:80: E501 line too long (106 > 79 characters)
-./backend/seed_data.py:407:80: E501 line too long (201 > 79 characters)
-./backend/seed_data.py:408:80: E501 line too long (107 > 79 characters)
-./backend/seed_data.py:409:80: E501 line too long (196 > 79 characters)
-./backend/seed_data.py:410:80: E501 line too long (106 > 79 characters)
-./backend/seed_data.py:411:80: E501 line too long (195 > 79 characters)
-./backend/seed_data.py:412:80: E501 line too long (106 > 79 characters)
-./backend/seed_data.py:413:80: E501 line too long (190 > 79 characters)
-./backend/seed_data.py:414:80: E501 line too long (103 > 79 characters)
-./backend/seed_data.py:415:1: W293 blank line contains whitespace
-./backend/seed_data.py:417:80: E501 line too long (203 > 79 characters)
-./backend/seed_data.py:418:80: E501 line too long (108 > 79 characters)
-./backend/seed_data.py:419:80: E501 line too long (197 > 79 characters)
-./backend/seed_data.py:420:80: E501 line too long (106 > 79 characters)
-./backend/seed_data.py:421:80: E501 line too long (210 > 79 characters)
-./backend/seed_data.py:422:80: E501 line too long (106 > 79 characters)
-./backend/seed_data.py:423:80: E501 line too long (197 > 79 characters)
-./backend/seed_data.py:424:80: E501 line too long (104 > 79 characters)
-./backend/seed_data.py:425:80: E501 line too long (206 > 79 characters)
-./backend/seed_data.py:426:80: E501 line too long (106 > 79 characters)
-./backend/seed_data.py:427:1: W293 blank line contains whitespace
-./backend/seed_data.py:429:80: E501 line too long (193 > 79 characters)
-./backend/seed_data.py:430:80: E501 line too long (106 > 79 characters)
-./backend/seed_data.py:431:80: E501 line too long (211 > 79 characters)
-./backend/seed_data.py:432:80: E501 line too long (106 > 79 characters)
-./backend/seed_data.py:433:80: E501 line too long (186 > 79 characters)
-./backend/seed_data.py:434:80: E501 line too long (106 > 79 characters)
-./backend/seed_data.py:435:80: E501 line too long (212 > 79 characters)
-./backend/seed_data.py:436:80: E501 line too long (106 > 79 characters)
-./backend/seed_data.py:437:80: E501 line too long (198 > 79 characters)
-./backend/seed_data.py:438:80: E501 line too long (109 > 79 characters)
-./backend/server.py:13:1: F401 'typing.Dict' imported but unused
-./backend/server.py:13:1: F401 'typing.Any' imported but unused
-./backend/server.py:15:1: F401 'uuid' imported but unused
-./backend/server.py:17:1: F401 'models.SOPStep' imported but unused
-./backend/server.py:17:1: F401 'models.CompetencyScores' imported but unused
-./backend/server.py:17:1: F401 'models.ContractBoundary' imported but unused
-./backend/server.py:17:1: F401 'models.KPIThresholds' imported but unused
-./backend/server.py:17:1: F401 'models.KPIValue' imported but unused
-./backend/server.py:17:1: F401 'models.GateExecutionRequest' imported but unused
-./backend/server.py:17:1: F401 'models.AlertCreate' imported but unused
-./backend/server.py:17:1: F401 'models.WorkflowExecution' imported but unused
-./backend/server.py:17:1: F401 'models.WorkflowExecutionCreate' imported but unused
-./backend/server.py:42:1: F401 'gate_logic.LabyrinthGateEngine' imported but unused
-./backend/server.py:58:80: E501 line too long (80 > 79 characters)
-./backend/server.py:89:80: E501 line too long (109 > 79 characters)
-./backend/server.py:97:80: E501 line too long (95 > 79 characters)
-./backend/server.py:97:96: W291 trailing whitespace
-./backend/server.py:98:80: E501 line too long (95 > 79 characters)
-./backend/server.py:117:80: E501 line too long (85 > 79 characters)
-./backend/server.py:130:1: W293 blank line contains whitespace
-./backend/server.py:134:80: E501 line too long (86 > 79 characters)
-./backend/server.py:140:1: W293 blank line contains whitespace
-./backend/server.py:150:1: W293 blank line contains whitespace
-./backend/server.py:160:1: W293 blank line contains whitespace
-./backend/server.py:183:1: W293 blank line contains whitespace
-./backend/server.py:191:80: E501 line too long (84 > 79 characters)
-./backend/server.py:200:80: E501 line too long (88 > 79 characters)
-./backend/server.py:202:80: E501 line too long (81 > 79 characters)
-./backend/server.py:203:1: W293 blank line contains whitespace
-./backend/server.py:216:1: W293 blank line contains whitespace
-./backend/server.py:219:1: W293 blank line contains whitespace
-./backend/server.py:224:1: W293 blank line contains whitespace
-./backend/server.py:225:80: E501 line too long (83 > 79 characters)
-./backend/server.py:234:80: E501 line too long (92 > 79 characters)
-./backend/server.py:257:1: W293 blank line contains whitespace
-./backend/server.py:277:1: W293 blank line contains whitespace
-./backend/server.py:290:1: W293 blank line contains whitespace
-./backend/server.py:293:1: W293 blank line contains whitespace
-./backend/server.py:296:80: E501 line too long (107 > 79 characters)
-./backend/server.py:297:1: W293 blank line contains whitespace
-./backend/server.py:302:1: W293 blank line contains whitespace
-./backend/server.py:312:80: E501 line too long (92 > 79 characters)
-./backend/server.py:341:1: W293 blank line contains whitespace
-./backend/server.py:359:1: W293 blank line contains whitespace
-./backend/server.py:361:80: E501 line too long (90 > 79 characters)
-./backend/server.py:364:1: W293 blank line contains whitespace
-./backend/server.py:376:1: W293 blank line contains whitespace
-./backend/server.py:378:1: W293 blank line contains whitespace
-./backend/server.py:380:80: E501 line too long (85 > 79 characters)
-./backend/server.py:384:1: W293 blank line contains whitespace
-./backend/server.py:389:1: W293 blank line contains whitespace
-./backend/server.py:399:80: E501 line too long (92 > 79 characters)
-./backend/server.py:406:80: E501 line too long (80 > 79 characters)
-./backend/server.py:412:1: W293 blank line contains whitespace
-./backend/server.py:413:80: E501 line too long (80 > 79 characters)
-./backend/server.py:414:1: W293 blank line contains whitespace
-./backend/server.py:423:1: W293 blank line contains whitespace
-./backend/server.py:444:1: W293 blank line contains whitespace
-./backend/server.py:465:1: W293 blank line contains whitespace
-./backend/server.py:478:1: W293 blank line contains whitespace
-./backend/server.py:481:1: W293 blank line contains whitespace
-./backend/server.py:483:80: E501 line too long (87 > 79 characters)
-./backend/server.py:486:80: E501 line too long (81 > 79 characters)
-./backend/server.py:489:1: W293 blank line contains whitespace
-./backend/server.py:494:1: W293 blank line contains whitespace
-./backend/server.py:504:80: E501 line too long (92 > 79 characters)
-./backend/server.py:524:1: W293 blank line contains whitespace
-./backend/server.py:544:1: W293 blank line contains whitespace
-./backend/server.py:557:1: W293 blank line contains whitespace
-./backend/server.py:560:1: W293 blank line contains whitespace
-./backend/server.py:561:80: E501 line too long (87 > 79 characters)
-./backend/server.py:563:1: W293 blank line contains whitespace
-./backend/server.py:568:1: W293 blank line contains whitespace
-./backend/server.py:578:80: E501 line too long (92 > 79 characters)
-./backend/server.py:594:1: W293 blank line contains whitespace
-./backend/server.py:599:1: W293 blank line contains whitespace
-./backend/server.py:610:1: W293 blank line contains whitespace
-./backend/server.py:619:1: W293 blank line contains whitespace
-./backend/server.py:622:1: W293 blank line contains whitespace
-./backend/server.py:630:80: E501 line too long (112 > 79 characters)
-./backend/server.py:638:1: W293 blank line contains whitespace
-./backend/server.py:654:1: W293 blank line contains whitespace
-./backend/server.py:655:80: E501 line too long (95 > 79 characters)
-./backend/server.py:665:1: W293 blank line contains whitespace
-./backend/server.py:667:80: E501 line too long (103 > 79 characters)
-./backend/server.py:669:1: W293 blank line contains whitespace
-./backend/server.py:677:1: W293 blank line contains whitespace
-./backend/server.py:683:1: W293 blank line contains whitespace
-./backend/server.py:688:80: E501 line too long (85 > 79 characters)
-./backend/server.py:690:80: E501 line too long (88 > 79 characters)
-./backend/server.py:693:1: W293 blank line contains whitespace
-./backend/server.py:696:1: W293 blank line contains whitespace
-./backend/server.py:697:80: E501 line too long (88 > 79 characters)
-./backend/server.py:702:1: W293 blank line contains whitespace
-./backend/server.py:706:80: E501 line too long (86 > 79 characters)
-./backend/server.py:712:1: W293 blank line contains whitespace
-./backend/server.py:713:80: E501 line too long (88 > 79 characters)
-./backend/server.py:716:1: W293 blank line contains whitespace
-./backend/server.py:719:1: W293 blank line contains whitespace
-./backend/server.py:720:80: E501 line too long (80 > 79 characters)
-./backend/server.py:721:1: W293 blank line contains whitespace
-./backend/server.py:723:80: E501 line too long (91 > 79 characters)
-./backend/server.py:725:1: W293 blank line contains whitespace
-./backend/server.py:730:1: W293 blank line contains whitespace
-./backend/server.py:734:80: E501 line too long (85 > 79 characters)
-./backend/server.py:737:80: E501 line too long (88 > 79 characters)
-./backend/server.py:740:1: W293 blank line contains whitespace
-./backend/server.py:742:1: W293 blank line contains whitespace
-./backend/server.py:746:1: W293 blank line contains whitespace
-./backend/server.py:748:1: W293 blank line contains whitespace
-./backend/server.py:751:1: W293 blank line contains whitespace
-./backend/server.py:761:1: W293 blank line contains whitespace
-./backend/server.py:762:80: E501 line too long (88 > 79 characters)
-./backend/server.py:765:1: W293 blank line contains whitespace
-./backend/server.py:768:1: W293 blank line contains whitespace
-./backend/server.py:770:80: E501 line too long (103 > 79 characters)
-./backend/server.py:771:80: E501 line too long (87 > 79 characters)
-./backend/server.py:772:1: W293 blank line contains whitespace
-./backend/server.py:773:80: E501 line too long (83 > 79 characters)
-./backend/server.py:774:1: W293 blank line contains whitespace
-./backend/server.py:775:80: E501 line too long (91 > 79 characters)
-./backend/server.py:777:1: W293 blank line contains whitespace
-./backend/server.py:781:1: W293 blank line contains whitespace
-./backend/server.py:785:80: E501 line too long (83 > 79 characters)
-./backend/server.py:789:80: E501 line too long (89 > 79 characters)
-./backend/server.py:791:1: W293 blank line contains whitespace
-./backend/server.py:802:1: W293 blank line contains whitespace
-./backend/server.py:803:80: E501 line too long (88 > 79 characters)
-./backend/server.py:804:1: W293 blank line contains whitespace
-./backend/server.py:805:80: E501 line too long (91 > 79 characters)
-./backend/server.py:807:1: W293 blank line contains whitespace
-./backend/server.py:812:1: W293 blank line contains whitespace
-./backend/server.py:829:1: W293 blank line contains whitespace
-./backend/server.py:832:80: E501 line too long (82 > 79 characters)
-./backend/server.py:834:80: E501 line too long (118 > 79 characters)
-./backend/server.py:835:1: W293 blank line contains whitespace
-./backend/server.py:840:80: E501 line too long (115 > 79 characters)
-./backend/server.py:841:1: W293 blank line contains whitespace
-./backend/server.py:843:80: E501 line too long (88 > 79 characters)
-./backend/server.py:845:80: E501 line too long (87 > 79 characters)
-./backend/server.py:847:1: W293 blank line contains whitespace
-./backend/server.py:849:80: E501 line too long (82 > 79 characters)
-./backend/server.py:851:80: E501 line too long (118 > 79 characters)
-./backend/server.py:852:1: W293 blank line contains whitespace
-./backend/server.py:856:80: E501 line too long (85 > 79 characters)
-./backend/server.py:858:1: W293 blank line contains whitespace
-./backend/server.py:859:80: E501 line too long (82 > 79 characters)
-./backend/server.py:866:80: E501 line too long (115 > 79 characters)
-./backend/server.py:867:1: W293 blank line contains whitespace
-./backend/server.py:871:1: W293 blank line contains whitespace
-./backend/server.py:875:80: E501 line too long (114 > 79 characters)
-./backend/server.py:876:1: W293 blank line contains whitespace
-./backend/server.py:878:80: E501 line too long (103 > 79 characters)
-./backend/server.py:879:80: E501 line too long (87 > 79 characters)
-./backend/server.py:880:1: W293 blank line contains whitespace
-./backend/server.py:881:80: E501 line too long (85 > 79 characters)
-./backend/server.py:882:80: E501 line too long (84 > 79 characters)
-./backend/server.py:888:80: E501 line too long (120 > 79 characters)
-./backend/server.py:889:1: W293 blank line contains whitespace
-./backend/server.py:891:80: E501 line too long (89 > 79 characters)
-./backend/server.py:893:1: W293 blank line contains whitespace
-./backend/server.py:896:80: E501 line too long (109 > 79 characters)
-./backend/server.py:899:1: W293 blank line contains whitespace
-./backend/server.py:900:80: E501 line too long (90 > 79 characters)
-./backend/server.py:906:1: W293 blank line contains whitespace
-./backend/server.py:909:80: E501 line too long (84 > 79 characters)
-./backend/server.py:941:1: W293 blank line contains whitespace
-./backend/server.py:942:80: E501 line too long (90 > 79 characters)
-./backend/server.py:982:1: W293 blank line contains whitespace
-./backend/server.py:983:80: E501 line too long (92 > 79 characters)
-./backend/server.py:989:80: E501 line too long (82 > 79 characters)
-./backend/server.py:1003:80: E501 line too long (83 > 79 characters)
-./backend/server.py:1004:1: W293 blank line contains whitespace
-./backend/server.py:1007:1: W293 blank line contains whitespace
-./backend/server.py:1015:1: W293 blank line contains whitespace
-./backend/server.py:1026:80: E501 line too long (85 > 79 characters)
-./backend/server.py:1041:1: W293 blank line contains whitespace
-./backend/server.py:1044:1: W293 blank line contains whitespace
-./backend/server.py:1046:80: E501 line too long (95 > 79 characters)
-./backend/server.py:1051:1: W293 blank line contains whitespace
-./backend/server.py:1055:80: E501 line too long (105 > 79 characters)
-./backend/server.py:1056:80: E501 line too long (95 > 79 characters)
-./backend/server.py:1057:80: E501 line too long (101 > 79 characters)
-./backend/server.py:1058:80: E501 line too long (113 > 79 characters)
-./backend/server.py:1059:80: E501 line too long (113 > 79 characters)
-./backend/server.py:1060:80: E501 line too long (113 > 79 characters)
-./backend/server.py:1061:80: E501 line too long (101 > 79 characters)
-./backend/server.py:1062:1: W293 blank line contains whitespace
-./backend/server.py:1065:80: E501 line too long (111 > 79 characters)
-./backend/server.py:1072:1: W293 blank line contains whitespace
-./backend/server.py:1085:1: W293 blank line contains whitespace
-./backend/server.py:1087:80: E501 line too long (116 > 79 characters)
-./backend/server.py:1088:80: E501 line too long (82 > 79 characters)
-./backend/server.py:1089:1: W293 blank line contains whitespace
-./backend/server.py:1094:80: E501 line too long (116 > 79 characters)
-./backend/server.py:1098:80: E501 line too long (123 > 79 characters)
-./backend/server.py:1101:1: W293 blank line contains whitespace
-./backend/workflow_models.py:119:80: E501 line too long (84 > 79 characters)
-./backend/workflow_models.py:137:1: W293 blank line contains whitespace
-./backend/workflow_models.py:142:1: W293 blank line contains whitespace
-./backend/workflow_models.py:147:1: W293 blank line contains whitespace
-./backend/workflow_models.py:150:1: W293 blank line contains whitespace
-./backend/workflow_models.py:153:1: W293 blank line contains whitespace
-./backend/workflow_models.py:156:1: W293 blank line contains whitespace
-./backend/workflow_models.py:158:80: E501 line too long (84 > 79 characters)
-./backend/workflow_models.py:159:80: E501 line too long (84 > 79 characters)
-./backend/workflow_models.py:169:1: W293 blank line contains whitespace
-./backend/workflow_models.py:172:80: E501 line too long (90 > 79 characters)
-./backend/workflow_models.py:198:1: W293 blank line contains whitespace
-./backend/workflow_models.py:233:80: E501 line too long (84 > 79 characters)
-./backend/workflow_models.py:234:80: E501 line too long (84 > 79 characters)
-./backend/workflow_models.py:236:1: W293 blank line contains whitespace
-./backend/workflow_models.py:251:80: E501 line too long (84 > 79 characters)
-./backend/workflow_models.py:277:80: E501 line too long (84 > 79 characters)
-./backend/workflow_models.py:278:80: E501 line too long (84 > 79 characters)
-./backend/workflow_models.py:290:80: E501 line too long (85 > 79 characters)
-./backend/workflow_models.py:333:80: E501 line too long (85 > 79 characters)
-./backend/workflow_models.py:357:80: E501 line too long (85 > 79 characters)
-./backend/workflow_routes.py:6:1: F401 'fastapi.Query' imported but unused
-./backend/workflow_routes.py:7:1: F401 'motor.motor_asyncio.AsyncIOMotorClient' imported but unused
-./backend/workflow_routes.py:8:1: F401 'os' imported but unused
-./backend/workflow_routes.py:13:1: F401 'workflow_models.NodeType' imported but unused
-./backend/workflow_routes.py:13:1: F401 'workflow_models.TaskStatus' imported but unused
-./backend/workflow_routes.py:13:1: F401 'workflow_models.BlockerCategory' imported but unused
-./backend/workflow_routes.py:13:1: F401 'workflow_models.CanvasState' imported but unused
-./backend/workflow_routes.py:13:1: F401 'workflow_models.LayerContext' imported but unused
-./backend/workflow_routes.py:13:1: F401 'workflow_models.NodePosition' imported but unused
-./backend/workflow_routes.py:13:1: F401 'workflow_models.WorkflowNodeData' imported but unused
-./backend/workflow_routes.py:13:1: F401 'workflow_models.ClickUpTaskSync' imported but unused
-./backend/workflow_routes.py:36:1: E302 expected 2 blank lines, found 1
-./backend/workflow_routes.py:57:80: E501 line too long (109 > 79 characters)
-./backend/workflow_routes.py:64:80: E501 line too long (110 > 79 characters)
-./backend/workflow_routes.py:82:80: E501 line too long (96 > 79 characters)
-./backend/workflow_routes.py:83:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:91:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:97:80: E501 line too long (83 > 79 characters)
-./backend/workflow_routes.py:99:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:103:80: E501 line too long (89 > 79 characters)
-./backend/workflow_routes.py:105:80: E501 line too long (83 > 79 characters)
-./backend/workflow_routes.py:107:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:111:80: E501 line too long (92 > 79 characters)
-./backend/workflow_routes.py:115:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:130:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:131:80: E501 line too long (98 > 79 characters)
-./backend/workflow_routes.py:158:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:162:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:163:80: E501 line too long (80 > 79 characters)
-./backend/workflow_routes.py:173:80: E501 line too long (92 > 79 characters)
-./backend/workflow_routes.py:182:80: E501 line too long (89 > 79 characters)
-./backend/workflow_routes.py:194:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:199:80: E501 line too long (84 > 79 characters)
-./backend/workflow_routes.py:206:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:212:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:218:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:222:80: E501 line too long (93 > 79 characters)
-./backend/workflow_routes.py:223:80: E501 line too long (87 > 79 characters)
-./backend/workflow_routes.py:225:80: E501 line too long (86 > 79 characters)
-./backend/workflow_routes.py:228:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:231:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:232:80: E501 line too long (87 > 79 characters)
-./backend/workflow_routes.py:233:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:239:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:248:80: E501 line too long (86 > 79 characters)
-./backend/workflow_routes.py:251:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:257:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:260:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:266:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:280:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:289:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:295:80: E501 line too long (89 > 79 characters)
-./backend/workflow_routes.py:304:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:309:80: E501 line too long (84 > 79 characters)
-./backend/workflow_routes.py:317:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:323:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:330:80: E501 line too long (86 > 79 characters)
-./backend/workflow_routes.py:333:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:339:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:350:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:364:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:378:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:387:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:388:80: E501 line too long (97 > 79 characters)
-./backend/workflow_routes.py:394:80: E501 line too long (87 > 79 characters)
-./backend/workflow_routes.py:397:80: E501 line too long (91 > 79 characters)
-./backend/workflow_routes.py:398:80: E501 line too long (91 > 79 characters)
-./backend/workflow_routes.py:400:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:403:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:409:80: E501 line too long (85 > 79 characters)
-./backend/workflow_routes.py:410:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:418:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:420:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:434:80: E501 line too long (83 > 79 characters)
-./backend/workflow_routes.py:442:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:446:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:452:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:461:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:479:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:481:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:485:45: W291 trailing whitespace
-./backend/workflow_routes.py:486:21: E128 continuation line under-indented for visual indent
-./backend/workflow_routes.py:487:21: E128 continuation line under-indented for visual indent
-./backend/workflow_routes.py:488:21: E128 continuation line under-indented for visual indent
-./backend/workflow_routes.py:488:80: E501 line too long (82 > 79 characters)
-./backend/workflow_routes.py:489:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:493:80: E501 line too long (81 > 79 characters)
-./backend/workflow_routes.py:528:80: E501 line too long (90 > 79 characters)
-./backend/workflow_routes.py:534:80: E501 line too long (88 > 79 characters)
-./backend/workflow_routes.py:540:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:541:80: E501 line too long (81 > 79 characters)
-./backend/workflow_routes.py:548:80: E501 line too long (94 > 79 characters)
-./backend/workflow_routes.py:550:80: E501 line too long (80 > 79 characters)
-./backend/workflow_routes.py:562:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:568:80: E501 line too long (93 > 79 characters)
-./backend/workflow_routes.py:593:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:625:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:644:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:645:80: E501 line too long (91 > 79 characters)
-./backend/workflow_routes.py:646:80: E501 line too long (91 > 79 characters)
-./backend/workflow_routes.py:647:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:653:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:663:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:667:80: E501 line too long (81 > 79 characters)
-./backend/workflow_routes.py:670:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:672:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:682:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:690:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:699:80: E501 line too long (80 > 79 characters)
-./backend/workflow_routes.py:700:80: E501 line too long (80 > 79 characters)
-./backend/workflow_routes.py:702:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:704:80: E501 line too long (92 > 79 characters)
-./backend/workflow_routes.py:707:80: E501 line too long (92 > 79 characters)
-./backend/workflow_routes.py:709:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:715:1: W293 blank line contains whitespace
-./backend/workflow_routes.py:721:1: W293 blank line contains whitespace
-./backend/workflow_seed_data.py:16:80: E501 line too long (83 > 79 characters)
-./backend/workflow_seed_data.py:18:80: E501 line too long (83 > 79 characters)
-./backend/workflow_seed_data.py:19:1: W293 blank line contains whitespace
-./backend/workflow_seed_data.py:21:80: E501 line too long (92 > 79 characters)
-./backend/workflow_seed_data.py:22:80: E501 line too long (88 > 79 characters)
-./backend/workflow_seed_data.py:23:80: E501 line too long (94 > 79 characters)
-./backend/workflow_seed_data.py:24:80: E501 line too long (90 > 79 characters)
-./backend/workflow_seed_data.py:25:1: W293 blank line contains whitespace
-./backend/workflow_seed_data.py:28:80: E501 line too long (82 > 79 characters)
-./backend/workflow_seed_data.py:29:80: E501 line too long (91 > 79 characters)
-./backend/workflow_seed_data.py:30:1: W293 blank line contains whitespace
-./backend/workflow_seed_data.py:32:80: E501 line too long (85 > 79 characters)
-./backend/workflow_seed_data.py:33:80: E501 line too long (91 > 79 characters)
-./backend/workflow_seed_data.py:34:1: W293 blank line contains whitespace
-./backend/workflow_seed_data.py:36:80: E501 line too long (87 > 79 characters)
-./backend/workflow_seed_data.py:37:80: E501 line too long (83 > 79 characters)
-./backend/workflow_seed_data.py:38:80: E501 line too long (93 > 79 characters)
-./backend/workflow_seed_data.py:39:80: E501 line too long (81 > 79 characters)
-./backend/workflow_seed_data.py:40:1: W293 blank line contains whitespace
-./backend/workflow_seed_data.py:42:80: E501 line too long (90 > 79 characters)
-./backend/workflow_seed_data.py:43:80: E501 line too long (90 > 79 characters)
-./backend/workflow_seed_data.py:44:80: E501 line too long (86 > 79 characters)
-./backend/workflow_seed_data.py:45:80: E501 line too long (88 > 79 characters)
-./backend/workflow_seed_data.py:46:1: W293 blank line contains whitespace
-./backend/workflow_seed_data.py:48:80: E501 line too long (83 > 79 characters)
-./backend/workflow_seed_data.py:49:80: E501 line too long (83 > 79 characters)
-./backend/workflow_seed_data.py:50:80: E501 line too long (89 > 79 characters)
-./backend/workflow_seed_data.py:51:80: E501 line too long (84 > 79 characters)
-./backend/workflow_seed_data.py:52:1: W293 blank line contains whitespace
-./backend/workflow_seed_data.py:56:80: E501 line too long (91 > 79 characters)
-./backend/workflow_seed_data.py:64:80: E501 line too long (166 > 79 characters)
-./backend/workflow_seed_data.py:65:80: E501 line too long (160 > 79 characters)
-./backend/workflow_seed_data.py:66:80: E501 line too long (168 > 79 characters)
-./backend/workflow_seed_data.py:67:1: W293 blank line contains whitespace
-./backend/workflow_seed_data.py:69:80: E501 line too long (171 > 79 characters)
-./backend/workflow_seed_data.py:70:80: E501 line too long (167 > 79 characters)
-./backend/workflow_seed_data.py:71:80: E501 line too long (177 > 79 characters)
-./backend/workflow_seed_data.py:72:1: W293 blank line contains whitespace
-./backend/workflow_seed_data.py:74:80: E501 line too long (176 > 79 characters)
-./backend/workflow_seed_data.py:75:80: E501 line too long (177 > 79 characters)
-./backend/workflow_seed_data.py:76:80: E501 line too long (177 > 79 characters)
-./backend/workflow_seed_data.py:77:1: W293 blank line contains whitespace
-./backend/workflow_seed_data.py:79:80: E501 line too long (170 > 79 characters)
-./backend/workflow_seed_data.py:80:80: E501 line too long (164 > 79 characters)
-./backend/workflow_seed_data.py:81:1: W293 blank line contains whitespace
-./backend/workflow_seed_data.py:83:80: E501 line too long (168 > 79 characters)
-./backend/workflow_seed_data.py:84:80: E501 line too long (174 > 79 characters)
-./backend/workflow_seed_data.py:85:80: E501 line too long (174 > 79 characters)
-./backend/workflow_seed_data.py:86:1: W293 blank line contains whitespace
-./backend/workflow_seed_data.py:88:80: E501 line too long (168 > 79 characters)
-./backend/workflow_seed_data.py:89:80: E501 line too long (183 > 79 characters)
-./backend/workflow_seed_data.py:90:80: E501 line too long (174 > 79 characters)
-./backend/workflow_seed_data.py:100:80: E501 line too long (98 > 79 characters)
-./backend/workflow_seed_data.py:115:80: E501 line too long (85 > 79 characters)
-./backend/workflow_seed_data.py:118:80: E501 line too long (80 > 79 characters)
-./backend/workflow_seed_data.py:145:80: E501 line too long (81 > 79 characters)
-./backend/workflow_seed_data.py:225:80: E501 line too long (95 > 79 characters)
-./backend/workflow_seed_data.py:230:80: E501 line too long (178 > 79 characters)
-./backend/workflow_seed_data.py:231:80: E501 line too long (191 > 79 characters)
-./backend/workflow_seed_data.py:232:80: E501 line too long (169 > 79 characters)
-./backend/workflow_seed_data.py:233:80: E501 line too long (181 > 79 characters)
-./backend/workflow_seed_data.py:234:80: E501 line too long (185 > 79 characters)
-./backend/workflow_seed_data.py:250:80: E501 line too long (182 > 79 characters)
-./backend/workflow_seed_data.py:251:80: E501 line too long (184 > 79 characters)
-./backend/workflow_seed_data.py:252:80: E501 line too long (182 > 79 characters)
-./backend/workflow_seed_data.py:253:80: E501 line too long (180 > 79 characters)
-./backend/workflow_seed_data.py:254:80: E501 line too long (179 > 79 characters)
-./backend/workflow_seed_data.py:255:80: E501 line too long (189 > 79 characters)
-./backend/workflow_seed_data.py:272:80: E501 line too long (180 > 79 characters)
-./backend/workflow_seed_data.py:273:80: E501 line too long (176 > 79 characters)
-./backend/workflow_seed_data.py:274:80: E501 line too long (160 > 79 characters)
-./backend/workflow_seed_data.py:275:80: E501 line too long (180 > 79 characters)
-./backend/workflow_seed_data.py:276:80: E501 line too long (181 > 79 characters)
-./backend/workflow_seed_data.py:277:80: E501 line too long (176 > 79 characters)
-./backend/workflow_seed_data.py:278:80: E501 line too long (175 > 79 characters)
-./backend/workflow_seed_data.py:296:80: E501 line too long (184 > 79 characters)
-./backend/workflow_seed_data.py:297:80: E501 line too long (173 > 79 characters)
-./backend/workflow_seed_data.py:298:80: E501 line too long (170 > 79 characters)
-./backend/workflow_seed_data.py:299:80: E501 line too long (165 > 79 characters)
-./backend/workflow_seed_data.py:300:80: E501 line too long (170 > 79 characters)
-./backend/workflow_seed_data.py:301:80: E501 line too long (161 > 79 characters)
-./backend/workflow_seed_data.py:302:80: E501 line too long (182 > 79 characters)
-./frontend/node_modules/flatted/python/flatted.py:19:1: E302 expected 2 blank lines, found 1
-./frontend/node_modules/flatted/python/flatted.py:24:1: E302 expected 2 blank lines, found 1
-./frontend/node_modules/flatted/python/flatted.py:37:1: E302 expected 2 blank lines, found 1
-./frontend/node_modules/flatted/python/flatted.py:43:1: E302 expected 2 blank lines, found 1
-./frontend/node_modules/flatted/python/flatted.py:46:1: E302 expected 2 blank lines, found 1
-./frontend/node_modules/flatted/python/flatted.py:49:1: E302 expected 2 blank lines, found 1
-./frontend/node_modules/flatted/python/flatted.py:52:1: E302 expected 2 blank lines, found 1
-./frontend/node_modules/flatted/python/flatted.py:59:1: E302 expected 2 blank lines, found 1
-./frontend/node_modules/flatted/python/flatted.py:67:1: E302 expected 2 blank lines, found 1
-./frontend/node_modules/flatted/python/flatted.py:77:1: E302 expected 2 blank lines, found 1
-./frontend/node_modules/flatted/python/flatted.py:81:9: E722 do not use bare 'except'
-./frontend/node_modules/flatted/python/flatted.py:86:1: E302 expected 2 blank lines, found 1
-./frontend/node_modules/flatted/python/flatted.py:101:1: E302 expected 2 blank lines, found 1
-./frontend/node_modules/flatted/python/flatted.py:117:1: E302 expected 2 blank lines, found 1 and  linting errors in both backend and frontend code.
+- **Recently completed:**
+    - **Labyrinth Builder Redesign:** Re-implemented the Labyrinth Builder UI () to match the user's detailed specification, including a multi-section preview. Added supporting backend endpoints (, , ). (DONE)
+    - **Global Search:** Implemented a global search feature () in the main header () to search across all data types. (DONE)
+    - **Saved Workflows List:** Added a sidebar to the  to list and load previously rendered workflows. (DONE)
+    - **Delete Functionality:** Added delete capabilities and confirmation dialogs for Workflows (), SOPs, Playbooks, Contracts, and Talents (). (DONE)
+    - **Team & Analytics Pages:** Seeded the database with team member data and verified that both the Team and Analytics pages are populated and functional. (DONE)
+    - **Data Unification & AI Integration:** Completed the unification of all database collections and updated the AI generation routes () to save content to the unified DB. (DONE)
+    - **Deployment & Data Seeding:** Fixed deployment issues by correcting API URLs and resolved cascading data-loading errors by seeding comprehensive demo data and relaxing Pydantic validation on the  endpoint. (DONE)
+    - **Bug Fix:** Fixed the Generate Workflow button error (Invalid selection format) by updating  to handle the new request format. (DONE)
 
 **Earlier issues found/mentioned but not fixed**
-*   None. The previously mentioned linting issues were resolved. The page refresh issue is documented above in the Pending/In progress Issue list.
+*   **Issue 1: Inconsistent Data Display for Contracts**
+    *   **Debug checklist:**
+        1.  Inspect the  component in .
+        2.  Compare the data fields it expects (e.g., , ) with the actual fields present in the  collection in MongoDB.
+        3.  Update the  component to gracefully handle missing or differently named fields, or run a one-time script to normalize the data in the database.
+    *   **Why to solve this issue and what will be achieved with this?** To improve UI consistency and user experience by ensuring all data is displayed correctly.
+    *   **Should Test frontend/backend/both after fix:** Frontend
+    *   **Is recurring issue?** N
+
+**Known issue recurrence from previous fork**
+*   None.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-*   **Backend:** FastAPI, MongoDB (asynchronous with ).
-*   **Frontend:** React, TailwindCSS, ShadCN UI components.
-*   **Canvas:**  (React Flow) for the node-based editor.
-*   **State Management:**  for client-side state in the  component.
+*   **Frontend:** React, Tailwind CSS, , 
+*   **Backend:** FastAPI, Pydantic
+*   **Database:** MongoDB
+*   **AI Integration:**  library for .
+*   **Key Pattern:** A data-driven workflow generator. A significant change was removing strict Pydantic  validation from several  endpoints (, , ) in  to prevent the app from crashing due to data inconsistencies between old and new data schemas.
 
 **key DB schema**
-*   **Labyrinth:** , , , , , , .
-*   **WorkflowViz:** , , , , , , .
+*   **Unified Collections:**
+    *   : Standard Operating Procedures
+    *   : Deliverable Templates
+    *   : Contracts
+    *   : Playbooks
+    *   : Team Members
+    *   : Key Performance Indicators
+*   **Workflow Collections:**
+    *   : Metadata for each rendered workflow canvas.
+    *   : Nodes for the  canvas, linked by .
+
+**changes in tech stack**
+*   No new changes in this session.  was introduced previously.
 
 **All files of reference**
-*   : **Primary file for current and upcoming work.** Contains all UI and logic for the canvas feature.
-*   : Backend API endpoints supporting the WorkflowViz feature.
-*   : Data definitions for the WorkflowViz feature.
-*   : The main application shell where the WorkflowViz component is integrated.
-*   : The main FastAPI server file.
+*   : Completely overwritten to match the user's new design specification.
+*   : Heavily modified to include the  component and delete functionality for SOPs, Contracts, Playbooks, and Talents.
+*   : Updated to include delete functionality for workflows and corrected API endpoint paths.
+*   : Overwritten to add the saved workflows sidebar.
+*   : A new file for the global search functionality.
+*   : Heavily modified to add new endpoints for the redesigned builder and to handle multiple request formats for rendering workflows.
+*   : Modified to remove  validation from , , and  to handle schema inconsistencies.
+*   : Updated to save generated content to the unified database collections.
 
-**Last 10 User Messages and any pending HUMAN messages**
-1.  **User:**  (COMPLETED by agent code, PENDING VISUAL VERIFICATION)
-2.  **User:** (Reported a compile error related to an ESLint rule) (RESOLVED)
-3.  **User:**  (ACKNOWLEDGED and IMPLEMENTED)
-4.  **User:** (Asked if WorkflowViz was a replacement for Labyrinth) (ANSWERED by agent, CLARIFIED by user)
-5.  **User:** (Provided the full PRD for the WorkflowViz feature) (IN PROGRESS)
-6.  **User:** (Responded to agent's clarifying questions about Labyrinth data population) (COMPLETED)
+**Areas that need refactoring**:
+*   The data seeding logic is scattered across multiple  calls and previous scripts. It should be consolidated into a single, idempotent seeding script for easier management.
+*   The removal of  validation on several endpoints is a temporary fix. A long-term solution would involve a data migration to unify the schemas, allowing for stricter validation to be re-enabled.
 
-**Project Health Check:**
-*   **Broken:** No broken functionality.
-*   **Mocked:** All initial data for both Labyrinth OS and WorkflowViz (team members, templates) is mocked via seed scripts (, ).
+**key api endpoints**
+*   : Generates a visual workflow. Handles multiple payload formats.
+*   , , : New endpoints for populating the redesigned builder dropdowns.
+*   : New endpoint to fetch the preview list of templates for the builder.
+*   : New endpoint for the global search feature.
+*   , , , etc.: Endpoints for deleting items.
+*   : The **correct** endpoint for fetching the list of saved workflows.
 
 **Critical Info for New Agent**
-*   The immediate priority is to **verify the Milanote-style node redesign**. Restart the frontend and use the screenshot tool to confirm the visual changes in  are correct.
-*   The project consists of two major features. The **Labyrinth OS** is mostly complete for now. The current and future focus is on building out the **WorkflowViz** feature according to its detailed PRD.
-*   After verifying the UI, the next major task is to implement the **3-layer hierarchical navigation** (Strategic → Tactical → Execution) for the WorkflowViz canvas. This is a critical requirement from the user's PRD.
-*   Refer to the WorkflowViz PRD (present in the message history) for all requirements related to that feature. Do not guess functionality.</analysis>
+*   **Data Unification is Key:** The One Labyrinth concept is paramount. All features must use the unified collections (, , etc.). The old  collections are deprecated.
+*   **API Endpoint for Workflows:** The correct path for fetching and manipulating rendered workflows is , not . This was a recurring bug; double-check all frontend calls.
+*   **Pragmatic Validation:** Strict Pydantic  validation has been *intentionally removed* from the list endpoints for SOPs, Contracts, and KPIs in . This was a necessary tradeoff to prevent crashes from inconsistent data schemas. Do not re-add it without first cleaning and migrating the database data.
+*   **Render Endpoint Complexity:** The  endpoint in  is complex and handles two different request body formats. Be cautious when modifying it.
+
+**documents and test reports created in this job**
+*   
+*    (updated multiple times)
+
+**Last 10 User Messages and any pending HUMAN messages**
+1.  **User:** Reports the Generate Workflow button is broken, showing an Invalid selection format error. (This was the last task the agent fixed).
+2.  **User:** Stated that after a successful deployment fix, the application had no demo data (SOPs, Playbooks) for testing.
+3.  **User:** Reported that the deployed version of the application was not reflecting the latest implemented features.
+4.  **User:** Requested the ability to see saved workflow templates and a global search function to find items across the app.
+5.  **User:** Provided a detailed textual and visual specification for a complete redesign of the Labyrinth Builder (Gate Console).
+6.  **User:** Requested the ability to delete workflows and other items, and asked the agent to flesh out the Team and Analytics pages.
+7.  **User:** Approved the agent's plan to proceed with upcoming tasks after the AI integration was completed.
+8.  **User:** Approved the agent's plan to proceed after the initial data unification was completed.
+9.  **Agent:** (Message asking for verification, no user response needed).
+10. **User:** Provided the critical directive for data unification: Its one labyrinth.
+
+**Project Health Check:**
+*   **Broken:** None.
+*   **Mocked:** None.
+*   **Fragile:** The data layer is functional but relies on loosened backend validation ( removed from several endpoints) to accommodate schema inconsistencies. This means the frontend must be robust against receiving objects with potentially missing fields. Minor data quality issues (e.g., empty names for some contracts) are visible in the UI.
+
+**3rd Party Integrations**
+*   **OpenAI GPT-4o-mini** — uses Emergent LLM Key via the  library for AI content generation.
+
+**Testing status**
+*   **Testing agent used after significant changes:** YES (Backend testing agent was used to verify data unification and AI integration).
+*   **Troubleshoot agent used after agent stuck in loop:** NO
+*   **Test files created:** None
+*   **Known regressions:** None.
+
+**Credentials to test flow:**
+*   The  is available in  for AI features. No other credentials are required for testing.
+
+**What agent forgot to execute**
+*   The agent has been thorough and addressed all user requests, including bug fixes and new features. The Optimization Plan feature remains unimplemented, but this was an intentional deferral based on the original user request and is correctly tracked as a future task.</analysis>
