@@ -508,3 +508,25 @@ agent_communication:
 - All API calls completed successfully with 200 OK responses
 - Backend service healthy and stable throughout testing
 
+
+## Bug Fixes Applied - 2026-01-08
+
+### Issue Fixed: Workflow not loading on Canvas when selected from sidebar
+**Root Cause**: Multiple issues identified and fixed:
+1. **API Path Duplication**: The `API` constant in `WorkflowViz.js` was set to `${BACKEND_URL}/api/workflowviz` but many axios calls also included `/workflowviz/` in the path, causing double path like `/api/workflowviz/workflowviz/workflows`
+2. **Missing Props**: `WorkflowViz` component was not accepting `initialWorkflowId` and `onWorkflowChange` props passed from `WorkflowsPage`
+3. **Promise.all Failure**: The data loading used `Promise.all` which would fail entirely if ANY API call failed. Missing routes (`/api/team`, `/api/software`, `/api/action-templates`) caused the entire data loading to fail.
+
+**Fixes Applied**:
+- Changed `const API = ${BACKEND_URL}/api/workflowviz` to `const API = ${BACKEND_URL}/api` in WorkflowViz.js
+- Added `initialWorkflowId` and `onWorkflowChange` props to `WorkflowViz` component
+- Added useEffect to handle `initialWorkflowId` prop changes from parent component
+- Changed data loading from `Promise.all` to individual try-catch blocks to make it more resilient
+- Updated API endpoints to use existing routes (`/api/talents` instead of `/api/team`, `/api/playbooks` instead of `/api/action-templates`)
+- Added callback to `refreshWorkflows()` to notify parent component of changes
+
+**Files Modified**:
+- `/app/frontend/src/WorkflowViz.js`
+
+**Testing Status**: Verified via screenshot - workflow now loads correctly on canvas when selected from sidebar
+
