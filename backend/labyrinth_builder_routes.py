@@ -464,9 +464,9 @@ async def render_workflow(request: WorkflowRenderRequest):
     """
     db = get_db()
     
-    # Handle new format (Gate Console)
-    if hasattr(request, 'selection') and request.selection and hasattr(request.selection, 'issue_id'):
-        sel = request.selection
+    # Handle new format (Gate Console) - check new_selection first
+    if request.new_selection:
+        sel = request.new_selection
         issue_id = sel.issue_id
         campaign_id = sel.campaign_id
         sprint_id = sel.sprint_id
