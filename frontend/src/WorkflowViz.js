@@ -821,14 +821,14 @@ const WorkflowCanvas = ({
     const loadData = async () => {
       if (!workflowId) return;
       try {
-        let nodeQuery = `${API}/workflows/${workflowId}/nodes?layer=${layer}`;
+        let nodeQuery = `${API}/workflowviz/workflows/${workflowId}/nodes?layer=${layer}`;
         if (parentNodeId) {
           nodeQuery += `&parent_node_id=${parentNodeId}`;
         }
         
         const [nodesRes, edgesRes] = await Promise.all([
           axios.get(nodeQuery),
-          axios.get(`${API}/workflows/${workflowId}/edges?layer=${layer}`)
+          axios.get(`${API}/workflowviz/workflows/${workflowId}/edges?layer=${layer}`)
         ]);
         
         // Filter edges for current layer context
@@ -882,7 +882,7 @@ const WorkflowCanvas = ({
     setSaveStatus('saving');
     saveTimeoutRef.current = setTimeout(async () => {
       try {
-        await axios.post(`${API}/workflows/${workflowId}/auto-save`, {
+        await axios.post(`${API}/workflowviz/workflows/${workflowId}/auto-save`, {
           nodes: nodes.map(n => ({ ...n, workflow_id: workflowId, layer })),
           edges: edges.map(e => ({ ...e, workflow_id: workflowId, layer })),
         });
@@ -1030,7 +1030,7 @@ const WorkflowCanvas = ({
     };
 
     try {
-      const response = await axios.post(`${API}/workflows/${workflowId}/nodes`, {
+      const response = await axios.post(`${API}/workflowviz/workflows/${workflowId}/nodes`, {
         type: 'custom',
         position,
         data: nodeData,
@@ -1129,7 +1129,7 @@ const WorkflowCanvas = ({
 
     // Save all nodes
     for (const node of nodesToAdd) {
-      await axios.post(`${API}/workflows/${workflowId}/nodes`, {
+      await axios.post(`${API}/workflowviz/workflows/${workflowId}/nodes`, {
         type: 'custom',
         position: node.position,
         data: node.data,
@@ -1140,7 +1140,7 @@ const WorkflowCanvas = ({
 
     // Save all edges
     for (const edge of edgesToAdd) {
-      await axios.post(`${API}/workflows/${workflowId}/edges`, {
+      await axios.post(`${API}/workflowviz/workflows/${workflowId}/edges`, {
         source: edge.source,
         target: edge.target,
         type: edge.type,
@@ -1160,7 +1160,7 @@ const WorkflowCanvas = ({
     pushHistoryState();
     
     try {
-      await axios.delete(`${API}/workflows/${workflowId}/nodes/${selectedNode.id}`);
+      await axios.delete(`${API}/workflowviz/workflows/${workflowId}/nodes/${selectedNode.id}`);
       setNodes((nds) => nds.filter(n => n.id !== selectedNode.id));
       setEdges((eds) => eds.filter(e => e.source !== selectedNode.id && e.target !== selectedNode.id));
       setSelectedNode(null);
@@ -1177,7 +1177,7 @@ const WorkflowCanvas = ({
     
     try {
       const updatedData = { ...selectedNode.data, ...updates };
-      await axios.put(`${API}/workflows/${workflowId}/nodes/${selectedNode.id}`, {
+      await axios.put(`${API}/workflowviz/workflows/${workflowId}/nodes/${selectedNode.id}`, {
         ...selectedNode,
         data: updatedData,
       });
@@ -1811,7 +1811,7 @@ const WorkflowViz = () => {
       setLoading(true);
       try {
         const [workflowsRes, teamRes, softwareRes, templatesRes, actionRes] = await Promise.all([
-          axios.get(`${API}/workflows`),
+          axios.get(`${API}/workflowviz/workflows`),
           axios.get(`${API}/team`),
           axios.get(`${API}/software`),
           axios.get(`${API}/templates`),
@@ -1843,7 +1843,7 @@ const WorkflowViz = () => {
   const createWorkflow = async () => {
     if (!newWorkflowName.trim()) return;
     try {
-      const response = await axios.post(`${API}/workflows`, {
+      const response = await axios.post(`${API}/workflowviz/workflows`, {
         name: newWorkflowName,
         description: '',
         access_level: 'PUBLIC',
@@ -1916,7 +1916,7 @@ const WorkflowViz = () => {
   const exportWorkflow = async () => {
     if (!selectedWorkflow) return;
     try {
-      const response = await axios.get(`${API}/workflows/${selectedWorkflow.id}/export`);
+      const response = await axios.get(`${API}/workflowviz/workflows/${selectedWorkflow.id}/export`);
       const blob = new Blob([JSON.stringify(response.data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -1931,7 +1931,7 @@ const WorkflowViz = () => {
 
   const refreshWorkflows = async () => {
     try {
-      const response = await axios.get(`${API}/workflows`);
+      const response = await axios.get(`${API}/workflowviz/workflows`);
       setWorkflows(response.data);
     } catch (error) {
       console.error('Error refreshing workflows:', error);
@@ -1944,7 +1944,7 @@ const WorkflowViz = () => {
     
     setDeleting(true);
     try {
-      await axios.delete(`${API}/workflows/${workflowToDelete.id}`);
+      await axios.delete(`${API}/workflowviz/workflows/${workflowToDelete.id}`);
       
       // Refresh the list
       await refreshWorkflows();
@@ -1977,7 +1977,7 @@ const WorkflowViz = () => {
     if (result?.success && result?.workflow_id) {
       await refreshWorkflows();
       // Select the new workflow
-      const newWorkflows = await axios.get(`${API}/workflows`);
+      const newWorkflows = await axios.get(`${API}/workflowviz/workflows`);
       const newWorkflow = newWorkflows.data.find(w => w.id === result.workflow_id);
       if (newWorkflow) {
         selectWorkflow(newWorkflow);
