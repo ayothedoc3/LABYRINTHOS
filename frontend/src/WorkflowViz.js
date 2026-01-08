@@ -1823,18 +1823,28 @@ const WorkflowViz = ({ initialWorkflowId, onWorkflowChange }) => {
     const loadData = async () => {
       setLoading(true);
       try {
-        const [workflowsRes, teamRes, softwareRes, templatesRes, actionRes] = await Promise.all([
-          axios.get(`${API}/workflowviz/workflows`),
-          axios.get(`${API}/team`),
-          axios.get(`${API}/software`),
-          axios.get(`${API}/templates`),
-          axios.get(`${API}/action-templates`),
-        ]);
+        // Load workflows first (critical)
+        const workflowsRes = await axios.get(`${API}/workflowviz/workflows`);
         setWorkflows(workflowsRes.data);
-        setTeamMembers(teamRes.data);
-        setSoftware(softwareRes.data);
-        setTemplates(templatesRes.data);
-        setActionTemplates(actionRes.data);
+        
+        // Load other data with individual error handling (non-critical)
+        try {
+          const teamRes = await axios.get(`${API}/talents`);
+          setTeamMembers(teamRes.data);
+        } catch (e) { console.log('Team data not available'); }
+        
+        try {
+          const templatesRes = await axios.get(`${API}/templates`);
+          setTemplates(templatesRes.data);
+        } catch (e) { console.log('Templates data not available'); }
+        
+        try {
+          const actionRes = await axios.get(`${API}/playbooks`);
+          setActionTemplates(actionRes.data);
+        } catch (e) { console.log('Action templates not available'); }
+        
+        // Software is optional, set empty array
+        setSoftware([]);
 
         // Restore selected workflow from URL query parameter or initialWorkflowId prop
         const urlParams = new URLSearchParams(window.location.search);
@@ -1846,7 +1856,7 @@ const WorkflowViz = ({ initialWorkflowId, onWorkflowChange }) => {
           }
         }
       } catch (error) {
-        console.error('Error loading data:', error);
+        console.error('Error loading workflows:', error);
       }
       setLoading(false);
     };
