@@ -517,15 +517,15 @@ async def delete_contract(contract_id: str):
 
 # ==================== KPI ENDPOINTS ====================
 
-@api_router.get("/kpis", response_model=List[KPI])
+@api_router.get("/kpis")
 async def get_kpis_list(
-    function: Optional[FunctionType] = None,
+    function: Optional[str] = None,
     is_active: Optional[bool] = True
 ):
-    """Get all KPIs with optional filtering"""
+    """Get all KPIs with optional filtering. Returns raw data without strict validation."""
     query = {}
     if function:
-        query["function"] = function.value
+        query["function"] = function
     if is_active is not None:
         query["is_active"] = is_active
     
