@@ -51,7 +51,7 @@ import AIGenerateDialog from './AIGenerateDialog';
 import { LayerGuide, ActionHint, resetGuide, isGuideDismissed } from './components/LayerGuide';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api/workflowviz`;
+const API = `${BACKEND_URL}/api`;
 
 // ==================== MILANOTE-STYLE NODE CONFIG ====================
 
