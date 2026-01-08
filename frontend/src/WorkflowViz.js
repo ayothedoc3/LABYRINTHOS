@@ -1946,6 +1946,10 @@ const WorkflowViz = ({ initialWorkflowId, onWorkflowChange }) => {
     try {
       const response = await axios.get(`${API}/workflowviz/workflows`);
       setWorkflows(response.data);
+      // Notify parent component if callback provided
+      if (onWorkflowChange) {
+        onWorkflowChange();
+      }
     } catch (error) {
       console.error('Error refreshing workflows:', error);
     }
