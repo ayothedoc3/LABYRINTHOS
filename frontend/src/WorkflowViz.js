@@ -1773,7 +1773,7 @@ const WorkflowCanvas = ({
 
 // ==================== MAIN WORKFLOWVIZ COMPONENT ====================
 
-const WorkflowViz = () => {
+const WorkflowViz = ({ initialWorkflowId, onWorkflowChange }) => {
   const [workflows, setWorkflows] = useState([]);
   const [selectedWorkflow, setSelectedWorkflow] = useState(null);
   const [currentLayer, setCurrentLayer] = useState('STRATEGIC');
@@ -1805,6 +1805,19 @@ const WorkflowViz = () => {
     }
   }, [selectedWorkflow]);
 
+  // Handle initialWorkflowId prop changes from parent component
+  useEffect(() => {
+    if (initialWorkflowId && workflows.length > 0) {
+      const workflow = workflows.find(wf => wf.id === initialWorkflowId);
+      if (workflow && (!selectedWorkflow || selectedWorkflow.id !== initialWorkflowId)) {
+        setSelectedWorkflow(workflow);
+        setCurrentLayer('STRATEGIC');
+        setParentNodeId(null);
+        setBreadcrumb([]);
+      }
+    }
+  }, [initialWorkflowId, workflows, selectedWorkflow]);
+
   // Load initial data and restore workflow from URL
   useEffect(() => {
     const loadData = async () => {
@@ -1823,9 +1836,9 @@ const WorkflowViz = () => {
         setTemplates(templatesRes.data);
         setActionTemplates(actionRes.data);
 
-        // Restore selected workflow from URL query parameter
+        // Restore selected workflow from URL query parameter or initialWorkflowId prop
         const urlParams = new URLSearchParams(window.location.search);
-        const workflowIdFromUrl = urlParams.get('workflow');
+        const workflowIdFromUrl = urlParams.get('workflow') || initialWorkflowId;
         if (workflowIdFromUrl && workflowsRes.data.length > 0) {
           const savedWorkflow = workflowsRes.data.find(wf => wf.id === workflowIdFromUrl);
           if (savedWorkflow) {
@@ -1838,7 +1851,7 @@ const WorkflowViz = () => {
       setLoading(false);
     };
     loadData();
-  }, []);
+  }, [initialWorkflowId]);
 
   const createWorkflow = async () => {
     if (!newWorkflowName.trim()) return;
