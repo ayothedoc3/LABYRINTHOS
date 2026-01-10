@@ -509,6 +509,58 @@ async def update_task(plan_id: str, task_id: str, status: str):
     return {"message": "Task status updated", "task_id": task_id, "status": status, "task": updated_task}
 
 
+@router.patch("/plans/{plan_id}/tasks/bulk-status")
+async def bulk_update_task_status(plan_id: str, task_ids: str, status: str):
+    """Bulk update status for multiple tasks"""
+    plan_doc = await plans_collection.find_one({"id": plan_id})
+    if not plan_doc:
+        raise HTTPException(status_code=404, detail="Execution plan not found")
+    
+    task_id_list = task_ids.split(",")
+    tasks = plan_doc.get("tasks", [])
+    updated_count = 0
+    
+    for task in tasks:
+        if task.get("id") in task_id_list:
+            task["status"] = status
+            if status == "completed":
+                task["completed_date"] = datetime.now(timezone.utc).isoformat()
+            updated_count += 1
+    
+    await plans_collection.update_one(
+        {"id": plan_id},
+        {"$set": {"tasks": tasks, "updated_at": datetime.now(timezone.utc)}}
+    )
+    
+    return {"message": f"Updated {updated_count} tasks", "status": status, "updated_count": updated_count}
+
+
+@router.patch("/plans/{plan_id}/tasks/bulk-assign")
+async def bulk_assign_tasks(plan_id: str, task_ids: str, assignee_id: str, assignee_name: str = None):
+    """Bulk assign multiple tasks to a person"""
+    plan_doc = await plans_collection.find_one({"id": plan_id})
+    if not plan_doc:
+        raise HTTPException(status_code=404, detail="Execution plan not found")
+    
+    task_id_list = task_ids.split(",")
+    tasks = plan_doc.get("tasks", [])
+    updated_count = 0
+    
+    for task in tasks:
+        if task.get("id") in task_id_list:
+            task["assignee_id"] = assignee_id
+            task["assignee_name"] = assignee_name or assignee_id
+            task["assigned_at"] = datetime.now(timezone.utc).isoformat()
+            updated_count += 1
+    
+    await plans_collection.update_one(
+        {"id": plan_id},
+        {"$set": {"tasks": tasks, "updated_at": datetime.now(timezone.utc)}}
+    )
+    
+    return {"message": f"Assigned {updated_count} tasks", "assignee_id": assignee_id, "updated_count": updated_count}
+
+
 @router.patch("/plans/{plan_id}/tasks/{task_id}/assign")
 async def assign_task(plan_id: str, task_id: str, assignee_id: str, assignee_name: str = None):
     """Assign a task to a specific person/talent"""
