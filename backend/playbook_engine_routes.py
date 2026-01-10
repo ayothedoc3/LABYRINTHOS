@@ -7,6 +7,8 @@ from fastapi import APIRouter, HTTPException, BackgroundTasks
 from typing import List, Optional
 from datetime import datetime, timezone, timedelta
 import uuid
+import os
+from motor.motor_asyncio import AsyncIOMotorClient
 
 from playbook_engine_models import (
     StrategyInput, ExecutionPlan, ExecutionPlanSummary,
@@ -18,8 +20,40 @@ from playbook_engine_models import (
 
 router = APIRouter(prefix="/api/playbook-engine", tags=["Playbook Engine"])
 
-# In-memory storage
+# Database connection
+MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
+DB_NAME = os.environ.get("DB_NAME", "labyrinth_db")
+client = AsyncIOMotorClient(MONGO_URL)
+db = client[DB_NAME]
+
+# Collections
+plans_collection = db.execution_plans
+
+# Keep in-memory storage for backward compatibility
 execution_plans_db: dict[str, ExecutionPlan] = {}
+
+
+def serialize_doc(doc: dict) -> dict:
+    """Convert MongoDB document for JSON serialization"""
+    if doc is None:
+        return None
+    if "_id" in doc:
+        del doc["_id"]
+    for key, value in doc.items():
+        if isinstance(value, datetime):
+            doc[key] = value.isoformat()
+        elif isinstance(value, list):
+            doc[key] = [serialize_doc(v) if isinstance(v, dict) else v for v in value]
+        elif isinstance(value, dict):
+            doc[key] = serialize_doc(value)
+    return doc
+
+
+def plan_to_dict(plan: ExecutionPlan) -> dict:
+    """Convert ExecutionPlan model to dict for MongoDB storage"""
+    data = plan.model_dump()
+    data["_id"] = plan.id
+    return data
 
 
 # ==================== PLAN GENERATION ENGINE ====================
