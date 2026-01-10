@@ -251,6 +251,15 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
     if (!plan?.tasks) return [];
     
     return plan.tasks.filter(task => {
+      // Search filter
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        const matchesTitle = task.title?.toLowerCase().includes(query);
+        const matchesAssignee = task.assignee_name?.toLowerCase().includes(query);
+        if (!matchesTitle && !matchesAssignee) {
+          return false;
+        }
+      }
       // Status filter
       if (statusFilter !== 'all' && task.status !== statusFilter) {
         return false;
@@ -267,6 +276,15 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
   };
 
   const filteredTasks = getFilteredTasks();
+
+  // Check if any filters are active
+  const hasActiveFilters = statusFilter !== 'all' || assigneeFilter !== 'all' || searchQuery.trim() !== '';
+
+  const clearAllFilters = () => {
+    setStatusFilter('all');
+    setAssigneeFilter('all');
+    setSearchQuery('');
+  };
 
   // Get unique assignees from tasks for the filter dropdown
   const getTaskAssignees = () => {
