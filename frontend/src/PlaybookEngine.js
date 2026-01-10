@@ -215,6 +215,19 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
     setAssigning(false);
   };
 
+  const handleTaskStatusChange = async (taskId, newStatus) => {
+    try {
+      await axios.patch(
+        `${API}/api/playbook-engine/plans/${planId}/tasks/${taskId}?status=${newStatus}`
+      );
+      loadPlan();
+      onRefresh();
+    } catch (error) {
+      console.error('Error updating task status:', error);
+      alert(error.response?.data?.detail || 'Failed to update task status');
+    }
+  };
+
   const handleExportPlan = async (format = 'json') => {
     try {
       if (format === 'pdf') {
