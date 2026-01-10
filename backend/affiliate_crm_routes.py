@@ -590,10 +590,29 @@ async def pay_commission(commission_id: str, payment_reference: str):
 @router.post("/seed-demo")
 async def seed_demo_data():
     """Seed demo data for affiliate CRM"""
+    # Clear MongoDB collections
+    await affiliates_collection.delete_many({})
+    await referrals_collection.delete_many({})
+    await commissions_collection.delete_many({})
+    
+    # Clear in-memory
     affiliates_db.clear()
     referrals_db.clear()
     commissions_db.clear()
+    
+    # Seed in-memory
     seed_demo_affiliates()
+    
+    # Persist to MongoDB
+    for affiliate in affiliates_db.values():
+        await affiliates_collection.insert_one(affiliate_to_dict(affiliate))
+    
+    for referral in referrals_db.values():
+        await referrals_collection.insert_one(referral_to_dict(referral))
+    
+    for commission in commissions_db.values():
+        await commissions_collection.insert_one(commission_to_dict(commission))
+    
     return {
-        "message": f"Seeded {len(affiliates_db)} affiliates, {len(referrals_db)} referrals, {len(commissions_db)} commissions"
+        "message": f"Seeded {len(affiliates_db)} affiliates, {len(referrals_db)} referrals, {len(commissions_db)} commissions to MongoDB"
     }
