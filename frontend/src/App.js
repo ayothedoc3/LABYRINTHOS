@@ -1758,6 +1758,10 @@ function App() {
             <PlaybookEngine />
           </TabsContent>
 
+          <TabsContent value="client-portal">
+            <ClientPortal />
+          </TabsContent>
+
           <TabsContent value="library">
             <Card>
               <CardHeader>
