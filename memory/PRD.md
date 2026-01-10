@@ -60,45 +60,56 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
 
 **Sales CRM:**
 - **Backend:** `sales_crm_models.py`, `sales_crm_routes.py`
-  - Lead stages: NEW → CONTACTED → QUALIFIED → PROPOSAL_SENT → NEGOTIATION → WON/LOST/NURTURING
-  - Lead management with contacts, priorities, tags, estimated values
-  - Proposal management with line items
-  - Activity logging (calls, emails, meetings, notes)
-  - Stage transition validation
 - **Frontend:** `SalesCRM.js`
-  - Stage pipeline filters with lead counts
-  - Summary stats cards (Pipeline Value, Conversion Rate, Avg Deal Size, Proposals Sent)
-  - Lead cards with stage-colored borders, contact info, tags, probability
-  - Lead detail panel with pipeline visualization, activity log
-  - Create lead dialog
+- Features: Lead pipeline (8 stages), activity logging, create/update leads
 
 **Affiliate CRM:**
 - **Backend:** `affiliate_crm_models.py`, `affiliate_crm_routes.py`
-  - Tier system: BRONZE (10%), SILVER (15%), GOLD (20%), PLATINUM (25%)
-  - Affiliate management with referral codes/links
-  - Referral tracking with qualification and conversion
-  - Commission management with approval/payment workflow
-  - Auto tier upgrades based on conversions
 - **Frontend:** `AffiliateCRM.js`
-  - Tier filter cards with commission rates
-  - Summary stats (Active Affiliates, Referrals, Conversions, Commissions)
-  - Affiliate cards with metrics and earnings
-  - Detail panel with referral link, referrals tab, commissions tab
-  - Create affiliate dialog
+- Features: 4-tier system, referral tracking, commission management
 
 **Communication Threads:**
 - **Backend:** `communication_models.py`, `communication_routes.py`
-  - Thread types: CONTRACT, LEAD, SUPPORT, INTERNAL, CLIENT
-  - Thread statuses: OPEN, PENDING, RESOLVED, ARCHIVED
-  - Message types: TEXT, FILE, NOTE, SYSTEM, UPDATE
-  - Participant management with roles
-  - Pin/unpin functionality
 - **Frontend:** `Communications.js`
-  - Thread type filters with color coding
-  - Summary stats (Total Threads, Open, Messages, Participants)
-  - Thread list with type icons, status badges, previews
-  - Thread detail with participants, message history, send functionality
-  - Create thread dialog
+- Features: 5 thread types, messaging, participant management
+
+### External API for CRM Integration ✅ COMPLETE (Jan 2026)
+
+**Purpose:** API layer for external CRM systems to integrate with Labyrinth
+
+**Backend:** `external_api_models.py`, `external_api_routes.py`
+
+**Authentication:**
+- API Key in header: `X-API-Key: elk_f531ebe4a7d24c8fbcde123456789abc`
+
+**Endpoints:**
+- `POST /api/external/deals` - Create deal
+- `GET /api/external/deals/{id}` - Get deal
+- `PATCH /api/external/deals/{id}` - Update deal (stage, status)
+- `GET /api/external/deals/{id}/validate-stage?next_stage={stage}` - Validate stage change
+- `POST /api/external/leads` - Create lead (auto-creates communication thread)
+- `GET/PATCH /api/external/leads/{id}` - Get/update lead
+- `POST /api/external/tasks` - Create task
+- `PATCH /api/external/tasks/{id}` - Update task
+- `GET /api/external/deals/{id}/tasks` - Get deal tasks
+- `POST /api/external/partners` - Create partner/affiliate
+- `GET /api/external/partners` - List partners
+- `GET /api/external/kpis` - Get KPI metrics
+- `GET /api/external/pipeline` - Get pipeline stats
+- `POST /api/external/webhooks/register` - Register webhook
+- `GET /api/external/contracts` - List auto-created contracts
+
+**Auto-Workflows:**
+- Deal Won → Auto-create Contract (with webhook)
+- New Lead → Auto-create Communication Thread
+- Task Overdue → SLA Breach (webhook)
+- Lead Qualified → Notification (webhook)
+
+**Stage-Gate Validation:**
+- Validates task completion before allowing stage transitions
+- Returns missing requirements if blocked
+
+**Documentation:** `/app/memory/EXTERNAL_API_DOCS.md`
 
 ---
 
