@@ -601,8 +601,8 @@ const ContractLifecycle = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+      <div className="flex-center h-64">
+        <RefreshCw className="w-6 h-6 animate-spin" style={{ color: 'var(--color-primary)' }} />
       </div>
     );
   }
