@@ -28,19 +28,27 @@ const TileWrapper = ({ title, iconName, color, children }) => {
   const Icon = ICONS[iconName] || Activity;
   return (
     <Card 
-      className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02] border-l-4"
-      style={{ borderLeftColor: color }}
+      className="labyrinth-tile cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 border-l-4 bg-white"
+      style={{ 
+        borderLeftColor: color,
+        '--tile-accent-color': color 
+      }}
     >
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
-            <Icon className="w-4 h-4" style={{ color }} />
-            {title}
+            <div 
+              className="p-1.5 rounded-md"
+              style={{ backgroundColor: `${color}10` }}
+            >
+              <Icon className="w-4 h-4" style={{ color }} />
+            </div>
+            <span className="text-neutral-700">{title}</span>
           </CardTitle>
-          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          <ChevronRight className="w-4 h-4 text-neutral-400 transition-transform group-hover:translate-x-0.5" />
         </div>
       </CardHeader>
-      <CardContent>{children}</CardContent>
+      <CardContent className="pt-0">{children}</CardContent>
     </Card>
   );
 };
@@ -49,18 +57,18 @@ const TileWrapper = ({ title, iconName, color, children }) => {
 
 const StatsTile = ({ title, iconName, color, value, subtitle, trend }) => (
   <TileWrapper title={title} iconName={iconName} color={color}>
-    <div className="space-y-1">
-      <div className="text-3xl font-bold">{value}</div>
-      {subtitle && <div className="text-sm text-muted-foreground">{subtitle}</div>}
+    <div className="space-y-1 mt-2">
+      <div className="text-2xl font-bold text-neutral-900">{value}</div>
+      {subtitle && <div className="text-sm text-neutral-500">{subtitle}</div>}
       {trend && (
-        <div className="flex items-center gap-1 text-sm">
+        <div className="flex items-center gap-1 text-xs mt-2">
           {trend > 0 ? (
-            <TrendingUp className="w-3 h-3 text-green-500" />
+            <TrendingUp className="w-3 h-3" style={{ color: 'var(--status-completed)' }} />
           ) : (
-            <TrendingUp className="w-3 h-3 text-red-500 rotate-180" />
+            <TrendingUp className="w-3 h-3 rotate-180" style={{ color: 'var(--status-overdue)' }} />
           )}
-          <span className={trend > 0 ? 'text-green-600' : 'text-red-600'}>
-            {Math.abs(trend)}%
+          <span style={{ color: trend > 0 ? 'var(--status-completed)' : 'var(--status-overdue)' }}>
+            {trend > 0 ? '+' : ''}{trend}% from last period
           </span>
         </div>
       )}
