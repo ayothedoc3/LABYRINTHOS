@@ -197,46 +197,45 @@ const RoleDashboard = () => {
 
   if (roleLoading || loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+      <div className="flex-center h-64">
+        <RefreshCw className="w-6 h-6 animate-spin" style={{ color: 'var(--color-primary)' }} />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in" data-testid="role-dashboard">
       {/* Role Header */}
-      <Card className="border-none shadow-none bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-        <CardHeader>
-          <div className="flex items-center gap-4">
-            <div 
-              className="p-3 rounded-xl" 
-              style={{ backgroundColor: `${roleConfig?.color}15` }}
-            >
-              <RoleIconComponent className="w-8 h-8" style={{ color: roleConfig?.color }} />
-            </div>
-            <div>
-              <CardTitle className="text-xl">{roleConfig?.displayName} Dashboard</CardTitle>
-              <CardDescription>{roleConfig?.description}</CardDescription>
-            </div>
+      <div className="role-header">
+        <div className="flex items-center gap-4">
+          <div 
+            className="role-header__icon" 
+            style={{ backgroundColor: `${roleConfig?.color}12` }}
+          >
+            <RoleIconComponent className="w-7 h-7" style={{ color: roleConfig?.color }} />
           </div>
-        </CardHeader>
-      </Card>
+          <div>
+            <h1 className="role-header__title">{roleConfig?.displayName} Dashboard</h1>
+            <p className="role-header__description">{roleConfig?.description}</p>
+          </div>
+        </div>
+      </div>
 
       {/* Dashboard Tiles - Game Menu Style */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {tiles.map((tileId) => {
+        {tiles.map((tileId, index) => {
           const config = getTileConfig(tileId, dashboardData);
           return (
-            <StatsTile
-              key={tileId}
-              title={config.title}
-              iconName={config.iconName}
-              color={config.color}
-              value={config.value}
-              subtitle={config.subtitle}
-              trend={config.trend}
-            />
+            <div key={tileId} style={{ animationDelay: `${index * 50}ms` }} className="animate-fade-in">
+              <StatsTile
+                title={config.title}
+                iconName={config.iconName}
+                color={config.color}
+                value={config.value}
+                subtitle={config.subtitle}
+                trend={config.trend}
+              />
+            </div>
           );
         })}
       </div>
