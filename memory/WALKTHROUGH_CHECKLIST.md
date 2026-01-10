@@ -160,6 +160,12 @@
   - "Reassign" option for assigned tasks
   - Assigned tasks display assignee name
 
+- [ ] **Task Status Updates** ⭐ NEW
+  - Status dropdown with options: Pending, In Progress, Completed, Blocked
+  - Color-coded icons for each status (clock, play, checkmark, warning)
+  - Checkbox to quickly mark task as complete
+  - Status changes persist to database immediately
+
 - [ ] **Export Dropdown** ⭐
   - Export as PDF (formatted report)
   - Export as JSON (full data)
