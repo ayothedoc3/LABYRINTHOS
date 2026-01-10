@@ -149,8 +149,16 @@
   - Overview tab: Stats, timeline, execution phases
   - **Gantt tab**: Visual timeline with milestones/tasks ⭐
   - Milestones tab: List with status, due dates
-  - Tasks tab: List with priority, hours, status
+  - Tasks tab: List with priority, hours, status, **assignment** ⭐
   - Team tab: Roles with responsibilities
+
+- [ ] **Task Assignment** ⭐ NEW
+  - Each task shows "Assign" button
+  - Click to open assignment dialog
+  - Select team member from dropdown (all roles displayed)
+  - Shows current assignee if already assigned
+  - "Reassign" option for assigned tasks
+  - Assigned tasks display assignee name
 
 - [ ] **Export Dropdown** ⭐
   - Export as PDF (formatted report)
@@ -165,6 +173,7 @@
 - View plans → Click plan → Switch tabs (Overview, Gantt, Milestones, Tasks, Team)
 - Click Export → Download PDF → Open and show formatted report
 - Click "New Plan" → Fill form → Generate → See result
+- **Click "Assign" on task → Select user → Confirm assignment** ⭐
 
 ---
 
