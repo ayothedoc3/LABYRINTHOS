@@ -302,6 +302,7 @@ def seed_external_api(deals_db: dict, external_leads_db: dict, tasks_db: dict, p
                 deal_id=deal_id,
                 owner_id="user_001",
                 due_date=datetime.now(timezone.utc) + timedelta(days=random.randint(1, 14)),
+                priority=random.choice(list(TaskPriority)),
                 status=random.choice(list(TaskStatus)),
                 created_at=datetime.now(timezone.utc) - timedelta(days=random.randint(1, 10))
             )
