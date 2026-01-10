@@ -833,10 +833,6 @@ const PlaybookEngine = () => {
     budget: ''
   });
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
   const loadData = async () => {
     setLoading(true);
     try {
@@ -851,6 +847,11 @@ const PlaybookEngine = () => {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleGeneratePlan = async () => {
     try {
