@@ -165,8 +165,11 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
   - Generated plans display in dialog with milestones, tasks, roles, and budget
 
 ### P2 (Medium Priority) - Data Layer Improvements
+- [x] **Consolidate seeding scripts** - DONE (Jan 2026)
+  - Created `/app/backend/seed_all.py` - unified seeder for all modules
+  - Single endpoint `POST /api/seed-all` to seed all demo data
+  - Covers: Sales CRM, Affiliate CRM, Communications, External API, Playbook Engine
 - [ ] Move hardcoded demo data to MongoDB collections
-- [ ] Consolidate seeding scripts into single script (role_routes, sales_crm_routes, affiliate_crm_routes, communication_routes, external_api_routes, playbook_engine_routes)
 - [ ] Improve Pydantic validation
 
 ### P3 (Low Priority) - Future Enhancements
