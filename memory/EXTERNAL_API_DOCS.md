@@ -12,7 +12,7 @@ The Labyrinth External API provides endpoints for CRM systems to integrate with 
 ## Base URL
 
 ```
-https://crmelevate.preview.emergentagent.com
+https://business-flow-6.preview.emergentagent.com
 ```
 
 ## Authentication
@@ -503,7 +503,7 @@ Creates sample deals, leads, tasks, and partners for testing.
 ### Test API Key
 ```bash
 curl -H "X-API-Key: elk_f531ebe4a7d24c8fbcde123456789abc" \
-  https://crmelevate.preview.emergentagent.com/api/external/kpis
+  https://business-flow-6.preview.emergentagent.com/api/external/kpis
 ```
 
 ---

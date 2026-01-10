@@ -193,7 +193,7 @@ python reseed_templates.py
 
 The app is already configured for Emergent. Just:
 1. Push to GitHub (done ✅)
-2. Emergent auto-deploys to: https://role-system-6.preview.emergentagent.com
+2. Emergent auto-deploys to: https://business-flow-6.preview.emergentagent.com
 3. Done!
 
 ---
