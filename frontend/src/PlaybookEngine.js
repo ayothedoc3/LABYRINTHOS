@@ -247,6 +247,10 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="gantt">
+            <BarChart3 className="w-4 h-4 mr-1" />
+            Gantt
+          </TabsTrigger>
           <TabsTrigger value="milestones">Milestones ({plan.milestones?.length})</TabsTrigger>
           <TabsTrigger value="tasks">Tasks ({plan.tasks?.length})</TabsTrigger>
           <TabsTrigger value="roles">Team ({plan.roles?.length})</TabsTrigger>
