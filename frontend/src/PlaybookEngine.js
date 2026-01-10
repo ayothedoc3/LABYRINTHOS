@@ -774,10 +774,31 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
         </TabsContent>
 
         <TabsContent value="tasks" className="mt-4">
-          {/* Filter Bar */}
+          {/* Search and Filter Bar */}
           <div className="flex items-center gap-3 p-3 mb-3 bg-muted/30 rounded-lg" data-testid="filter-bar">
+            {/* Search Input */}
+            <div className="relative flex-1 max-w-xs">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search tasks..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-8 pl-8 text-sm"
+                data-testid="task-search"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+
+            <Separator orientation="vertical" className="h-6" />
+            
             <Filter className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Filters:</span>
             
             {/* Status Filter */}
             <Select value={statusFilter} onValueChange={setStatusFilter}>
