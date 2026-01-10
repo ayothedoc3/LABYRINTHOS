@@ -191,6 +191,10 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
   - Added `PATCH /api/playbook-engine/plans/{id}/tasks/{id}/assign` endpoint
   - Supports assignee_id and assignee_name parameters
   - Tracks assignment timestamp
+  - **Frontend UI COMPLETE** - Added "Assign" button to each task in the Tasks tab
+  - User selection dropdown with all demo users and their roles
+  - Shows current assignee if already assigned
+  - "Reassign" option for assigned tasks
 - [x] **Export plans to JSON/CSV** - DONE (Jan 2026)
   - Added Export button in Plan Details header
   - Exports plan metadata, milestones, tasks, and roles
@@ -208,7 +212,6 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
 ### Remaining Low-Priority Items
 - Role dashboard hardcoded data (minor - works fine with current implementation)
 - Contract lifecycle demo data (already using MongoDB)
-- PDF export (can be added later - JSON/CSV export available)
 
 ### Now Persisted to MongoDB ✅
 - **Sales CRM:** leads, proposals
