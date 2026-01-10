@@ -53,6 +53,7 @@ from affiliate_crm_routes import router as affiliate_router
 from communication_routes import router as communication_router
 from external_api_routes import router as external_router
 from playbook_engine_routes import router as playbook_engine_router
+from client_portal_routes import router as client_portal_router
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
