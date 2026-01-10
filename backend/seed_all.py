@@ -80,13 +80,13 @@ def seed_sales_crm(leads_db: dict, proposals_db: dict) -> dict:
             proposal = Proposal(
                 id=proposal_id,
                 lead_id=lead_id,
-                title=f"{lead.company} - Service Proposal",
-                description=f"Comprehensive service proposal for {lead.company}",
-                total_value=lead.estimated_value,
+                title=f"{lead.contact.company or 'Client'} - Service Proposal",
+                description=f"Comprehensive service proposal for {lead.contact.company or 'client'}",
+                total_value=lead.estimated_value or 0,
                 status=proposal_statuses[lead.stage],
                 valid_until=datetime.now(timezone.utc) + timedelta(days=30),
                 created_at=datetime.now(timezone.utc) - timedelta(days=random.randint(1, 14)),
-                created_by=lead.assigned_to
+                created_by=lead.assigned_to or "system"
             )
             proposals_db[proposal_id] = proposal
     
