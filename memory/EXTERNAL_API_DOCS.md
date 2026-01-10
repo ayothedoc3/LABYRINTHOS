@@ -444,17 +444,25 @@ All webhooks include:
 
 ## Stage-Gate Requirements
 
-Deals must complete certain tasks before advancing stages:
+Deals must complete certain tasks before advancing stages. Tasks are matched by keywords in the title.
 
-| Current Stage | Next Stage | Required Tasks |
-|--------------|------------|----------------|
-| Discovery | Qualification | - |
-| Qualification | Proposal | Discovery call completed, Budget confirmed |
-| Proposal | Negotiation | Qualification document uploaded, Proposal created |
-| Negotiation | Closed Won | Proposal sent, Stakeholder approval |
-| Closed Won | - | Contract signed, Payment terms agreed |
+| Current Stage | Next Stage | Required Tasks (Keywords) |
+|--------------|------------|---------------------------|
+| Discovery | Qualification | Discovery call completed, Budget confirmed |
+| Qualification | Proposal | Qualification document uploaded, Proposal created |
+| Proposal | Negotiation | Proposal sent, Stakeholder approval |
+| Negotiation | Closed Won | Contract signed, Payment terms agreed |
+| Any | Closed Lost | None (always allowed) |
 
-Tasks are matched by keywords in the title (e.g., "Discovery call with Acme" satisfies "discovery_call_completed").
+**Note:** Task titles containing these keywords are matched:
+- "discovery" or "call" → `discovery_call_completed`
+- "budget" → `budget_confirmed`  
+- "qualification" or "document" → `qualification_document_uploaded`
+- "proposal" + "create" → `proposal_created`
+- "proposal" + "send" → `proposal_sent`
+- "stakeholder" or "approval" → `stakeholder_approval`
+- "contract" or "sign" → `contract_signed`
+- "payment" or "terms" → `payment_terms_agreed`
 
 ---
 
