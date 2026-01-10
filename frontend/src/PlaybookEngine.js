@@ -28,7 +28,8 @@ import {
 import {
   Play, Pause, CheckCircle, Clock, Users, FileText, Target,
   Plus, RefreshCw, Calendar, DollarSign, ArrowRight, Zap,
-  AlertTriangle, TrendingUp, Milestone, BarChart3, Download, ChevronDown
+  AlertTriangle, TrendingUp, Milestone, BarChart3, Download, ChevronDown,
+  UserPlus, User
 } from 'lucide-react';
 import GanttChart from './GanttChart';
 
