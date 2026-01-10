@@ -348,7 +348,7 @@ const ContractDetail = ({ contract, onClose, onTransition, onRefresh }) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Stage Transition</AlertDialogTitle>
             <AlertDialogDescription>
-              Move "{contract.name}" from{' '}
+              Move &quot;{contract.name}&quot; from{' '}
               <Badge variant="outline" className="mx-1">{STAGE_CONFIG[contract.stage]?.label}</Badge>
               to{' '}
               <Badge variant="outline" className="mx-1">{STAGE_CONFIG[selectedNextStage]?.label}</Badge>
