@@ -1655,7 +1655,9 @@ function App() {
   };
 
   const NAV_ITEMS = [
+    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "workflows", label: "Workflows", icon: Workflow },
+    { id: "contracts", label: "Contracts", icon: GitBranch },
     { id: "library", label: "Library", icon: FolderOpen },
     { id: "templates", label: "Templates", icon: FileText },
     { id: "team", label: "Team", icon: Users },
