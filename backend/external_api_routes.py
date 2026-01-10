@@ -841,7 +841,8 @@ async def seed_demo_data(api_key: dict = Depends(verify_api_key)):
             deal_id="deal_demo1",
             owner_id="user_sales1",
             priority=TaskPriority.HIGH,
-            status=TaskStatus.COMPLETED
+            status=TaskStatus.COMPLETED,
+            completed_at=datetime.now(timezone.utc) - timedelta(days=5)
         ),
         Task(
             id="task_demo2",
@@ -849,7 +850,8 @@ async def seed_demo_data(api_key: dict = Depends(verify_api_key)):
             deal_id="deal_demo1",
             owner_id="user_sales1",
             priority=TaskPriority.HIGH,
-            status=TaskStatus.COMPLETED
+            status=TaskStatus.COMPLETED,
+            completed_at=datetime.now(timezone.utc) - timedelta(days=3)
         ),
         Task(
             id="task_demo3",
