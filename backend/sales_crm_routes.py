@@ -210,34 +210,56 @@ async def get_leads(
     function: Optional[str] = None
 ):
     """Get all leads with optional filtering"""
-    if not leads_db:
-        seed_demo_leads()
-    
-    leads = list(leads_db.values())
-    
+    # Build query filter
+    query = {}
     if stage:
-        leads = [l for l in leads if l.stage == stage]
+        query["stage"] = stage.value
     if source:
-        leads = [l for l in leads if l.source == source]
+        query["source"] = source.value
     if priority:
-        leads = [l for l in leads if l.priority == priority]
+        query["priority"] = priority.value
     if assigned_to:
-        leads = [l for l in leads if l.assigned_to == assigned_to]
+        query["assigned_to"] = assigned_to
     if function:
-        leads = [l for l in leads if l.function == function]
+        query["function"] = function
     
-    return sorted(leads, key=lambda x: x.updated_at, reverse=True)
+    # Query MongoDB
+    leads_docs = await leads_collection.find(query, {"_id": 0}).sort("updated_at", -1).to_list(1000)
+    
+    # If no data in MongoDB, seed and try again
+    if not leads_docs:
+        # Check if we have in-memory data to migrate
+        if leads_db:
+            for lead in leads_db.values():
+                await leads_collection.update_one(
+                    {"id": lead.id},
+                    {"$set": lead_to_dict(lead)},
+                    upsert=True
+                )
+            leads_docs = await leads_collection.find(query, {"_id": 0}).sort("updated_at", -1).to_list(1000)
+        else:
+            seed_demo_leads()
+            for lead in leads_db.values():
+                await leads_collection.update_one(
+                    {"id": lead.id},
+                    {"$set": lead_to_dict(lead)},
+                    upsert=True
+                )
+            leads_docs = await leads_collection.find(query, {"_id": 0}).sort("updated_at", -1).to_list(1000)
+    
+    return [serialize_doc(doc) for doc in leads_docs]
 
 
-@router.get("/leads/{lead_id}", response_model=Lead)
+@router.get("/leads/{lead_id}")
 async def get_lead(lead_id: str):
     """Get a specific lead by ID"""
-    if lead_id not in leads_db:
+    lead_doc = await leads_collection.find_one({"id": lead_id}, {"_id": 0})
+    if not lead_doc:
         raise HTTPException(status_code=404, detail="Lead not found")
-    return leads_db[lead_id]
+    return serialize_doc(lead_doc)
 
 
-@router.post("/leads", response_model=Lead)
+@router.post("/leads")
 async def create_lead(lead_data: LeadCreate):
     """Create a new lead"""
     lead = Lead(
@@ -252,31 +274,43 @@ async def create_lead(lead_data: LeadCreate):
             )
         ]
     )
-    leads_db[lead.id] = lead
+    
+    # Store in MongoDB
+    await leads_collection.insert_one(lead_to_dict(lead))
+    leads_db[lead.id] = lead  # Keep in-memory sync
+    
     return lead
 
 
-@router.put("/leads/{lead_id}", response_model=Lead)
+@router.put("/leads/{lead_id}")
 async def update_lead(lead_id: str, lead_data: LeadCreate):
     """Update an existing lead"""
-    if lead_id not in leads_db:
+    existing_doc = await leads_collection.find_one({"id": lead_id})
+    if not existing_doc:
         raise HTTPException(status_code=404, detail="Lead not found")
     
-    existing = leads_db[lead_id]
-    updated = existing.model_copy(update={
+    update_data = {
         **lead_data.model_dump(),
         "updated_at": datetime.now(timezone.utc)
-    })
-    leads_db[lead_id] = updated
-    return updated
+    }
+    
+    await leads_collection.update_one(
+        {"id": lead_id},
+        {"$set": update_data}
+    )
+    
+    updated_doc = await leads_collection.find_one({"id": lead_id}, {"_id": 0})
+    return serialize_doc(updated_doc)
 
 
 @router.delete("/leads/{lead_id}")
 async def delete_lead(lead_id: str):
     """Delete a lead"""
-    if lead_id not in leads_db:
+    result = await leads_collection.delete_one({"id": lead_id})
+    if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Lead not found")
-    del leads_db[lead_id]
+    if lead_id in leads_db:
+        del leads_db[lead_id]
     return {"message": "Lead deleted successfully"}
 
 
