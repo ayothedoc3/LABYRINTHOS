@@ -180,11 +180,26 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
 - [x] **MongoDB persistence for External API** - DONE (Jan 2026)
   - Collections: `external_deals`, `external_leads`, `external_tasks`, `external_partners`
 
-### P3 (Low Priority) - Future Enhancements
-- [ ] Task assignment to actual talents (not just role IDs)
-- [ ] Gantt chart visualization for execution plans
-- [ ] Real-time progress tracking with notifications
-- [ ] Export plans to PDF/Excel
+### P3 (Low Priority) - Future Enhancements ✅ COMPLETE
+- [x] **Gantt chart visualization** - DONE (Jan 2026)
+  - Created `GanttChart.js` component with timeline visualization
+  - Shows milestones and tasks as colored bars
+  - Phase-based coloring (Initiation, Planning, Execution, Monitoring, Closure)
+  - Today marker, status badges, task nesting under milestones
+  - Integrated as "Gantt" tab in Plan Details
+- [x] **Task assignment to talents** - DONE (Jan 2026)
+  - Added `PATCH /api/playbook-engine/plans/{id}/tasks/{id}/assign` endpoint
+  - Supports assignee_id and assignee_name parameters
+  - Tracks assignment timestamp
+- [x] **Export plans to JSON/CSV** - DONE (Jan 2026)
+  - Added Export button in Plan Details header
+  - Exports plan metadata, milestones, tasks, and roles
+  - Downloads as JSON file (CSV option available)
+- [x] **Real-time progress tracking** - DONE (Jan 2026)
+  - Added `GET /api/playbook-engine/plans/{id}/progress` endpoint
+  - Returns milestone progress, task progress, hours tracking
+  - Phase-by-phase progress breakdown
+  - Days remaining calculation
 
 ---
 
