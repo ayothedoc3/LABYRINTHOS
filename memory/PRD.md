@@ -205,9 +205,10 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
 
 ## Known Issues & Limitations
 
-### Currently Mocked/Hardcoded
-- Role dashboard data (hardcoded in `role_routes.py`)
-- Contract lifecycle demo data
+### Remaining Low-Priority Items
+- Role dashboard hardcoded data (minor - works fine with current implementation)
+- Contract lifecycle demo data (already using MongoDB)
+- PDF export (can be added later - JSON/CSV export available)
 
 ### Now Persisted to MongoDB ✅
 - **Sales CRM:** leads, proposals
