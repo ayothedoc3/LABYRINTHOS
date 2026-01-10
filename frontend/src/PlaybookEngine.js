@@ -171,7 +171,105 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
 
   const handleExportPlan = async (format = 'json') => {
     try {
-      // Create export data
+      if (format === 'pdf') {
+        // Generate PDF
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        
+        // Title
+        doc.setFontSize(20);
+        doc.setTextColor(59, 130, 246);
+        doc.text(plan.name, 14, 20);
+        
+        // Subtitle
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(`Status: ${plan.status?.toUpperCase()} | Budget: $${(plan.estimated_budget || 0).toLocaleString()}`, 14, 28);
+        doc.text(`Timeline: ${new Date(plan.start_date).toLocaleDateString()} - ${new Date(plan.target_end_date).toLocaleDateString()}`, 14, 34);
+        
+        // Description
+        if (plan.description) {
+          doc.setFontSize(10);
+          doc.setTextColor(60);
+          const splitDesc = doc.splitTextToSize(plan.description, pageWidth - 28);
+          doc.text(splitDesc, 14, 44);
+        }
+        
+        // Milestones Table
+        doc.setFontSize(14);
+        doc.setTextColor(0);
+        doc.text('Milestones', 14, 60);
+        
+        const milestoneData = plan.milestones?.map(m => [
+          m.name,
+          m.phase,
+          m.status,
+          new Date(m.due_date).toLocaleDateString()
+        ]) || [];
+        
+        doc.autoTable({
+          startY: 65,
+          head: [['Milestone', 'Phase', 'Status', 'Due Date']],
+          body: milestoneData,
+          theme: 'striped',
+          headStyles: { fillColor: [59, 130, 246] },
+          margin: { left: 14 }
+        });
+        
+        // Tasks Table
+        const tasksStartY = doc.lastAutoTable.finalY + 15;
+        doc.setFontSize(14);
+        doc.text('Tasks', 14, tasksStartY);
+        
+        const taskData = plan.tasks?.map(t => [
+          t.title,
+          t.phase,
+          t.priority,
+          t.status,
+          `${t.estimated_hours || 0}h`
+        ]) || [];
+        
+        doc.autoTable({
+          startY: tasksStartY + 5,
+          head: [['Task', 'Phase', 'Priority', 'Status', 'Hours']],
+          body: taskData,
+          theme: 'striped',
+          headStyles: { fillColor: [59, 130, 246] },
+          margin: { left: 14 }
+        });
+        
+        // Team Table
+        const teamStartY = doc.lastAutoTable.finalY + 15;
+        doc.setFontSize(14);
+        doc.text('Team Roles', 14, teamStartY);
+        
+        const roleData = plan.roles?.map(r => [
+          r.title,
+          r.role_type,
+          r.time_commitment || 'TBD'
+        ]) || [];
+        
+        doc.autoTable({
+          startY: teamStartY + 5,
+          head: [['Role', 'Type', 'Commitment']],
+          body: roleData,
+          theme: 'striped',
+          headStyles: { fillColor: [59, 130, 246] },
+          margin: { left: 14 }
+        });
+        
+        // Footer
+        const footerY = doc.internal.pageSize.getHeight() - 10;
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.text(`Exported from Labyrinth OS on ${new Date().toLocaleString()}`, 14, footerY);
+        
+        // Save
+        doc.save(`${plan.name.replace(/\s+/g, '_')}_plan.pdf`);
+        return;
+      }
+      
+      // Create export data for JSON/CSV
       const exportData = {
         plan: {
           id: plan.id,
@@ -206,7 +304,6 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
       };
 
       if (format === 'json') {
-        // Download as JSON
         const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -217,7 +314,6 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       } else if (format === 'csv') {
-        // Create CSV for tasks
         const csvHeaders = ['Task', 'Phase', 'Status', 'Priority', 'Hours'];
         const csvRows = plan.tasks?.map(t => 
           [t.title, t.phase, t.status, t.priority, t.estimated_hours].join(',')
