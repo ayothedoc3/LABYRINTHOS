@@ -9,7 +9,7 @@ import uuid
 import random
 
 # Import models from all modules
-from sales_crm_models import Lead, LeadStage, LeadSource, LeadPriority, Proposal, ProposalStatus
+from sales_crm_models import Lead, LeadStage, LeadSource, LeadPriority, Proposal, ProposalStatus, ContactInfo
 from affiliate_crm_models import Affiliate, AffiliateStatus, AffiliateTier, Referral, ReferralStatus, Commission, CommissionStatus
 from communication_models import Thread, Message, Participant, ThreadType, ThreadStatus, MessageType, ParticipantRole
 from external_api_models import Deal, DealStage, ExternalLead, LeadStatus, Task, TaskStatus, Partner
