@@ -641,14 +641,18 @@ const ContractLifecycle = () => {
         <div className={`space-y-4 ${selectedContract ? 'w-1/3' : 'w-full'}`}>
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold">
+              <h2 className="text-heading">
                 {stageFilter === 'all' ? 'All Contracts' : STAGE_CONFIG[stageFilter]?.label}
               </h2>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-caption mt-1">
                 {filteredContracts.length} contract{filteredContracts.length !== 1 ? 's' : ''}
               </p>
             </div>
-            <Button onClick={() => setShowCreateDialog(true)} className="gap-2">
+            <Button 
+              onClick={() => setShowCreateDialog(true)} 
+              className="gap-2"
+              data-testid="new-contract-btn"
+            >
               <Plus className="w-4 h-4" />
               New Contract
             </Button>
@@ -663,16 +667,33 @@ const ContractLifecycle = () => {
                   onSelect={setSelectedContract}
                 />
               ))}
+              {filteredContracts.length === 0 && (
+                <div className="col-span-full empty-state">
+                  <FileText className="empty-state__icon" />
+                  <div className="empty-state__title">No contracts found</div>
+                  <div className="empty-state__description">
+                    {stageFilter !== 'all' 
+                      ? `No contracts in ${STAGE_CONFIG[stageFilter]?.label} stage`
+                      : 'Create your first contract to get started'
+                    }
+                  </div>
+                </div>
+              )}
             </div>
           </ScrollArea>
         </div>
 
         {/* Detail Panel */}
         {selectedContract && (
-          <div className="w-2/3 border-l pl-6">
+          <div className="w-2/3 border-l pl-6 animate-slide-in">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-medium">Contract Details</h3>
-              <Button variant="ghost" size="sm" onClick={() => setSelectedContract(null)}>
+              <h3 className="text-subheading">Contract Details</h3>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setSelectedContract(null)}
+                data-testid="close-detail-btn"
+              >
                 Close
               </Button>
             </div>
@@ -689,6 +710,7 @@ const ContractLifecycle = () => {
             />
           </div>
         )}
+      </div>
       </div>
 
       {/* Create Dialog */}
