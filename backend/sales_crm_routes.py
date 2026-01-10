@@ -402,15 +402,6 @@ async def add_lead_activity(
     
     updated_doc = await leads_collection.find_one({"id": lead_id}, {"_id": 0})
     return serialize_doc(updated_doc)
-    )
-    lead.activities.append(activity)
-    lead.updated_at = datetime.now(timezone.utc)
-    
-    if activity_type in ["call", "email", "meeting"]:
-        lead.last_contacted = datetime.now(timezone.utc)
-    
-    leads_db[lead_id] = lead
-    return {"message": "Activity added", "activity": activity}
 
 
 # ==================== STAGE ENDPOINTS ====================
