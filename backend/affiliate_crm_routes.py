@@ -230,35 +230,58 @@ def seed_demo_affiliates():
 @router.get("/stats", response_model=AffiliateCRMStats)
 async def get_affiliate_stats():
     """Get affiliate CRM statistics"""
-    if not affiliates_db:
-        seed_demo_affiliates()
+    # Get all from MongoDB
+    affiliates_docs = await affiliates_collection.find({}, {"_id": 0}).to_list(1000)
+    referrals_docs = await referrals_collection.find({}, {"_id": 0}).to_list(1000)
+    commissions_docs = await commissions_collection.find({}, {"_id": 0}).to_list(1000)
     
-    affiliates = list(affiliates_db.values())
-    referrals = list(referrals_db.values())
-    commissions = list(commissions_db.values())
+    # If no data, seed first
+    if not affiliates_docs:
+        seed_demo_affiliates()
+        for affiliate in affiliates_db.values():
+            await affiliates_collection.update_one(
+                {"id": affiliate.id},
+                {"$set": affiliate_to_dict(affiliate)},
+                upsert=True
+            )
+        for referral in referrals_db.values():
+            await referrals_collection.update_one(
+                {"id": referral.id},
+                {"$set": referral_to_dict(referral)},
+                upsert=True
+            )
+        for commission in commissions_db.values():
+            await commissions_collection.update_one(
+                {"id": commission.id},
+                {"$set": commission_to_dict(commission)},
+                upsert=True
+            )
+        affiliates_docs = await affiliates_collection.find({}, {"_id": 0}).to_list(1000)
+        referrals_docs = await referrals_collection.find({}, {"_id": 0}).to_list(1000)
+        commissions_docs = await commissions_collection.find({}, {"_id": 0}).to_list(1000)
     
     # Affiliates by tier
     tier_counts = {}
     for tier in AffiliateTier:
-        tier_counts[tier.value] = len([a for a in affiliates if a.tier == tier])
+        tier_counts[tier.value] = len([a for a in affiliates_docs if a.get("tier") == tier.value])
     
     # Active affiliates
-    active_count = len([a for a in affiliates if a.status == AffiliateStatus.ACTIVE])
+    active_count = len([a for a in affiliates_docs if a.get("status") == AffiliateStatus.ACTIVE.value])
     
     # Referral stats
-    total_referrals = len(referrals)
-    converted = len([r for r in referrals if r.status == ReferralStatus.CONVERTED])
+    total_referrals = len(referrals_docs)
+    converted = len([r for r in referrals_docs if r.get("status") == ReferralStatus.CONVERTED.value])
     conversion_rate = (converted / total_referrals * 100) if total_referrals > 0 else 0
     
     # Commission stats
-    paid_commissions = sum(c.amount for c in commissions if c.status == CommissionStatus.PAID)
-    pending_commissions = sum(c.amount for c in commissions if c.status in [CommissionStatus.PENDING, CommissionStatus.APPROVED])
+    paid_commissions = sum(c.get("amount", 0) for c in commissions_docs if c.get("status") == CommissionStatus.PAID.value)
+    pending_commissions = sum(c.get("amount", 0) for c in commissions_docs if c.get("status") in [CommissionStatus.PENDING.value, CommissionStatus.APPROVED.value])
     
     # Top affiliates
-    top_affiliates = sorted(affiliates, key=lambda x: x.total_earnings, reverse=True)[:5]
+    top_affiliates = sorted(affiliates_docs, key=lambda x: x.get("total_earnings", 0), reverse=True)[:5]
     
     return AffiliateCRMStats(
-        total_affiliates=len(affiliates),
+        total_affiliates=len(affiliates_docs),
         active_affiliates=active_count,
         affiliates_by_tier=tier_counts,
         total_referrals=total_referrals,
@@ -268,11 +291,11 @@ async def get_affiliate_stats():
         pending_commissions=pending_commissions,
         top_affiliates=[
             {
-                "id": a.id,
-                "name": a.name,
-                "tier": a.tier.value,
-                "total_earnings": a.total_earnings,
-                "conversion_rate": a.conversion_rate
+                "id": a.get("id"),
+                "name": a.get("name"),
+                "tier": a.get("tier"),
+                "total_earnings": a.get("total_earnings", 0),
+                "conversion_rate": a.get("conversion_rate", 0)
             }
             for a in top_affiliates
         ]
