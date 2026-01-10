@@ -1139,6 +1139,7 @@ app.include_router(lifecycle_router, prefix="/api")  # Contract Lifecycle routes
 app.include_router(sales_router)  # Sales CRM routes
 app.include_router(affiliate_router)  # Affiliate CRM routes
 app.include_router(communication_router)  # Communication routes
+app.include_router(external_router)  # External API for CRM integration
 
 # CORS middleware
 app.add_middleware(
