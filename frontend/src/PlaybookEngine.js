@@ -588,6 +588,24 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          
+          {/* Auto-refresh toggle */}
+          <div className="flex items-center gap-2 ml-4 pl-4 border-l">
+            <Button
+              variant={autoRefresh ? "default" : "outline"}
+              size="sm"
+              onClick={() => setAutoRefresh(!autoRefresh)}
+              data-testid="auto-refresh-toggle"
+            >
+              <RefreshCw className={`w-4 h-4 mr-1 ${autoRefresh ? 'animate-spin' : ''}`} />
+              {autoRefresh ? 'Live' : 'Auto'}
+            </Button>
+            {lastUpdated && (
+              <span className="text-xs text-muted-foreground">
+                Updated {lastUpdated.toLocaleTimeString()}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
