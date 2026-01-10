@@ -577,6 +577,74 @@ body {
   background: linear-gradient(135deg, white 0%, var(--neutral-50) 100%);
 }
 
+/* ==================== DASHBOARD CARDS ==================== */
+
+.dashboard-stat-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  border: 1px solid var(--neutral-100);
+  transition: all var(--transition-normal) var(--easing-default);
+}
+
+.dashboard-stat-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.dashboard-stat-card__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-sm);
+}
+
+.dashboard-stat-card__value {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--neutral-900);
+  line-height: 1.2;
+}
+
+.dashboard-stat-card__label {
+  font-size: var(--font-size-sm);
+  color: var(--neutral-500);
+  margin-top: var(--space-xs);
+}
+
+/* ==================== ROLE HEADER ==================== */
+
+.role-header {
+  background: linear-gradient(135deg, var(--neutral-50) 0%, white 100%);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  border: 1px solid var(--neutral-100);
+}
+
+.role-header__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.role-header__title {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--neutral-900);
+}
+
+.role-header__description {
+  font-size: var(--font-size-sm);
+  color: var(--neutral-500);
+  margin-top: var(--space-xs);
+}
+
 /* Focus states - accessible but subtle */
 :focus-visible {
   outline: 2px solid var(--color-primary);
