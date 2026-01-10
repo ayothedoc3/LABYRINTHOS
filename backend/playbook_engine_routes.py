@@ -494,9 +494,111 @@ async def update_task(plan_id: str, task_id: str, status: str):
             
             plan.updated_at = datetime.now(timezone.utc)
             execution_plans_db[plan_id] = plan
+            
+            # Update in MongoDB
+            await plans_collection.update_one(
+                {"id": plan_id},
+                {"$set": plan_to_dict(plan)}
+            )
+            
             return task
     
     raise HTTPException(status_code=404, detail="Task not found")
+
+
+@router.patch("/plans/{plan_id}/tasks/{task_id}/assign")
+async def assign_task(plan_id: str, task_id: str, assignee_id: str, assignee_name: str = None):
+    """Assign a task to a specific person/talent"""
+    plan_doc = await plans_collection.find_one({"id": plan_id})
+    if not plan_doc:
+        raise HTTPException(status_code=404, detail="Execution plan not found")
+    
+    tasks = plan_doc.get("tasks", [])
+    task_found = False
+    
+    for task in tasks:
+        if task.get("id") == task_id:
+            task["assignee_id"] = assignee_id
+            task["assignee_name"] = assignee_name or assignee_id
+            task["assigned_at"] = datetime.now(timezone.utc).isoformat()
+            task_found = True
+            break
+    
+    if not task_found:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    await plans_collection.update_one(
+        {"id": plan_id},
+        {"$set": {"tasks": tasks, "updated_at": datetime.now(timezone.utc)}}
+    )
+    
+    return {"message": "Task assigned successfully", "task_id": task_id, "assignee_id": assignee_id}
+
+
+@router.get("/plans/{plan_id}/progress")
+async def get_plan_progress(plan_id: str):
+    """Get detailed progress tracking for a plan"""
+    plan_doc = await plans_collection.find_one({"id": plan_id}, {"_id": 0})
+    if not plan_doc:
+        raise HTTPException(status_code=404, detail="Execution plan not found")
+    
+    milestones = plan_doc.get("milestones", [])
+    tasks = plan_doc.get("tasks", [])
+    
+    # Calculate progress metrics
+    completed_milestones = len([m for m in milestones if m.get("status") == "COMPLETED"])
+    completed_tasks = len([t for t in tasks if t.get("status") == "completed"])
+    in_progress_tasks = len([t for t in tasks if t.get("status") == "in_progress"])
+    blocked_tasks = len([t for t in tasks if t.get("status") == "blocked"])
+    
+    total_hours = sum(t.get("estimated_hours", 0) for t in tasks)
+    completed_hours = sum(t.get("estimated_hours", 0) for t in tasks if t.get("status") == "completed")
+    
+    # Calculate days remaining
+    target_end = plan_doc.get("target_end_date")
+    days_remaining = None
+    if target_end:
+        try:
+            end_date = datetime.fromisoformat(target_end.replace('Z', '+00:00')) if isinstance(target_end, str) else target_end
+            days_remaining = (end_date - datetime.now(timezone.utc)).days
+        except:
+            pass
+    
+    # Progress by phase
+    phase_progress = {}
+    for phase in ["INITIATION", "PLANNING", "EXECUTION", "MONITORING", "CLOSURE"]:
+        phase_tasks = [t for t in tasks if t.get("phase") == phase]
+        phase_completed = len([t for t in phase_tasks if t.get("status") == "completed"])
+        phase_progress[phase] = {
+            "total": len(phase_tasks),
+            "completed": phase_completed,
+            "percent": round((phase_completed / len(phase_tasks) * 100) if phase_tasks else 0, 1)
+        }
+    
+    return {
+        "plan_id": plan_id,
+        "overall_progress": plan_doc.get("progress_percent", 0),
+        "milestones": {
+            "total": len(milestones),
+            "completed": completed_milestones,
+            "percent": round((completed_milestones / len(milestones) * 100) if milestones else 0, 1)
+        },
+        "tasks": {
+            "total": len(tasks),
+            "completed": completed_tasks,
+            "in_progress": in_progress_tasks,
+            "blocked": blocked_tasks,
+            "percent": round((completed_tasks / len(tasks) * 100) if tasks else 0, 1)
+        },
+        "hours": {
+            "total": total_hours,
+            "completed": completed_hours,
+            "percent": round((completed_hours / total_hours * 100) if total_hours else 0, 1)
+        },
+        "days_remaining": days_remaining,
+        "phase_progress": phase_progress,
+        "last_updated": plan_doc.get("updated_at")
+    }
 
 
 @router.post("/plans/{plan_id}/activate")
