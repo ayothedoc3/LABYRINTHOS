@@ -373,15 +373,26 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
               Resume
             </Button>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleExportPlan('json')}
-            className="ml-2"
-          >
-            <Download className="w-4 h-4 mr-1" />
-            Export
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="ml-2">
+                <Download className="w-4 h-4 mr-1" />
+                Export
+                <ChevronDown className="w-3 h-3 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => handleExportPlan('pdf')}>
+                Export as PDF
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExportPlan('json')}>
+                Export as JSON
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExportPlan('csv')}>
+                Export Tasks as CSV
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
