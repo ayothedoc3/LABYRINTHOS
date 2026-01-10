@@ -1008,7 +1008,8 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
                     </Select>
                   </div>
                 </div>
-              ))}
+              ))
+              )}
             </div>
           </ScrollArea>
 
