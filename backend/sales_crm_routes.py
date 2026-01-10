@@ -540,29 +540,38 @@ async def respond_to_proposal(proposal_id: str, accepted: bool, notes: str = "")
 @router.get("/stats", response_model=SalesCRMStats)
 async def get_sales_stats():
     """Get sales CRM statistics"""
-    if not leads_db:
-        seed_demo_leads()
+    # Get all leads from MongoDB
+    leads_docs = await leads_collection.find({}, {"_id": 0}).to_list(1000)
     
-    leads = list(leads_db.values())
+    # If no data, seed first
+    if not leads_docs:
+        seed_demo_leads()
+        for lead in leads_db.values():
+            await leads_collection.update_one(
+                {"id": lead.id},
+                {"$set": lead_to_dict(lead)},
+                upsert=True
+            )
+        leads_docs = await leads_collection.find({}, {"_id": 0}).to_list(1000)
     
     # Leads by stage
     stage_counts = {}
     for stage in LeadStage:
-        stage_counts[stage.value] = len([l for l in leads if l.stage == stage])
+        stage_counts[stage.value] = len([l for l in leads_docs if l.get("stage") == stage.value])
     
     # Leads by source
     source_counts = {}
     for source in LeadSource:
-        source_counts[source.value] = len([l for l in leads if l.source == source])
+        source_counts[source.value] = len([l for l in leads_docs if l.get("source") == source.value])
     
     # Leads by priority
     priority_counts = {}
     for priority in LeadPriority:
-        priority_counts[priority.value] = len([l for l in leads if l.priority == priority])
+        priority_counts[priority.value] = len([l for l in leads_docs if l.get("priority") == priority.value])
     
     # Pipeline value (excluding won/lost)
-    pipeline_leads = [l for l in leads if l.stage not in [LeadStage.WON, LeadStage.LOST]]
-    pipeline_value = sum(l.estimated_value or 0 for l in pipeline_leads)
+    pipeline_leads = [l for l in leads_docs if l.get("stage") not in [LeadStage.WON.value, LeadStage.LOST.value]]
+    pipeline_value = sum(l.get("estimated_value") or 0 for l in pipeline_leads)
     
     # Conversion rate
     won_count = stage_counts.get(LeadStage.WON.value, 0)
@@ -571,16 +580,16 @@ async def get_sales_stats():
     conversion_rate = (won_count / total_closed * 100) if total_closed > 0 else 0
     
     # Average deal size
-    won_leads = [l for l in leads if l.stage == LeadStage.WON and l.estimated_value]
-    avg_deal = sum(l.estimated_value for l in won_leads) / len(won_leads) if won_leads else 0
+    won_leads = [l for l in leads_docs if l.get("stage") == LeadStage.WON.value and l.get("estimated_value")]
+    avg_deal = sum(l.get("estimated_value", 0) for l in won_leads) / len(won_leads) if won_leads else 0
     
     # Proposal stats
-    proposals = list(proposals_db.values())
-    proposals_sent = len([p for p in proposals if p.status != ProposalStatus.DRAFT])
-    proposals_accepted = len([p for p in proposals if p.status == ProposalStatus.ACCEPTED])
+    proposals_docs = await proposals_collection.find({}, {"_id": 0}).to_list(1000)
+    proposals_sent = len([p for p in proposals_docs if p.get("status") != ProposalStatus.DRAFT.value])
+    proposals_accepted = len([p for p in proposals_docs if p.get("status") == ProposalStatus.ACCEPTED.value])
     
     return SalesCRMStats(
-        total_leads=len(leads),
+        total_leads=len(leads_docs),
         leads_by_stage=stage_counts,
         leads_by_source=source_counts,
         leads_by_priority=priority_counts,
@@ -595,7 +604,14 @@ async def get_sales_stats():
 @router.post("/seed-demo")
 async def seed_demo_data():
     """Seed demo data for sales CRM"""
+    # Clear MongoDB collections
+    await leads_collection.delete_many({})
+    await proposals_collection.delete_many({})
+    
+    # Clear in-memory
     leads_db.clear()
     proposals_db.clear()
+    
+    # Seed in-memory
     seed_demo_leads()
     return {"message": f"Seeded {len(leads_db)} leads and {len(proposals_db)} proposals"}
