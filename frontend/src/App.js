@@ -1752,6 +1752,10 @@ function App() {
             <Communications />
           </TabsContent>
 
+          <TabsContent value="execution">
+            <PlaybookEngine />
+          </TabsContent>
+
           <TabsContent value="library">
             <Card>
               <CardHeader>
