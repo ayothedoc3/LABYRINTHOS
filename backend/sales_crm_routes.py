@@ -322,21 +322,18 @@ async def transition_lead_stage(
     reason: str = ""
 ):
     """Transition a lead to a new stage"""
-    if lead_id not in leads_db:
+    lead_doc = await leads_collection.find_one({"id": lead_id})
+    if not lead_doc:
         raise HTTPException(status_code=404, detail="Lead not found")
     
-    lead = leads_db[lead_id]
-    current_config = LEAD_STAGE_CONFIG.get(lead.stage)
+    current_stage = LeadStage(lead_doc.get("stage", "NEW"))
+    current_config = LEAD_STAGE_CONFIG.get(current_stage)
     
     if current_config and new_stage not in current_config["valid_transitions"]:
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid transition from {lead.stage.value} to {new_stage.value}"
+            detail=f"Invalid transition from {current_stage.value} to {new_stage.value}"
         )
-    
-    old_stage = lead.stage
-    lead.stage = new_stage
-    lead.updated_at = datetime.now(timezone.utc)
     
     # Update conversion probability based on stage
     probability_map = {
@@ -349,17 +346,30 @@ async def transition_lead_stage(
         LeadStage.LOST: 0.0,
         LeadStage.NURTURING: 15.0
     }
-    lead.conversion_probability = probability_map.get(new_stage, lead.conversion_probability)
     
     # Add activity log
-    lead.activities.append(LeadActivity(
-        type="stage_change",
-        description=f"Stage changed from {old_stage.value} to {new_stage.value}. {reason}",
-        created_by=transitioned_by
-    ))
+    new_activity = {
+        "id": str(uuid.uuid4()),
+        "type": "stage_change",
+        "description": f"Stage changed from {current_stage.value} to {new_stage.value}. {reason}",
+        "created_by": transitioned_by,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
     
-    leads_db[lead_id] = lead
-    return lead
+    await leads_collection.update_one(
+        {"id": lead_id},
+        {
+            "$set": {
+                "stage": new_stage.value,
+                "updated_at": datetime.now(timezone.utc),
+                "conversion_probability": probability_map.get(new_stage, lead_doc.get("conversion_probability", 0))
+            },
+            "$push": {"activities": new_activity}
+        }
+    )
+    
+    updated_doc = await leads_collection.find_one({"id": lead_id}, {"_id": 0})
+    return serialize_doc(updated_doc)
 
 
 @router.post("/leads/{lead_id}/activity")
@@ -370,14 +380,28 @@ async def add_lead_activity(
     created_by: str = "system"
 ):
     """Add an activity to a lead"""
-    if lead_id not in leads_db:
+    lead_doc = await leads_collection.find_one({"id": lead_id})
+    if not lead_doc:
         raise HTTPException(status_code=404, detail="Lead not found")
     
-    lead = leads_db[lead_id]
-    activity = LeadActivity(
-        type=activity_type,
-        description=description,
-        created_by=created_by
+    new_activity = {
+        "id": str(uuid.uuid4()),
+        "type": activity_type,
+        "description": description,
+        "created_by": created_by,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await leads_collection.update_one(
+        {"id": lead_id},
+        {
+            "$set": {"updated_at": datetime.now(timezone.utc), "last_contacted": datetime.now(timezone.utc)},
+            "$push": {"activities": new_activity}
+        }
+    )
+    
+    updated_doc = await leads_collection.find_one({"id": lead_id}, {"_id": 0})
+    return serialize_doc(updated_doc)
     )
     lead.activities.append(activity)
     lead.updated_at = datetime.now(timezone.utc)
