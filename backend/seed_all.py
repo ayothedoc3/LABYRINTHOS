@@ -36,9 +36,9 @@ def seed_sales_crm(leads_db: dict, proposals_db: dict) -> dict:
     demo_leads = [
         {"name": "Sarah Chen", "email": "sarah.chen@techcorp.com", "company": "TechCorp Industries", "source": LeadSource.WEBSITE, "stage": LeadStage.QUALIFIED, "value": 75000},
         {"name": "Michael Rodriguez", "email": "m.rodriguez@innovate.io", "company": "Innovate.io", "source": LeadSource.REFERRAL, "stage": LeadStage.PROPOSAL_SENT, "value": 120000},
-        {"name": "Emily Watson", "email": "ewatson@globalfinance.com", "company": "Global Finance Ltd", "source": LeadSource.LINKEDIN, "stage": LeadStage.NEGOTIATION, "value": 200000},
-        {"name": "David Kim", "email": "david.kim@startupventures.co", "company": "Startup Ventures", "source": LeadSource.CONFERENCE, "stage": LeadStage.NEW, "value": 45000},
-        {"name": "Lisa Thompson", "email": "lisa.t@enterprise.com", "company": "Enterprise Solutions", "source": LeadSource.COLD_CALL, "stage": LeadStage.CONTACTED, "value": 90000},
+        {"name": "Emily Watson", "email": "ewatson@globalfinance.com", "company": "Global Finance Ltd", "source": LeadSource.SOCIAL_MEDIA, "stage": LeadStage.NEGOTIATION, "value": 200000},
+        {"name": "David Kim", "email": "david.kim@startupventures.co", "company": "Startup Ventures", "source": LeadSource.EVENT, "stage": LeadStage.NEW, "value": 45000},
+        {"name": "Lisa Thompson", "email": "lisa.t@enterprise.com", "company": "Enterprise Solutions", "source": LeadSource.COLD_OUTREACH, "stage": LeadStage.CONTACTED, "value": 90000},
         {"name": "James Wilson", "email": "jwilson@mediahub.net", "company": "MediaHub Networks", "source": LeadSource.WEBSITE, "stage": LeadStage.WON, "value": 150000},
         {"name": "Amanda Foster", "email": "a.foster@retail.com", "company": "RetailMax Inc", "source": LeadSource.REFERRAL, "stage": LeadStage.LOST, "value": 80000},
         {"name": "Robert Chang", "email": "rchang@manufacturing.co", "company": "Chang Manufacturing", "source": LeadSource.PARTNER, "stage": LeadStage.QUALIFIED, "value": 250000},
