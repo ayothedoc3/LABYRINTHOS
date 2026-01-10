@@ -166,6 +166,17 @@
   - Checkbox to quickly mark task as complete
   - Status changes persist to database immediately
 
+- [ ] **Bulk Task Operations** ⭐ NEW
+  - "Select All" checkbox at top to select all tasks
+  - Individual checkboxes to select specific tasks
+  - Bulk toolbar appears when tasks are selected
+  - Shows count of selected tasks
+  - "Mark Complete" button - bulk status update
+  - "In Progress" button - bulk status update
+  - "Assign All" button - opens dialog to assign all to one person
+  - "Clear" button to deselect all
+  - Dialog shows list of tasks being assigned
+
 - [ ] **Export Dropdown** ⭐
   - Export as PDF (formatted report)
   - Export as JSON (full data)
