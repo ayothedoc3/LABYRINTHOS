@@ -21,7 +21,7 @@ import {
   BarChart3, Shield, Settings, AlertTriangle, CheckCircle2, 
   XCircle, Clock, TrendingUp, TrendingDown, Play, RefreshCw,
   Plus, ChevronRight, Activity, Zap, Target, ArrowRight, Workflow, Sparkles,
-  FolderOpen, Library, Trash2
+  FolderOpen, Library, Trash2, GitBranch
 } from "lucide-react";
 import WorkflowViz from "./WorkflowViz";
 import SettingsPage from "./Settings";
@@ -30,6 +30,10 @@ import { BulkUploadButton } from "./components/BulkUpload";
 import LabyrinthBuilder from "./LabyrinthBuilder";
 import WorkflowsPage from "./WorkflowsPage";
 import GlobalSearch from "./GlobalSearch";
+import { RoleProvider, useRole } from "./RoleContext";
+import RoleDashboard from "./RoleDashboard";
+import RoleSelector from "./RoleSelector";
+import ContractLifecycle from "./ContractLifecycle";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
