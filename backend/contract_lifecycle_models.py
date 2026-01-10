@@ -179,7 +179,7 @@ class LifecycleContract(LifecycleContractBase):
 class StageTransition(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     contract_id: str
-    from_stage: ContractStage
+    from_stage: Optional[ContractStage] = None  # None for initial creation
     to_stage: ContractStage
     transitioned_by: str
     reason: str = ""
