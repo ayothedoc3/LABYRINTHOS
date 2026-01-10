@@ -51,6 +51,7 @@ from contract_lifecycle_routes import router as lifecycle_router
 from sales_crm_routes import router as sales_router
 from affiliate_crm_routes import router as affiliate_router
 from communication_routes import router as communication_router
+from external_api_routes import router as external_router
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
