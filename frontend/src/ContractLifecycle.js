@@ -720,7 +720,6 @@ const ContractLifecycle = () => {
           </div>
         )}
       </div>
-      </div>
 
       {/* Create Dialog */}
       <CreateContractDialog
