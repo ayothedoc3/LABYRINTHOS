@@ -4,18 +4,18 @@ Consolidates all demo data generation into a single module.
 """
 
 from datetime import datetime, timezone, timedelta
-from typing import Optional
+from typing import Optional, List
 import uuid
 import random
 
 # Import models from all modules
-from sales_crm_models import Lead, LeadStage, LeadSource, Proposal, ProposalStatus
+from sales_crm_models import Lead, LeadStage, LeadSource, LeadPriority, Proposal, ProposalStatus
 from affiliate_crm_models import Affiliate, AffiliateStatus, AffiliateTier, Referral, ReferralStatus, Commission, CommissionStatus
 from communication_models import Thread, Message, Participant, ThreadType, ThreadStatus, MessageType, ParticipantRole
-from external_api_models import Deal, DealStage, ExternalLead, LeadStatus as ExtLeadStatus, Task, TaskStatus, Partner, PartnerStatus
+from external_api_models import Deal, DealStage, ExternalLead, LeadStatus, Task, TaskStatus, Partner
 from playbook_engine_models import (
-    ExecutionPlan, PlanMilestone, PlanTask, PlanRole, PlanContract, CommunicationChannel,
-    MilestoneStatus, TaskPhase
+    ExecutionPlan, ExecutionMilestone, ExecutionTask, ExecutionRole, ExecutionContract, CommunicationChannel,
+    MilestoneStatus, ExecutionPhase
 )
 
 
@@ -34,14 +34,14 @@ def seed_sales_crm(leads_db: dict, proposals_db: dict) -> dict:
     proposals_db.clear()
     
     demo_leads = [
-        {"name": "Sarah Chen", "email": "sarah.chen@techcorp.com", "company": "TechCorp Industries", "source": LeadSource.WEBSITE, "status": LeadStatus.QUALIFIED, "value": 75000},
-        {"name": "Michael Rodriguez", "email": "m.rodriguez@innovate.io", "company": "Innovate.io", "source": LeadSource.REFERRAL, "status": LeadStatus.PROPOSAL, "value": 120000},
-        {"name": "Emily Watson", "email": "ewatson@globalfinance.com", "company": "Global Finance Ltd", "source": LeadSource.LINKEDIN, "status": LeadStatus.NEGOTIATION, "value": 200000},
-        {"name": "David Kim", "email": "david.kim@startupventures.co", "company": "Startup Ventures", "source": LeadSource.CONFERENCE, "status": LeadStatus.NEW, "value": 45000},
-        {"name": "Lisa Thompson", "email": "lisa.t@enterprise.com", "company": "Enterprise Solutions", "source": LeadSource.COLD_OUTREACH, "status": LeadStatus.CONTACTED, "value": 90000},
-        {"name": "James Wilson", "email": "jwilson@mediahub.net", "company": "MediaHub Networks", "source": LeadSource.WEBSITE, "status": LeadStatus.WON, "value": 150000},
-        {"name": "Amanda Foster", "email": "a.foster@retail.com", "company": "RetailMax Inc", "source": LeadSource.REFERRAL, "status": LeadStatus.LOST, "value": 80000},
-        {"name": "Robert Chang", "email": "rchang@manufacturing.co", "company": "Chang Manufacturing", "source": LeadSource.PARTNER, "status": LeadStatus.QUALIFIED, "value": 250000},
+        {"name": "Sarah Chen", "email": "sarah.chen@techcorp.com", "company": "TechCorp Industries", "source": LeadSource.WEBSITE, "stage": LeadStage.QUALIFIED, "value": 75000},
+        {"name": "Michael Rodriguez", "email": "m.rodriguez@innovate.io", "company": "Innovate.io", "source": LeadSource.REFERRAL, "stage": LeadStage.PROPOSAL, "value": 120000},
+        {"name": "Emily Watson", "email": "ewatson@globalfinance.com", "company": "Global Finance Ltd", "source": LeadSource.LINKEDIN, "stage": LeadStage.NEGOTIATION, "value": 200000},
+        {"name": "David Kim", "email": "david.kim@startupventures.co", "company": "Startup Ventures", "source": LeadSource.CONFERENCE, "stage": LeadStage.NEW, "value": 45000},
+        {"name": "Lisa Thompson", "email": "lisa.t@enterprise.com", "company": "Enterprise Solutions", "source": LeadSource.COLD_CALL, "stage": LeadStage.CONTACTED, "value": 90000},
+        {"name": "James Wilson", "email": "jwilson@mediahub.net", "company": "MediaHub Networks", "source": LeadSource.WEBSITE, "stage": LeadStage.WON, "value": 150000},
+        {"name": "Amanda Foster", "email": "a.foster@retail.com", "company": "RetailMax Inc", "source": LeadSource.REFERRAL, "stage": LeadStage.LOST, "value": 80000},
+        {"name": "Robert Chang", "email": "rchang@manufacturing.co", "company": "Chang Manufacturing", "source": LeadSource.PARTNER, "stage": LeadStage.QUALIFIED, "value": 250000},
     ]
     
     for i, lead_data in enumerate(demo_leads):
@@ -51,9 +51,9 @@ def seed_sales_crm(leads_db: dict, proposals_db: dict) -> dict:
             name=lead_data["name"],
             email=lead_data["email"],
             company=lead_data["company"],
-            phone=f"+1-555-{random.randint(100, 999)}-{random.randint(1000, 9999)}",
             source=lead_data["source"],
-            status=lead_data["status"],
+            stage=lead_data["stage"],
+            priority=random.choice(list(LeadPriority)),
             estimated_value=lead_data["value"],
             notes=f"Initial contact made via {lead_data['source'].value}",
             assigned_to=random.choice(["user_001", "user_002", "user_003"]),
@@ -64,22 +64,22 @@ def seed_sales_crm(leads_db: dict, proposals_db: dict) -> dict:
     
     # Create proposals for leads in PROPOSAL, NEGOTIATION, WON, LOST stages
     proposal_statuses = {
-        LeadStatus.PROPOSAL: ProposalStatus.SENT,
-        LeadStatus.NEGOTIATION: ProposalStatus.UNDER_REVIEW,
-        LeadStatus.WON: ProposalStatus.ACCEPTED,
-        LeadStatus.LOST: ProposalStatus.REJECTED
+        LeadStage.PROPOSAL: ProposalStatus.SENT,
+        LeadStage.NEGOTIATION: ProposalStatus.UNDER_REVIEW,
+        LeadStage.WON: ProposalStatus.ACCEPTED,
+        LeadStage.LOST: ProposalStatus.REJECTED
     }
     
     for lead_id, lead in leads_db.items():
-        if lead.status in proposal_statuses:
+        if lead.stage in proposal_statuses:
             proposal_id = f"prop_{uuid.uuid4().hex[:8]}"
             proposal = Proposal(
                 id=proposal_id,
                 lead_id=lead_id,
                 title=f"{lead.company} - Service Proposal",
                 description=f"Comprehensive service proposal for {lead.company}",
-                value=lead.estimated_value,
-                status=proposal_statuses[lead.status],
+                total_value=lead.estimated_value,
+                status=proposal_statuses[lead.stage],
                 valid_until=datetime.now(timezone.utc) + timedelta(days=30),
                 created_at=datetime.now(timezone.utc) - timedelta(days=random.randint(1, 14)),
                 created_by=lead.assigned_to
@@ -238,8 +238,8 @@ def seed_external_api(deals_db: dict, external_leads_db: dict, tasks_db: dict, p
     
     # Create partners
     demo_partners = [
-        {"name": "CRM Partner Inc", "type": "integration"},
-        {"name": "Sales Force Pro", "type": "reseller"},
+        {"name": "CRM Partner Inc", "email": "contact@crmpartner.com"},
+        {"name": "Sales Force Pro", "email": "info@salesforcepro.com"},
     ]
     
     for p_data in demo_partners:
@@ -247,9 +247,11 @@ def seed_external_api(deals_db: dict, external_leads_db: dict, tasks_db: dict, p
         partner = Partner(
             id=p_id,
             name=p_data["name"],
-            partner_type=p_data["type"],
-            api_key=f"elk_{uuid.uuid4().hex}",
-            status=PartnerStatus.ACTIVE,
+            email=p_data["email"],
+            company=p_data["name"],
+            commission_rate=10.0,
+            tier="gold",
+            status="active",
             created_at=datetime.now(timezone.utc) - timedelta(days=90)
         )
         partners_db[p_id] = partner
@@ -264,7 +266,7 @@ def seed_external_api(deals_db: dict, external_leads_db: dict, tasks_db: dict, p
             email=f"lead{i+1}@external.com",
             company=f"External Company {i+1}",
             source="crm_integration",
-            status=random.choice(list(ExtLeadStatus)),
+            status=random.choice(list(LeadStatus)),
             created_at=datetime.now(timezone.utc) - timedelta(days=random.randint(1, 30))
         )
         external_leads_db[lead_id] = lead
@@ -348,12 +350,12 @@ def seed_playbook_engine(execution_plans_db: dict) -> dict:
         
         # Generate milestones
         milestones = []
-        phases = ["INITIATION", "PLANNING", "EXECUTION", "REVIEW", "CLOSURE"]
+        phases = [ExecutionPhase.INITIATION, ExecutionPhase.PLANNING, ExecutionPhase.EXECUTION, ExecutionPhase.REVIEW, ExecutionPhase.CLOSURE]
         for i, phase in enumerate(phases):
-            milestone = PlanMilestone(
+            milestone = ExecutionMilestone(
                 id=f"ms_{uuid.uuid4().hex[:8]}",
-                name=f"{phase.title()} Phase",
-                description=f"Complete {phase.lower()} activities",
+                name=f"{phase.value.title()} Phase",
+                description=f"Complete {phase.value.lower()} activities",
                 phase=phase,
                 due_date=datetime.now(timezone.utc) + timedelta(days=(i+1)*3),
                 status=MilestoneStatus.PENDING,
@@ -371,11 +373,11 @@ def seed_playbook_engine(execution_plans_db: dict) -> dict:
             "Post-Launch Review", "Documentation", "Handover"
         ]
         for i, title in enumerate(task_titles):
-            task = PlanTask(
+            task = ExecutionTask(
                 id=f"task_{uuid.uuid4().hex[:8]}",
                 title=title,
                 description=f"Complete {title.lower()}",
-                phase=TaskPhase(phases[i % len(phases)]),
+                phase=phases[i % len(phases)],
                 milestone_id=milestones[i % len(milestones)].id,
                 assigned_role_id=f"role_{i % 4}",
                 priority=random.choice(["LOW", "MEDIUM", "HIGH"]),
@@ -388,7 +390,7 @@ def seed_playbook_engine(execution_plans_db: dict) -> dict:
         role_types = ["EXECUTIVE_SPONSOR", "PROJECT_LEAD", "COORDINATOR", "SPECIALIST"]
         roles = []
         for i, role_type in enumerate(role_types):
-            role = PlanRole(
+            role = ExecutionRole(
                 id=f"role_{i}",
                 title=role_type.replace("_", " ").title(),
                 role_type=role_type,
