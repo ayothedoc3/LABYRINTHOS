@@ -1738,6 +1738,18 @@ function App() {
             <ContractLifecycle />
           </TabsContent>
 
+          <TabsContent value="sales">
+            <SalesCRM />
+          </TabsContent>
+
+          <TabsContent value="affiliates">
+            <AffiliateCRM />
+          </TabsContent>
+
+          <TabsContent value="communications">
+            <Communications />
+          </TabsContent>
+
           <TabsContent value="library">
             <Card>
               <CardHeader>
