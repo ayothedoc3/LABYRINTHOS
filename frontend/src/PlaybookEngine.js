@@ -245,11 +245,46 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
     );
   };
 
+  // Filter tasks based on status and assignee
+  const getFilteredTasks = () => {
+    if (!plan?.tasks) return [];
+    
+    return plan.tasks.filter(task => {
+      // Status filter
+      if (statusFilter !== 'all' && task.status !== statusFilter) {
+        return false;
+      }
+      // Assignee filter
+      if (assigneeFilter === 'unassigned' && task.assignee_id) {
+        return false;
+      }
+      if (assigneeFilter !== 'all' && assigneeFilter !== 'unassigned' && task.assignee_id !== assigneeFilter) {
+        return false;
+      }
+      return true;
+    });
+  };
+
+  const filteredTasks = getFilteredTasks();
+
+  // Get unique assignees from tasks for the filter dropdown
+  const getTaskAssignees = () => {
+    if (!plan?.tasks) return [];
+    const assignees = new Map();
+    plan.tasks.forEach(task => {
+      if (task.assignee_id && task.assignee_name) {
+        assignees.set(task.assignee_id, task.assignee_name);
+      }
+    });
+    return Array.from(assignees, ([id, name]) => ({ id, name }));
+  };
+
   const selectAllTasks = () => {
-    if (selectedTaskIds.length === plan?.tasks?.length) {
+    const filteredIds = filteredTasks.map(t => t.id);
+    if (selectedTaskIds.length === filteredIds.length && filteredIds.every(id => selectedTaskIds.includes(id))) {
       setSelectedTaskIds([]);
     } else {
-      setSelectedTaskIds(plan?.tasks?.map(t => t.id) || []);
+      setSelectedTaskIds(filteredIds);
     }
   };
 
