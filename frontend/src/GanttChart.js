@@ -269,7 +269,4 @@ const GanttChart = ({ plan }) => {
   );
 };
 
-// Import Calendar icon
-import { Calendar } from 'lucide-react';
-
 export default GanttChart;
