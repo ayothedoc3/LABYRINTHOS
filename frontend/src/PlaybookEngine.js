@@ -132,9 +132,15 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [users, setUsers] = useState([]);
+  const [showAssignDialog, setShowAssignDialog] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [selectedAssignee, setSelectedAssignee] = useState('');
+  const [assigning, setAssigning] = useState(false);
 
   useEffect(() => {
     loadPlan();
+    loadUsers();
   }, [planId]);
 
   const loadPlan = async () => {
@@ -146,6 +152,15 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
       console.error('Error loading plan:', error);
     }
     setLoading(false);
+  };
+
+  const loadUsers = async () => {
+    try {
+      const res = await axios.get(`${API}/api/roles/users`);
+      setUsers(res.data || []);
+    } catch (error) {
+      console.error('Error loading users:', error);
+    }
   };
 
   const handleStatusChange = async (newStatus) => {
@@ -168,6 +183,35 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
       console.error('Error activating plan:', error);
       alert(error.response?.data?.detail || 'Failed to activate plan');
     }
+  };
+
+  const openAssignDialog = (task) => {
+    setSelectedTask(task);
+    setSelectedAssignee(task.assignee_id || '');
+    setShowAssignDialog(true);
+  };
+
+  const handleAssignTask = async () => {
+    if (!selectedTask || !selectedAssignee) return;
+    
+    setAssigning(true);
+    try {
+      const user = users.find(u => u.id === selectedAssignee);
+      const assigneeName = user ? user.name : selectedAssignee;
+      
+      await axios.patch(
+        `${API}/api/playbook-engine/plans/${planId}/tasks/${selectedTask.id}/assign?assignee_id=${selectedAssignee}&assignee_name=${encodeURIComponent(assigneeName)}`
+      );
+      
+      setShowAssignDialog(false);
+      setSelectedTask(null);
+      setSelectedAssignee('');
+      loadPlan();
+    } catch (error) {
+      console.error('Error assigning task:', error);
+      alert(error.response?.data?.detail || 'Failed to assign task');
+    }
+    setAssigning(false);
   };
 
   const handleExportPlan = async (format = 'json') => {
