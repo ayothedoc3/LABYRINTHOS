@@ -206,13 +206,24 @@ const LabyrinthBuilder = ({ onWorkflowCreated }) => {
       
       const issueCategory = issueCategoryMap[selectedIssue] || "OPERATIONS";
       
+      // Map tier number to TIER_X format
+      const tierMap = {
+        1: "TIER_1",
+        2: "TIER_2",
+        3: "TIER_3",
+        "1": "TIER_1",
+        "2": "TIER_2",
+        "3": "TIER_3"
+      };
+      const tier = tierMap[playbook?.tier] || "TIER_2";
+      
       // Map builder selections to Playbook Engine strategy inputs
       const strategyInput = {
         issue_category: issueCategory,
         issue_type_id: selectedCampaign,
         issue_name: `${issue?.name || selectedIssue} - ${campaign?.name || selectedCampaign}`,
         sprint_timeline: selectedSprint,
-        tier: playbook?.tier || selectedPlaybook,
+        tier: tier,
         client_name: clientName || undefined,
         description: workflowDescription || `Execution plan for ${issue?.name || selectedIssue}`,
         priority: selectedSprint === "YESTERDAY" || selectedSprint === "THREE_DAYS" ? "HIGH" : "MEDIUM",
