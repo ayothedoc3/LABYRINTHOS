@@ -7,6 +7,8 @@ from fastapi import APIRouter, HTTPException, Query
 from typing import List, Optional
 from datetime import datetime, timezone, timedelta
 import uuid
+import os
+from motor.motor_asyncio import AsyncIOMotorClient
 
 from sales_crm_models import (
     Lead, LeadCreate, LeadStage, LeadSource, LeadPriority, LeadActivity,
@@ -16,9 +18,49 @@ from sales_crm_models import (
 
 router = APIRouter(prefix="/api/sales", tags=["Sales CRM"])
 
-# In-memory storage (would be MongoDB in production)
+# Database connection
+MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
+DB_NAME = os.environ.get("DB_NAME", "labyrinth_db")
+client = AsyncIOMotorClient(MONGO_URL)
+db = client[DB_NAME]
+
+# Collections
+leads_collection = db.sales_leads
+proposals_collection = db.sales_proposals
+
+# Keep in-memory dict for backward compatibility with seed_all.py
 leads_db: dict[str, Lead] = {}
 proposals_db: dict[str, Proposal] = {}
+
+
+def serialize_doc(doc: dict) -> dict:
+    """Convert MongoDB document for JSON serialization"""
+    if doc is None:
+        return None
+    if "_id" in doc:
+        del doc["_id"]
+    for key, value in doc.items():
+        if isinstance(value, datetime):
+            doc[key] = value.isoformat()
+        elif isinstance(value, list):
+            doc[key] = [serialize_doc(v) if isinstance(v, dict) else v for v in value]
+        elif isinstance(value, dict):
+            doc[key] = serialize_doc(value)
+    return doc
+
+
+def lead_to_dict(lead: Lead) -> dict:
+    """Convert Lead model to dict for MongoDB storage"""
+    data = lead.model_dump()
+    data["_id"] = lead.id
+    return data
+
+
+def proposal_to_dict(proposal: Proposal) -> dict:
+    """Convert Proposal model to dict for MongoDB storage"""
+    data = proposal.model_dump()
+    data["_id"] = proposal.id
+    return data
 
 
 def seed_demo_leads():
