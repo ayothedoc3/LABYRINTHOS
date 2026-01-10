@@ -1687,6 +1687,7 @@ function App() {
             </div>
             
             <div className="flex items-center gap-4">
+              <RoleSelector />
               <Button variant="ghost" size="sm" onClick={fetchData} data-testid="refresh-btn">
                 <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
                 Refresh
