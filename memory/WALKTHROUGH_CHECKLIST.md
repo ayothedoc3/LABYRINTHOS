@@ -177,6 +177,14 @@
   - "Clear" button to deselect all
   - Dialog shows list of tasks being assigned
 
+- [ ] **Task Filters** ⭐ NEW
+  - Status filter: All Status, Pending, In Progress, Completed, Blocked
+  - Assignee filter: All Assignees, Unassigned, or specific team members
+  - "Clear" button appears when filters are active
+  - Counter shows "Showing X of Y tasks"
+  - Select All only selects filtered tasks
+  - Empty state message when no tasks match filters
+
 - [ ] **Export Dropdown** ⭐
   - Export as PDF (formatted report)
   - Export as JSON (full data)
