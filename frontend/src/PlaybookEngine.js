@@ -849,8 +849,11 @@ const PlaybookEngine = () => {
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+    const fetchData = async () => {
+      await loadData();
+    };
+    fetchData();
+  }, []); // eslint-disable-line react-hooks/set-state-in-effect
 
   const handleGeneratePlan = async () => {
     try {
