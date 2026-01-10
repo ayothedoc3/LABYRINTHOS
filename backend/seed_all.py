@@ -15,7 +15,7 @@ from communication_models import Thread, Message, Participant, ThreadType, Threa
 from external_api_models import Deal, DealStage, ExternalLead, LeadStatus, LeadTier, Task, TaskStatus, TaskPriority, Partner
 from playbook_engine_models import (
     ExecutionPlan, ExecutionMilestone, ExecutionTask, ExecutionRole, ExecutionContract, CommunicationChannel,
-    MilestoneStatus, ExecutionPhase
+    MilestoneStatus, ExecutionPhase, StrategyInput
 )
 
 
