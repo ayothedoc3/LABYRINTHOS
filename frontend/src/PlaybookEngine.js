@@ -233,6 +233,64 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
     }
   };
 
+  // Bulk operations handlers
+  const toggleTaskSelection = (taskId) => {
+    setSelectedTaskIds(prev => 
+      prev.includes(taskId) 
+        ? prev.filter(id => id !== taskId)
+        : [...prev, taskId]
+    );
+  };
+
+  const selectAllTasks = () => {
+    if (selectedTaskIds.length === plan?.tasks?.length) {
+      setSelectedTaskIds([]);
+    } else {
+      setSelectedTaskIds(plan?.tasks?.map(t => t.id) || []);
+    }
+  };
+
+  const handleBulkStatusChange = async (status) => {
+    if (selectedTaskIds.length === 0) return;
+    
+    setBulkOperating(true);
+    try {
+      await axios.patch(
+        `${API}/api/playbook-engine/plans/${planId}/tasks/bulk-status?task_ids=${selectedTaskIds.join(',')}&status=${status}`
+      );
+      setSelectedTaskIds([]);
+      loadPlan();
+      onRefresh();
+    } catch (error) {
+      console.error('Error bulk updating tasks:', error);
+      alert(error.response?.data?.detail || 'Failed to update tasks');
+    }
+    setBulkOperating(false);
+  };
+
+  const handleBulkAssign = async () => {
+    if (selectedTaskIds.length === 0 || !bulkAssignee) return;
+    
+    setBulkOperating(true);
+    try {
+      const user = users.find(u => u.id === bulkAssignee);
+      const assigneeName = user ? user.name : bulkAssignee;
+      
+      await axios.patch(
+        `${API}/api/playbook-engine/plans/${planId}/tasks/bulk-assign?task_ids=${selectedTaskIds.join(',')}&assignee_id=${bulkAssignee}&assignee_name=${encodeURIComponent(assigneeName)}`
+      );
+      setSelectedTaskIds([]);
+      setShowBulkAssignDialog(false);
+      setBulkAssignee('');
+      loadPlan();
+      onRefresh();
+    } catch (error) {
+      console.error('Error bulk assigning tasks:', error);
+      alert(error.response?.data?.detail || 'Failed to assign tasks');
+    }
+    setBulkOperating(false);
+  };
+
   const handleExportPlan = async (format = 'json') => {
     try {
       if (format === 'pdf') {
