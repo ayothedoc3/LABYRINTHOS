@@ -616,7 +616,7 @@ async def get_plan_progress(plan_id: str):
         try:
             end_date = datetime.fromisoformat(target_end.replace('Z', '+00:00')) if isinstance(target_end, str) else target_end
             days_remaining = (end_date - datetime.now(timezone.utc)).days
-        except:
+        except (ValueError, TypeError, AttributeError):
             pass
     
     # Progress by phase
