@@ -347,6 +347,10 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
           </div>
         </TabsContent>
 
+        <TabsContent value="gantt" className="mt-4">
+          <GanttChart plan={plan} />
+        </TabsContent>
+
         <TabsContent value="milestones" className="mt-4">
           <ScrollArea className="h-[400px]">
             <div className="space-y-3">
