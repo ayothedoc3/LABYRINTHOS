@@ -1715,8 +1715,16 @@ function App() {
             ))}
           </TabsList>
 
+          <TabsContent value="dashboard">
+            <RoleDashboard />
+          </TabsContent>
+
           <TabsContent value="workflows">
             <WorkflowsPage />
+          </TabsContent>
+
+          <TabsContent value="contracts">
+            <ContractLifecycle />
           </TabsContent>
 
           <TabsContent value="library">
