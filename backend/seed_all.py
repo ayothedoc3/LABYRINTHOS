@@ -354,6 +354,18 @@ def seed_playbook_engine(execution_plans_db: dict) -> dict:
     for plan_data in demo_plans:
         plan_id = f"plan_{uuid.uuid4().hex[:8]}"
         
+        # Create strategy input
+        strategy_input = StrategyInput(
+            issue_category=plan_data["category"],
+            issue_type_id=plan_data["category"].lower(),
+            issue_name=plan_data["name"],
+            sprint_timeline="TWO_THREE_WEEKS",
+            tier="TIER_2",
+            client_name=plan_data["client"],
+            description=plan_data["description"],
+            budget=plan_data["budget"]
+        )
+        
         # Generate milestones
         milestones = []
         phases = [ExecutionPhase.INITIATION, ExecutionPhase.PLANNING, ExecutionPhase.EXECUTION, ExecutionPhase.MONITORING, ExecutionPhase.CLOSURE]
