@@ -612,6 +612,22 @@ async def list_partners(api_key: dict = Depends(verify_api_key)):
     return list(partners_db.values())
 
 
+# ==================== CONTRACTS ENDPOINTS ====================
+
+@router.get("/contracts", response_model=List[dict])
+async def list_contracts(api_key: dict = Depends(verify_api_key)):
+    """List all contracts created from won deals"""
+    return list(external_contracts_db.values())
+
+
+@router.get("/contracts/{contract_id}")
+async def get_contract(contract_id: str, api_key: dict = Depends(verify_api_key)):
+    """Get a contract by ID"""
+    if contract_id not in external_contracts_db:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    return external_contracts_db[contract_id]
+
+
 # ==================== KPI ENDPOINTS ====================
 
 @router.get("/kpis", response_model=List[ExternalKPI])
