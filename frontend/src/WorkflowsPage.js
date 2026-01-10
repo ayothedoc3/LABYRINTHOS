@@ -22,7 +22,7 @@ const API = `${BACKEND_URL}/api`;
 /**
  * WorkflowsPage - Combined Gate Console (Builder) + Canvas (WorkflowViz) + Saved Workflows
  */
-const WorkflowsPage = () => {
+const WorkflowsPage = ({ onNavigateToTab }) => {
   const [activeSubTab, setActiveSubTab] = useState("builder");
   const [selectedWorkflowId, setSelectedWorkflowId] = useState(null);
   const [workflows, setWorkflows] = useState([]);
