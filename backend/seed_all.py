@@ -364,7 +364,7 @@ def seed_playbook_engine(execution_plans_db: dict) -> dict:
                 description=f"Complete {phase.value.lower()} activities",
                 phase=phase,
                 due_date=datetime.now(timezone.utc) + timedelta(days=(i+1)*3),
-                status=MilestoneStatus.PENDING,
+                status=MilestoneStatus.NOT_STARTED,
                 deliverables=[f"Deliverable {i+1}.1", f"Deliverable {i+1}.2"],
                 success_criteria=[f"Criteria {i+1}.1", f"Criteria {i+1}.2"]
             )
