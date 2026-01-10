@@ -933,8 +933,26 @@ async def seed_demo_data(api_key: dict = Depends(verify_api_key)):
     for task in tasks:
         tasks_db[task.id] = task
     
+    # Persist to MongoDB
+    await deals_collection.delete_many({})
+    await external_leads_collection.delete_many({})
+    await tasks_collection.delete_many({})
+    await partners_collection.delete_many({})
+    
+    for deal in deals_db.values():
+        await deals_collection.insert_one(deal_to_dict(deal))
+    
+    for lead in external_leads_db.values():
+        await external_leads_collection.insert_one(lead_to_dict(lead))
+    
+    for task in tasks_db.values():
+        await tasks_collection.insert_one(task_to_dict(task))
+    
+    for partner_item in partners_db.values():
+        await partners_collection.insert_one(partner_to_dict(partner_item))
+    
     return {
-        "message": "Demo data seeded",
+        "message": "Demo data seeded to MongoDB",
         "counts": {
             "deals": len(deals_db),
             "leads": len(external_leads_db),
