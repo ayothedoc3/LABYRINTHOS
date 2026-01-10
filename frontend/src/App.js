@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import WorkflowViz from "./WorkflowViz";
 import SettingsPage from "./Settings";
+import ClientPortal from "./ClientPortal";
 import AIGenerateDialog from "./AIGenerateDialog";
 import { BulkUploadButton } from "./components/BulkUpload";
 import LabyrinthBuilder from "./LabyrinthBuilder";
