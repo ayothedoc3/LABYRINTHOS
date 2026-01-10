@@ -30,17 +30,18 @@ const ICONS = {
   Wrench, Link, User
 };
 
-const getIcon = (iconName) => ICONS[iconName] || User;
-
 const RoleSelector = ({ variant = 'dropdown' }) => {
-  const { currentRole, switchRole, getRoleConfig, user } = useRole();
+  const { currentRole, switchRole, getRoleConfig } = useRole();
   const roleConfig = getRoleConfig(currentRole);
-  const RoleIcon = getIcon(roleConfig?.icon);
+  
+  // Get icon safely without dynamic component creation in render
+  const roleIconName = roleConfig?.icon || 'User';
+  const CurrentRoleIcon = ICONS[roleIconName] || User;
 
   const roles = Object.entries(ROLE_CONFIG).map(([key, config]) => ({
     key,
     ...config,
-    icon: getIcon(config.icon),
+    IconComponent: ICONS[config.icon] || User,
   }));
 
   // Group roles by type
@@ -56,7 +57,7 @@ const RoleSelector = ({ variant = 'dropdown' }) => {
       <Dialog>
         <DialogTrigger asChild>
           <Button variant="outline" className="gap-2">
-            <RoleIcon className="w-4 h-4" style={{ color: roleConfig?.color }} />
+            <CurrentRoleIcon className="w-4 h-4" style={{ color: roleConfig?.color }} />
             <span>{roleConfig?.displayName}</span>
             <ChevronDown className="w-3 h-3 ml-1" />
           </Button>
@@ -75,7 +76,7 @@ const RoleSelector = ({ variant = 'dropdown' }) => {
                 <h4 className="text-sm font-medium text-muted-foreground mb-2">Internal Roles</h4>
                 <div className="grid grid-cols-2 gap-2">
                   {internalRoles.map((role) => {
-                    const Icon = role.icon;
+                    const RoleIcon = role.IconComponent;
                     const isActive = currentRole === role.key;
                     return (
                       <button
@@ -89,7 +90,7 @@ const RoleSelector = ({ variant = 'dropdown' }) => {
                         style={isActive ? { borderColor: role.color } : {}}
                       >
                         <div className="flex items-center gap-2 mb-1">
-                          <Icon className="w-4 h-4" style={{ color: role.color }} />
+                          <RoleIcon className="w-4 h-4" style={{ color: role.color }} />
                           <span className="font-medium text-sm">{role.displayName}</span>
                           {isActive && (
                             <Badge variant="secondary" className="ml-auto text-xs">Active</Badge>
@@ -108,7 +109,7 @@ const RoleSelector = ({ variant = 'dropdown' }) => {
                 <h4 className="text-sm font-medium text-muted-foreground mb-2">External Roles</h4>
                 <div className="grid grid-cols-2 gap-2">
                   {externalRoles.map((role) => {
-                    const Icon = role.icon;
+                    const RoleIcon = role.IconComponent;
                     const isActive = currentRole === role.key;
                     return (
                       <button
@@ -122,7 +123,7 @@ const RoleSelector = ({ variant = 'dropdown' }) => {
                         style={isActive ? { borderColor: role.color } : {}}
                       >
                         <div className="flex items-center gap-2 mb-1">
-                          <Icon className="w-4 h-4" style={{ color: role.color }} />
+                          <RoleIcon className="w-4 h-4" style={{ color: role.color }} />
                           <span className="font-medium text-sm">{role.displayName}</span>
                           {isActive && (
                             <Badge variant="secondary" className="ml-auto text-xs">Active</Badge>
@@ -152,7 +153,7 @@ const RoleSelector = ({ variant = 'dropdown' }) => {
             className="w-6 h-6 rounded-full flex items-center justify-center"
             style={{ backgroundColor: `${roleConfig?.color}20` }}
           >
-            <RoleIcon className="w-3.5 h-3.5" style={{ color: roleConfig?.color }} />
+            <CurrentRoleIcon className="w-3.5 h-3.5" style={{ color: roleConfig?.color }} />
           </div>
           <span className="hidden md:inline text-sm font-medium">
             {roleConfig?.displayName}
@@ -169,7 +170,7 @@ const RoleSelector = ({ variant = 'dropdown' }) => {
           Internal
         </DropdownMenuLabel>
         {internalRoles.map((role) => {
-          const Icon = role.icon;
+          const RoleIcon = role.IconComponent;
           const isActive = currentRole === role.key;
           return (
             <DropdownMenuItem
@@ -177,7 +178,7 @@ const RoleSelector = ({ variant = 'dropdown' }) => {
               onClick={() => switchRole(role.key)}
               className={isActive ? 'bg-muted' : ''}
             >
-              <Icon className="w-4 h-4 mr-2" style={{ color: role.color }} />
+              <RoleIcon className="w-4 h-4 mr-2" style={{ color: role.color }} />
               <span>{role.displayName}</span>
               {isActive && (
                 <Badge variant="secondary" className="ml-auto text-xs">●</Badge>
@@ -193,7 +194,7 @@ const RoleSelector = ({ variant = 'dropdown' }) => {
           External
         </DropdownMenuLabel>
         {externalRoles.map((role) => {
-          const Icon = role.icon;
+          const RoleIcon = role.IconComponent;
           const isActive = currentRole === role.key;
           return (
             <DropdownMenuItem
@@ -201,7 +202,7 @@ const RoleSelector = ({ variant = 'dropdown' }) => {
               onClick={() => switchRole(role.key)}
               className={isActive ? 'bg-muted' : ''}
             >
-              <Icon className="w-4 h-4 mr-2" style={{ color: role.color }} />
+              <RoleIcon className="w-4 h-4 mr-2" style={{ color: role.color }} />
               <span>{role.displayName}</span>
               {isActive && (
                 <Badge variant="secondary" className="ml-auto text-xs">●</Badge>
