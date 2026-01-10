@@ -270,6 +270,7 @@ def seed_external_api(deals_db: dict, external_leads_db: dict, tasks_db: dict, p
             email=f"lead{i+1}@external.com",
             company=f"External Company {i+1}",
             source="crm_integration",
+            tier=random.choice(list(LeadTier)),
             status=random.choice(list(LeadStatus)),
             created_at=datetime.now(timezone.utc) - timedelta(days=random.randint(1, 30))
         )
