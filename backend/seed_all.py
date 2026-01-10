@@ -139,9 +139,9 @@ def seed_affiliate_crm(affiliates_db: dict, referrals_db: dict, commissions_db: 
             referral = Referral(
                 id=ref_id,
                 affiliate_id=aff_id,
-                referred_company=f"Company_{uuid.uuid4().hex[:4]}",
-                referred_contact=f"Contact_{uuid.uuid4().hex[:4]}",
+                referred_name=f"Contact_{uuid.uuid4().hex[:4]}",
                 referred_email=f"contact_{uuid.uuid4().hex[:4]}@example.com",
+                referred_company=f"Company_{uuid.uuid4().hex[:4]}",
                 status=ref_status,
                 deal_value=random.uniform(10000, 100000) if ref_status == ReferralStatus.CONVERTED else None,
                 notes="Referral through partner network",
