@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 import {
   Card, CardHeader, CardTitle, CardDescription, CardContent
 } from './components/ui/card';
@@ -21,9 +23,12 @@ import {
   Tabs, TabsContent, TabsList, TabsTrigger
 } from './components/ui/tabs';
 import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
+} from './components/ui/dropdown-menu';
+import {
   Play, Pause, CheckCircle, Clock, Users, FileText, Target,
   Plus, RefreshCw, Calendar, DollarSign, ArrowRight, Zap,
-  AlertTriangle, TrendingUp, Milestone, BarChart3, Download
+  AlertTriangle, TrendingUp, Milestone, BarChart3, Download, ChevronDown
 } from 'lucide-react';
 import GanttChart from './GanttChart';
 
