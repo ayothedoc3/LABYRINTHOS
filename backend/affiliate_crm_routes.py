@@ -7,6 +7,8 @@ from fastapi import APIRouter, HTTPException, Query
 from typing import List, Optional
 from datetime import datetime, timezone, timedelta
 import uuid
+import os
+from motor.motor_asyncio import AsyncIOMotorClient
 
 from affiliate_crm_models import (
     Affiliate, AffiliateCreate, AffiliateStatus, AffiliateTier,
@@ -17,10 +19,58 @@ from affiliate_crm_models import (
 
 router = APIRouter(prefix="/api/affiliates", tags=["Affiliate CRM"])
 
-# In-memory storage (would be MongoDB in production)
+# Database connection
+MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
+DB_NAME = os.environ.get("DB_NAME", "labyrinth_db")
+client = AsyncIOMotorClient(MONGO_URL)
+db = client[DB_NAME]
+
+# Collections
+affiliates_collection = db.affiliates
+referrals_collection = db.referrals
+commissions_collection = db.commissions
+
+# Keep in-memory dict for backward compatibility
 affiliates_db: dict[str, Affiliate] = {}
 referrals_db: dict[str, Referral] = {}
 commissions_db: dict[str, Commission] = {}
+
+
+def serialize_doc(doc: dict) -> dict:
+    """Convert MongoDB document for JSON serialization"""
+    if doc is None:
+        return None
+    if "_id" in doc:
+        del doc["_id"]
+    for key, value in doc.items():
+        if isinstance(value, datetime):
+            doc[key] = value.isoformat()
+        elif isinstance(value, list):
+            doc[key] = [serialize_doc(v) if isinstance(v, dict) else v for v in value]
+        elif isinstance(value, dict):
+            doc[key] = serialize_doc(value)
+    return doc
+
+
+def affiliate_to_dict(affiliate: Affiliate) -> dict:
+    """Convert Affiliate model to dict for MongoDB storage"""
+    data = affiliate.model_dump()
+    data["_id"] = affiliate.id
+    return data
+
+
+def referral_to_dict(referral: Referral) -> dict:
+    """Convert Referral model to dict for MongoDB storage"""
+    data = referral.model_dump()
+    data["_id"] = referral.id
+    return data
+
+
+def commission_to_dict(commission: Commission) -> dict:
+    """Convert Commission model to dict for MongoDB storage"""
+    data = commission.model_dump()
+    data["_id"] = commission.id
+    return data
 
 
 def seed_demo_affiliates():
