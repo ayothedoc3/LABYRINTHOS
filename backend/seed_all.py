@@ -46,11 +46,15 @@ def seed_sales_crm(leads_db: dict, proposals_db: dict) -> dict:
     
     for i, lead_data in enumerate(demo_leads):
         lead_id = f"lead_{uuid.uuid4().hex[:8]}"
+        contact = ContactInfo(
+            email=lead_data["email"],
+            phone=f"+1-555-{random.randint(100, 999)}-{random.randint(1000, 9999)}",
+            company=lead_data["company"]
+        )
         lead = Lead(
             id=lead_id,
             name=lead_data["name"],
-            email=lead_data["email"],
-            company=lead_data["company"],
+            contact=contact,
             source=lead_data["source"],
             stage=lead_data["stage"],
             priority=random.choice(list(LeadPriority)),
