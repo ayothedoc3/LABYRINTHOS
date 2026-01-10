@@ -132,6 +132,7 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
   - Tasks categorized by phase (Initiation, Planning, Execution, Review, Closure)
   - Contracts linked to execution plan
   - Communication channels/threads
+- **Labyrinth Builder Integration:** Step 9 "Optimization Plan" connects to Playbook Engine to generate execution plans from builder selections
 
 **API Endpoints:**
 - `POST /api/playbook-engine/generate` - Generate new execution plan
