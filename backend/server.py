@@ -1152,14 +1152,16 @@ async def seed_all_demo_data():
     Unified endpoint to seed all demo data across all modules.
     Consolidates data seeding for Sales CRM, Affiliate CRM, Communications,
     External API, and Playbook Engine.
+    Data is stored both in-memory and persisted to MongoDB.
     """
     from seed_all import seed_all_data
-    from sales_crm_routes import leads_db, proposals_db
+    from sales_crm_routes import leads_db, proposals_db, leads_collection, proposals_collection, lead_to_dict, proposal_to_dict
     from affiliate_crm_routes import affiliates_db, referrals_db, commissions_db
     from communication_routes import threads_db, messages_db
     from external_api_routes import deals_db, external_leads_db, tasks_db, partners_db
     from playbook_engine_routes import execution_plans_db
     
+    # Seed in-memory data
     results = seed_all_data(
         leads_db=leads_db,
         proposals_db=proposals_db,
@@ -1175,8 +1177,23 @@ async def seed_all_demo_data():
         execution_plans_db=execution_plans_db
     )
     
+    # Persist Sales CRM to MongoDB
+    await leads_collection.delete_many({})
+    await proposals_collection.delete_many({})
+    
+    for lead in leads_db.values():
+        await leads_collection.insert_one(lead_to_dict(lead))
+    
+    for proposal in proposals_db.values():
+        await proposals_collection.insert_one(proposal_to_dict(proposal))
+    
+    results["mongodb_persisted"] = {
+        "sales_leads": len(leads_db),
+        "sales_proposals": len(proposals_db)
+    }
+    
     return {
-        "message": "All demo data seeded successfully",
+        "message": "All demo data seeded successfully (Sales CRM persisted to MongoDB)",
         "results": results
     }
 
