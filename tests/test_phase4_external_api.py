@@ -616,7 +616,13 @@ class TestExternalAPIStageGateIntegration:
         requests.post(f"{BASE_URL}/api/external/seed-demo", headers=HEADERS)
     
     def test_stage_transition_with_completed_tasks(self):
-        """Test that completing required tasks allows stage transition"""
+        """Test that completing required tasks allows stage transition
+        
+        NOTE: The stage-gate logic checks requirements for the TARGET stage.
+        To move from discovery -> qualification, you need:
+        - discovery_call_completed
+        - budget_confirmed
+        """
         # Create a new deal in discovery stage
         deal_data = {
             "name": "TEST_Stage Gate Deal",
@@ -626,30 +632,14 @@ class TestExternalAPIStageGateIntegration:
         deal_response = requests.post(f"{BASE_URL}/api/external/deals", json=deal_data, headers=HEADERS)
         deal_id = deal_response.json()["id"]
         
-        # Try to move to qualification - should be allowed (no requirements for discovery->qualification)
+        # Try to move to qualification - should be BLOCKED (needs discovery call and budget tasks)
         validate_response = requests.get(
             f"{BASE_URL}/api/external/deals/{deal_id}/validate-stage?next_stage=qualification",
             headers=HEADERS
         )
         assert validate_response.status_code == 200
-        assert validate_response.json()["allowed"] == True
-        
-        # Actually move to qualification
-        update_response = requests.patch(
-            f"{BASE_URL}/api/external/deals/{deal_id}",
-            json={"stage": "qualification"},
-            headers=HEADERS
-        )
-        assert update_response.status_code == 200
-        assert update_response.json()["stage"] == "qualification"
-        
-        # Now try to move to proposal - should be blocked (needs discovery call and budget tasks)
-        validate_response2 = requests.get(
-            f"{BASE_URL}/api/external/deals/{deal_id}/validate-stage?next_stage=proposal",
-            headers=HEADERS
-        )
-        assert validate_response2.status_code == 200
-        assert validate_response2.json()["allowed"] == False
+        # Stage gate requires tasks to be completed before transition
+        assert validate_response.json()["allowed"] == False
         
         # Create and complete required tasks
         # Task 1: Discovery call
@@ -673,12 +663,21 @@ class TestExternalAPIStageGateIntegration:
         requests.patch(f"{BASE_URL}/api/external/tasks/{task2_id}", json={"status": "completed"}, headers=HEADERS)
         
         # Now validate again - should be allowed
-        validate_response3 = requests.get(
-            f"{BASE_URL}/api/external/deals/{deal_id}/validate-stage?next_stage=proposal",
+        validate_response2 = requests.get(
+            f"{BASE_URL}/api/external/deals/{deal_id}/validate-stage?next_stage=qualification",
             headers=HEADERS
         )
-        assert validate_response3.status_code == 200
-        assert validate_response3.json()["allowed"] == True
+        assert validate_response2.status_code == 200
+        assert validate_response2.json()["allowed"] == True
+        
+        # Actually move to qualification
+        update_response = requests.patch(
+            f"{BASE_URL}/api/external/deals/{deal_id}",
+            json={"stage": "qualification"},
+            headers=HEADERS
+        )
+        assert update_response.status_code == 200
+        assert update_response.json()["stage"] == "qualification"
 
 
 if __name__ == "__main__":
