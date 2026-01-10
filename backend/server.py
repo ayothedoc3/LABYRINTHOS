@@ -1135,6 +1135,9 @@ app.include_router(bulk_router, prefix="/api")  # Bulk Upload routes
 app.include_router(builder_router, prefix="/api")  # Labyrinth Builder routes
 app.include_router(role_router, prefix="/api")  # Role System routes
 app.include_router(lifecycle_router, prefix="/api")  # Contract Lifecycle routes
+app.include_router(sales_router)  # Sales CRM routes
+app.include_router(affiliate_router)  # Affiliate CRM routes
+app.include_router(communication_router)  # Communication routes
 
 # CORS middleware
 app.add_middleware(
