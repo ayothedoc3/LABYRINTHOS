@@ -64,7 +64,7 @@ def seed_sales_crm(leads_db: dict, proposals_db: dict) -> dict:
     
     # Create proposals for leads in PROPOSAL, NEGOTIATION, WON, LOST stages
     proposal_statuses = {
-        LeadStage.PROPOSAL: ProposalStatus.SENT,
+        LeadStage.PROPOSAL_SENT: ProposalStatus.SENT,
         LeadStage.NEGOTIATION: ProposalStatus.UNDER_REVIEW,
         LeadStage.WON: ProposalStatus.ACCEPTED,
         LeadStage.LOST: ProposalStatus.REJECTED
