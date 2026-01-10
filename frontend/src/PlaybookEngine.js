@@ -137,6 +137,11 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
   const [selectedTask, setSelectedTask] = useState(null);
   const [selectedAssignee, setSelectedAssignee] = useState('');
   const [assigning, setAssigning] = useState(false);
+  // Bulk operations state
+  const [selectedTaskIds, setSelectedTaskIds] = useState([]);
+  const [showBulkAssignDialog, setShowBulkAssignDialog] = useState(false);
+  const [bulkAssignee, setBulkAssignee] = useState('');
+  const [bulkOperating, setBulkOperating] = useState(false);
 
   const loadPlan = async () => {
     setLoading(true);
