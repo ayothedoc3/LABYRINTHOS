@@ -197,10 +197,10 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
 - Role dashboard data (hardcoded in `role_routes.py`)
 - Contract lifecycle demo data
 - ~~Sales CRM leads and proposals~~ **NOW PERSISTED TO MONGODB**
-- Affiliate referrals and commissions (in-memory)
-- Communication threads and messages (in-memory)
-- External API data (in-memory)
-- Playbook Engine execution plans (in-memory)
+- ~~Affiliate referrals and commissions~~ **NOW PERSISTED TO MONGODB**
+- Communication threads and messages (in-memory - pending migration)
+- External API data (in-memory - pending migration)
+- ~~Playbook Engine execution plans~~ **NOW PERSISTED TO MONGODB**
 
 ### Technical Debt
 - Some components still use raw Tailwind instead of design system classes
