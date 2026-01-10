@@ -11,11 +11,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertTriangle, CheckCircle2, ChevronRight, ArrowRight, Zap,
   FileText, Clock, Users, Package, Play, RefreshCw, Layers,
   Target, Sparkles, ListChecks, FileCheck, ScrollText, Info,
-  Loader2, BookOpen, Briefcase, Settings2, TrendingUp
+  Loader2, BookOpen, Briefcase, Settings2, TrendingUp, Calendar,
+  DollarSign, Milestone
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
