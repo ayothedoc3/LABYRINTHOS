@@ -593,9 +593,10 @@ async def delete_plan(plan_id: str):
 @router.get("/analytics/summary")
 async def get_analytics_summary():
     """Get analytics summary of all execution plans"""
-    plans = list(execution_plans_db.values())
+    # Query MongoDB
+    plans_docs = await plans_collection.find({}, {"_id": 0}).to_list(1000)
     
-    if not plans:
+    if not plans_docs:
         return {
             "total_plans": 0,
             "active_plans": 0,
@@ -610,35 +611,36 @@ async def get_analytics_summary():
         }
     
     # Calculate metrics
-    active = len([p for p in plans if p.status == "active"])
-    completed = len([p for p in plans if p.status == "completed"])
+    active = len([p for p in plans_docs if p.get("status") == "active"])
+    completed = len([p for p in plans_docs if p.get("status") == "completed"])
     
-    all_milestones = [m for p in plans for m in p.milestones]
-    completed_milestones = len([m for m in all_milestones if m.status == MilestoneStatus.COMPLETED])
+    all_milestones = [m for p in plans_docs for m in p.get("milestones", [])]
+    completed_milestones = len([m for m in all_milestones if m.get("status") == MilestoneStatus.COMPLETED.value])
     
-    all_tasks = [t for p in plans for t in p.tasks]
-    completed_tasks = len([t for t in all_tasks if t.status == "completed"])
+    all_tasks = [t for p in plans_docs for t in p.get("tasks", [])]
+    completed_tasks = len([t for t in all_tasks if t.get("status") == "completed"])
     
-    total_budget = sum(p.estimated_budget for p in plans)
+    total_budget = sum(p.get("estimated_budget", 0) for p in plans_docs)
     
     # Group by category
     by_category = {}
-    for plan in plans:
-        cat = plan.strategy_input.issue_category
+    for plan in plans_docs:
+        strategy_input = plan.get("strategy_input", {})
+        cat = strategy_input.get("issue_category", "UNKNOWN")
         if cat not in by_category:
             by_category[cat] = 0
         by_category[cat] += 1
     
     # Group by status
     by_status = {}
-    for plan in plans:
-        status = plan.status
+    for plan in plans_docs:
+        status = plan.get("status", "unknown")
         if status not in by_status:
             by_status[status] = 0
         by_status[status] += 1
     
     return {
-        "total_plans": len(plans),
+        "total_plans": len(plans_docs),
         "active_plans": active,
         "completed_plans": completed,
         "total_milestones": len(all_milestones),
@@ -656,6 +658,8 @@ async def get_analytics_summary():
 @router.post("/seed-demo")
 async def seed_demo_data():
     """Seed demo execution plans"""
+    # Clear MongoDB collection
+    await plans_collection.delete_many({})
     execution_plans_db.clear()
     
     # Create demo strategies and generate plans
