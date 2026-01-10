@@ -70,21 +70,23 @@ const ContractCard = ({ contract, onSelect, onTransition }) => {
   
   return (
     <Card 
-      className="cursor-pointer hover:shadow-md transition-all duration-200 hover:border-primary/50"
+      className="labyrinth-card labyrinth-card--interactive cursor-pointer group"
+      style={{ borderLeft: `4px solid ${stageConfig.color}` }}
       onClick={() => onSelect(contract)}
+      data-testid={`contract-card-${contract.id}`}
     >
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div className="space-y-1">
-            <CardTitle className="text-base">{contract.name}</CardTitle>
-            <CardDescription className="text-xs">{contract.client_name}</CardDescription>
+            <CardTitle className="text-subheading">{contract.name}</CardTitle>
+            <CardDescription className="text-caption">{contract.client_name}</CardDescription>
           </div>
           <Badge 
-            className="text-xs font-medium"
+            className="status-badge"
             style={{ 
-              backgroundColor: `${stageConfig.color}15`,
+              backgroundColor: `${stageConfig.color}10`,
               color: stageConfig.color,
-              border: `1px solid ${stageConfig.color}30`
+              border: `1px solid ${stageConfig.color}25`
             }}
           >
             <StageIcon className="w-3 h-3 mr-1" />
@@ -93,7 +95,7 @@ const ContractCard = ({ contract, onSelect, onTransition }) => {
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+        <div className="flex items-center gap-4 text-caption">
           <span className="flex items-center gap-1">
             <FileText className="w-3 h-3" />
             {contract.contract_type?.replace('_', ' ')}
@@ -103,7 +105,7 @@ const ContractCard = ({ contract, onSelect, onTransition }) => {
             {contract.function}
           </span>
           {contract.estimated_value && (
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1 font-medium" style={{ color: 'var(--function-finance)' }}>
               <DollarSign className="w-3 h-3" />
               ${contract.estimated_value.toLocaleString()}
             </span>
@@ -112,13 +114,14 @@ const ContractCard = ({ contract, onSelect, onTransition }) => {
         
         {/* Stage Progress */}
         <div className="space-y-1">
-          <div className="flex justify-between text-xs text-muted-foreground">
+          <div className="flex justify-between text-micro">
             <span>Progress</span>
             <span>{STAGE_FLOW.indexOf(contract.stage) + 1} of {STAGE_FLOW.length}</span>
           </div>
           <Progress 
             value={((STAGE_FLOW.indexOf(contract.stage) + 1) / STAGE_FLOW.length) * 100}
-            className="h-1"
+            className="h-1.5"
+            style={{ '--progress-color': stageConfig.color }}
           />
         </div>
       </CardContent>
@@ -596,28 +599,36 @@ const ContractLifecycle = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Stats Header */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+    <div className="space-y-6 animate-fade-in" data-testid="contract-lifecycle">
+      {/* Stats Header - Stage Pipeline */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
         {Object.entries(STAGE_CONFIG).slice(0, 7).map(([stage, config]) => {
           const Icon = config.icon;
           const count = stats?.stage_counts?.[stage] || 0;
+          const isSelected = stageFilter === stage;
           return (
             <Card 
               key={stage}
-              className={`cursor-pointer transition-all hover:shadow-md ${
-                stageFilter === stage ? 'ring-2' : ''
+              className={`labyrinth-card cursor-pointer transition-all ${
+                isSelected ? 'ring-2 ring-offset-2' : 'hover:shadow-md'
               }`}
               style={{ 
                 borderTop: `3px solid ${config.color}`,
-                ringColor: config.color
+                ringColor: config.color,
+                background: isSelected ? `${config.color}08` : 'white'
               }}
               onClick={() => setStageFilter(stageFilter === stage ? 'all' : stage)}
+              data-testid={`stage-filter-${stage}`}
             >
-              <CardContent className="pt-4 pb-3 text-center">
-                <Icon className="w-5 h-5 mx-auto mb-1" style={{ color: config.color }} />
-                <div className="text-2xl font-bold">{count}</div>
-                <div className="text-xs text-muted-foreground">{config.label}</div>
+              <CardContent className="pt-4 pb-3 text-center metric-card">
+                <div 
+                  className="w-8 h-8 mx-auto mb-2 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: `${config.color}12` }}
+                >
+                  <Icon className="w-4 h-4" style={{ color: config.color }} />
+                </div>
+                <div className="metric-card__value">{count}</div>
+                <div className="text-micro mt-1">{config.label}</div>
               </CardContent>
             </Card>
           );
