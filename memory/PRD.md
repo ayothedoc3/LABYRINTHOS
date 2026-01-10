@@ -209,6 +209,13 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
   - "Assign All" - opens dialog to assign all selected tasks to one person
   - Shows list of tasks to be assigned in dialog
   - Backend endpoints: `bulk-status` and `bulk-assign`
+- [x] **Task filters** - DONE (Jan 2026)
+  - Status filter dropdown: All, Pending, In Progress, Completed, Blocked
+  - Assignee filter dropdown: All, Unassigned, or specific assignees
+  - "Clear" button appears when filters active
+  - Counter shows "Showing X of Y tasks"
+  - Select All works with filtered results
+  - Empty state with "Clear filters" link when no matches
 - [x] **Export plans to JSON/CSV** - DONE (Jan 2026)
   - Added Export button in Plan Details header
   - Exports plan metadata, milestones, tasks, and roles
