@@ -416,7 +416,7 @@ const LobbyV1 = ({ client, onComplete }) => {
                 setShowVideoModal(false);
                 completeStep('video');
               }} data-testid="video-complete-btn">
-                I've Watched the Video
+                Video Complete
               </Button>
             </DialogFooter>
           </DialogContent>
