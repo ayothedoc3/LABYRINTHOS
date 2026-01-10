@@ -173,7 +173,14 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
   - Sales CRM routes updated to use MongoDB (`sales_leads`, `sales_proposals` collections)
   - Data persisted via `POST /api/seed-all` and individual CRUD operations
   - Stats endpoint reads from MongoDB
-- [ ] MongoDB persistence for other CRM modules (Affiliate, Communications, External API, Playbook Engine)
+- [x] **MongoDB persistence for Affiliate CRM** - DONE (Jan 2026)
+  - Routes updated to use MongoDB (`affiliates`, `referrals`, `commissions` collections)
+  - All CRUD operations use MongoDB
+- [x] **MongoDB persistence for Playbook Engine** - DONE (Jan 2026)
+  - Routes updated to use MongoDB (`execution_plans` collection)
+  - Plan generation, listing, and analytics all use MongoDB
+- [ ] MongoDB persistence for Communications (threads, messages)
+- [ ] MongoDB persistence for External API (deals, leads, tasks, partners)
 - [ ] Improve Pydantic validation
 
 ### P3 (Low Priority) - Future Enhancements
