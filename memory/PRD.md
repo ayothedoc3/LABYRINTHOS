@@ -40,13 +40,6 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
 - `ContractLifecycle.js` - Contract pipeline view with stage management
 - Integrated into `App.js` with new Contracts tab
 
-**API Endpoints:**
-- `GET /api/roles` - Fetch all roles
-- `GET /api/roles/{role_name}/dashboard` - Role-specific dashboard data
-- `GET /api/lifecycle/contracts` - Fetch all contracts
-- `PUT /api/lifecycle/contracts/{id}/stage` - Transition contract stage
-- `GET /api/lifecycle/stats` - Contract statistics
-
 ### Phase 2: Design System Enhancement ✅ COMPLETE (Jan 2026)
 **Design System File:**
 - `frontend/src/design-system.css` - Central CSS with:
@@ -63,83 +56,105 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
 - `ContractLifecycle.js` - Stage pipeline filters, contract cards, detail view
 - `App.js` - Premium header, pill-style navigation
 
-**Bug Fixes:**
-- Fixed Invalid Date display in Templates contracts
-- Fixed StageTransition model to allow null from_stage for new contracts
+### Phase 3: CRM Modules ✅ COMPLETE (Jan 2026)
+
+**Sales CRM:**
+- **Backend:** `sales_crm_models.py`, `sales_crm_routes.py`
+  - Lead stages: NEW → CONTACTED → QUALIFIED → PROPOSAL_SENT → NEGOTIATION → WON/LOST/NURTURING
+  - Lead management with contacts, priorities, tags, estimated values
+  - Proposal management with line items
+  - Activity logging (calls, emails, meetings, notes)
+  - Stage transition validation
+- **Frontend:** `SalesCRM.js`
+  - Stage pipeline filters with lead counts
+  - Summary stats cards (Pipeline Value, Conversion Rate, Avg Deal Size, Proposals Sent)
+  - Lead cards with stage-colored borders, contact info, tags, probability
+  - Lead detail panel with pipeline visualization, activity log
+  - Create lead dialog
+
+**Affiliate CRM:**
+- **Backend:** `affiliate_crm_models.py`, `affiliate_crm_routes.py`
+  - Tier system: BRONZE (10%), SILVER (15%), GOLD (20%), PLATINUM (25%)
+  - Affiliate management with referral codes/links
+  - Referral tracking with qualification and conversion
+  - Commission management with approval/payment workflow
+  - Auto tier upgrades based on conversions
+- **Frontend:** `AffiliateCRM.js`
+  - Tier filter cards with commission rates
+  - Summary stats (Active Affiliates, Referrals, Conversions, Commissions)
+  - Affiliate cards with metrics and earnings
+  - Detail panel with referral link, referrals tab, commissions tab
+  - Create affiliate dialog
+
+**Communication Threads:**
+- **Backend:** `communication_models.py`, `communication_routes.py`
+  - Thread types: CONTRACT, LEAD, SUPPORT, INTERNAL, CLIENT
+  - Thread statuses: OPEN, PENDING, RESOLVED, ARCHIVED
+  - Message types: TEXT, FILE, NOTE, SYSTEM, UPDATE
+  - Participant management with roles
+  - Pin/unpin functionality
+- **Frontend:** `Communications.js`
+  - Thread type filters with color coding
+  - Summary stats (Total Threads, Open, Messages, Participants)
+  - Thread list with type icons, status badges, previews
+  - Thread detail with participants, message history, send functionality
+  - Create thread dialog
 
 ---
 
 ## Prioritized Backlog
 
-### P0 (Critical) - Currently Planned
-None - Phase 2 complete
-
-### P1 (High Priority) - Phase 3: CRM Modules
-- [ ] **Sales CRM Module**
-  - Backend: `sales_crm_routes.py`, `sales_crm_models.py`
-  - Frontend: `SalesCRM.js`
-  - Features: Lead management, qualification stages, proposals
-
-- [ ] **Affiliate CRM Module**
-  - Backend: `affiliate_crm_routes.py`, `affiliate_crm_models.py`
-  - Frontend: `AffiliateCRM.js`
-  - Features: Referral tracking, commission calculations
-
-- [ ] **Communication Threads**
-  - Backend: `communication_routes.py`
-  - Frontend: `CommunicationThread.js`
-  - Features: Per-contract messaging, structured threads
-
-### P2 (Medium Priority) - Phase 4: Playbook Engine
+### P1 (High Priority) - Phase 4: Playbook Engine
 - [ ] **Playbook Engine Logic**
   - Backend: `playbook_engine_routes.py`, `playbook_models.py`
   - Translate strategy inputs into execution plans
   - Generate contracts, roles, milestones automatically
 
-### P3 (Low Priority) - Future Enhancements
+### P2 (Medium Priority) - Future Enhancements
 - [ ] **Optimization Plan Feature**
   - Make final Labyrinth Builder step functional
   - Files: `LabyrinthBuilder.js`, `labyrinth_builder_routes.py`
 
-- [ ] **Data Layer Improvements**
-  - Move hardcoded demo data to MongoDB collections
-  - Consolidate seeding scripts into single script
-  - Improve Pydantic validation
+### P3 (Low Priority) - Data Layer Improvements
+- [ ] Move hardcoded demo data to MongoDB collections
+- [ ] Consolidate seeding scripts into single script
+- [ ] Improve Pydantic validation
 
 ---
 
 ## Known Issues & Limitations
 
-### Currently Mocked/Hardcoded
+### Currently Mocked/Hardcoded (IN-MEMORY)
 - Role dashboard data (hardcoded in `role_routes.py`)
-- Contract lifecycle demo data (seeded via endpoint)
-- Some dashboard statistics
+- Contract lifecycle demo data
+- Sales CRM leads and proposals
+- Affiliate referrals and commissions
+- Communication threads and messages
 
 ### Technical Debt
-- Data layer relies on loosened Pydantic validation
 - Some components still use raw Tailwind instead of design system classes
+- Send message endpoint uses query params instead of JSON body
 
 ---
 
 ## File Reference
 
-### Backend
-- `/app/backend/server.py` - Main FastAPI app
-- `/app/backend/role_models.py` - Role Pydantic models
-- `/app/backend/role_routes.py` - Role API endpoints
-- `/app/backend/contract_lifecycle_models.py` - Contract lifecycle models
-- `/app/backend/contract_lifecycle_routes.py` - Contract API endpoints
+### Backend - CRM Modules
+- `/app/backend/sales_crm_models.py` - Lead, Proposal, Stage models
+- `/app/backend/sales_crm_routes.py` - Sales CRM API endpoints
+- `/app/backend/affiliate_crm_models.py` - Affiliate, Referral, Commission models
+- `/app/backend/affiliate_crm_routes.py` - Affiliate CRM API endpoints
+- `/app/backend/communication_models.py` - Thread, Message, Participant models
+- `/app/backend/communication_routes.py` - Communication API endpoints
 
-### Frontend
-- `/app/frontend/src/App.js` - Main application layout
-- `/app/frontend/src/design-system.css` - Design system CSS
-- `/app/frontend/src/RoleContext.js` - Role state context
-- `/app/frontend/src/RoleDashboard.js` - Role dashboard component
-- `/app/frontend/src/RoleSelector.js` - Role dropdown
-- `/app/frontend/src/ContractLifecycle.js` - Contract management
+### Frontend - CRM Modules
+- `/app/frontend/src/SalesCRM.js` - Sales CRM component
+- `/app/frontend/src/AffiliateCRM.js` - Affiliate CRM component
+- `/app/frontend/src/Communications.js` - Communications component
 
 ### Tests
 - `/app/tests/test_phase2_design_system.py` - Phase 2 tests (14 passing)
+- `/app/tests/test_phase3_crm_modules.py` - Phase 3 tests (23 passing)
 
 ---
 
@@ -148,13 +163,13 @@ None - Phase 2 complete
 ### Phase 2 Test Results (Jan 2026)
 - **Backend:** 100% (14/14 tests passed)
 - **Frontend:** 100% (all visual elements verified)
-- **Test File:** `/app/test_reports/iteration_1.json`
 
-### Features Verified
-- Dashboard Tab with role-based tiles ✅
-- Contracts Tab with stage pipeline ✅
-- Contract detail panel with lifecycle visualization ✅
-- Templates Tab with playbooks and tier badges ✅
-- Navigation with pill-style buttons ✅
-- Role Selector dropdown ✅
-- Contract creation flow ✅
+### Phase 3 Test Results (Jan 2026)
+- **Backend:** 100% (23/23 tests passed)
+- **Frontend:** 100% (all features verified)
+- **Test File:** `/app/test_reports/iteration_2.json`
+
+### API Endpoints Verified
+**Sales CRM:** GET /api/sales/stats, GET/POST /api/sales/leads, GET /api/sales/stages, GET /api/sales/proposals
+**Affiliate CRM:** GET /api/affiliates/stats, GET/POST /api/affiliates/, GET /api/affiliates/{id}/referrals, GET /api/affiliates/{id}/commissions
+**Communications:** GET /api/communications/stats, GET/POST /api/communications/threads, GET/POST /api/communications/threads/{id}/messages
