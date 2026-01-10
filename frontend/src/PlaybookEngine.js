@@ -953,6 +953,79 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+
+          {/* Bulk Assign Dialog */}
+          <Dialog open={showBulkAssignDialog} onOpenChange={setShowBulkAssignDialog}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Bulk Assign Tasks</DialogTitle>
+                <DialogDescription>
+                  Assign {selectedTaskIds.length} selected task{selectedTaskIds.length > 1 ? 's' : ''} to a team member
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>Select Assignee</Label>
+                  <Select value={bulkAssignee} onValueChange={setBulkAssignee}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a team member..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {users.length > 0 ? (
+                        users.map((user) => (
+                          <SelectItem key={user.id} value={user.id}>
+                            <div className="flex items-center gap-2">
+                              <User className="w-4 h-4" />
+                              <span>{user.name}</span>
+                              <Badge variant="outline" className="text-xs ml-2">
+                                {user.role}
+                              </Badge>
+                            </div>
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="no-users" disabled>
+                          No users available
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  <div className="text-micro text-muted-foreground mb-2">Tasks to be assigned:</div>
+                  <div className="space-y-1 max-h-[150px] overflow-y-auto">
+                    {plan?.tasks?.filter(t => selectedTaskIds.includes(t.id)).map(task => (
+                      <div key={task.id} className="text-sm flex items-center gap-2">
+                        <CheckCircle className="w-3 h-3 text-primary" />
+                        {task.title}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowBulkAssignDialog(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleBulkAssign} 
+                  disabled={!bulkAssignee || bulkOperating}
+                >
+                  {bulkOperating ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-1 animate-spin" />
+                      Assigning...
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4 mr-1" />
+                      Assign {selectedTaskIds.length} Tasks
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </TabsContent>
 
         <TabsContent value="roles" className="mt-4">
