@@ -195,6 +195,12 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
   - User selection dropdown with all demo users and their roles
   - Shows current assignee if already assigned
   - "Reassign" option for assigned tasks
+- [x] **Task status updates** - DONE (Jan 2026)
+  - Added `PATCH /api/playbook-engine/plans/{id}/tasks/{id}?status=` endpoint (MongoDB)
+  - Status dropdown with 4 states: Pending, In Progress, Completed, Blocked
+  - Checkbox to quickly toggle completed status
+  - Color-coded icons for each status
+  - Real-time UI updates after status change
 - [x] **Export plans to JSON/CSV** - DONE (Jan 2026)
   - Added Export button in Plan Details header
   - Exports plan metadata, milestones, tasks, and roles
