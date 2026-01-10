@@ -169,7 +169,11 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
   - Created `/app/backend/seed_all.py` - unified seeder for all modules
   - Single endpoint `POST /api/seed-all` to seed all demo data
   - Covers: Sales CRM, Affiliate CRM, Communications, External API, Playbook Engine
-- [ ] Move hardcoded demo data to MongoDB collections
+- [x] **MongoDB persistence for Sales CRM** - DONE (Jan 2026)
+  - Sales CRM routes updated to use MongoDB (`sales_leads`, `sales_proposals` collections)
+  - Data persisted via `POST /api/seed-all` and individual CRUD operations
+  - Stats endpoint reads from MongoDB
+- [ ] MongoDB persistence for other CRM modules (Affiliate, Communications, External API, Playbook Engine)
 - [ ] Improve Pydantic validation
 
 ### P3 (Low Priority) - Future Enhancements
