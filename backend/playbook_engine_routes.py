@@ -478,37 +478,7 @@ async def update_milestone(plan_id: str, milestone_id: str, status: MilestoneSta
     raise HTTPException(status_code=404, detail="Milestone not found")
 
 
-@router.patch("/plans/{plan_id}/tasks/{task_id}")
-async def update_task(plan_id: str, task_id: str, status: str):
-    """Update task status"""
-    plan_doc = await plans_collection.find_one({"id": plan_id})
-    if not plan_doc:
-        raise HTTPException(status_code=404, detail="Execution plan not found")
-    
-    tasks = plan_doc.get("tasks", [])
-    task_found = False
-    updated_task = None
-    
-    for task in tasks:
-        if task.get("id") == task_id:
-            task["status"] = status
-            if status == "completed":
-                task["completed_date"] = datetime.now(timezone.utc).isoformat()
-            task_found = True
-            updated_task = task
-            break
-    
-    if not task_found:
-        raise HTTPException(status_code=404, detail="Task not found")
-    
-    await plans_collection.update_one(
-        {"id": plan_id},
-        {"$set": {"tasks": tasks, "updated_at": datetime.now(timezone.utc)}}
-    )
-    
-    return {"message": "Task status updated", "task_id": task_id, "status": status, "task": updated_task}
-
-
+# BULK OPERATIONS - Must be defined BEFORE parametric routes
 @router.patch("/plans/{plan_id}/tasks/bulk-status")
 async def bulk_update_task_status(plan_id: str, task_ids: str, status: str):
     """Bulk update status for multiple tasks"""
@@ -559,6 +529,38 @@ async def bulk_assign_tasks(plan_id: str, task_ids: str, assignee_id: str, assig
     )
     
     return {"message": f"Assigned {updated_count} tasks", "assignee_id": assignee_id, "updated_count": updated_count}
+
+
+# SINGLE TASK OPERATIONS - After bulk routes
+@router.patch("/plans/{plan_id}/tasks/{task_id}")
+async def update_task(plan_id: str, task_id: str, status: str):
+    """Update task status"""
+    plan_doc = await plans_collection.find_one({"id": plan_id})
+    if not plan_doc:
+        raise HTTPException(status_code=404, detail="Execution plan not found")
+    
+    tasks = plan_doc.get("tasks", [])
+    task_found = False
+    updated_task = None
+    
+    for task in tasks:
+        if task.get("id") == task_id:
+            task["status"] = status
+            if status == "completed":
+                task["completed_date"] = datetime.now(timezone.utc).isoformat()
+            task_found = True
+            updated_task = task
+            break
+    
+    if not task_found:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    await plans_collection.update_one(
+        {"id": plan_id},
+        {"$set": {"tasks": tasks, "updated_at": datetime.now(timezone.utc)}}
+    )
+    
+    return {"message": "Task status updated", "task_id": task_id, "status": status, "task": updated_task}
 
 
 @router.patch("/plans/{plan_id}/tasks/{task_id}/assign")
