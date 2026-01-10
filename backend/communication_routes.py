@@ -317,6 +317,8 @@ async def create_thread(thread_data: ThreadCreate, created_by: str = "system"):
                 Participant(user_id=user_id, name=user_id, role=ParticipantRole.MEMBER)
             )
     
+    # Store in MongoDB
+    await threads_collection.insert_one(thread_to_dict(thread))
     threads_db[thread.id] = thread
     messages_db[thread.id] = []
     
@@ -328,6 +330,7 @@ async def create_thread(thread_data: ThreadCreate, created_by: str = "system"):
         content=f"Thread created: {thread.title}",
         message_type=MessageType.SYSTEM
     )
+    await messages_collection.insert_one(message_to_dict(system_msg))
     messages_db[thread.id].append(system_msg)
     
     return thread
@@ -336,27 +339,35 @@ async def create_thread(thread_data: ThreadCreate, created_by: str = "system"):
 @router.put("/threads/{thread_id}/status")
 async def update_thread_status(thread_id: str, status: ThreadStatus):
     """Update thread status"""
-    if thread_id not in threads_db:
+    thread_doc = await threads_collection.find_one({"id": thread_id})
+    if not thread_doc:
         raise HTTPException(status_code=404, detail="Thread not found")
     
-    thread = threads_db[thread_id]
-    thread.status = status
-    thread.updated_at = datetime.now(timezone.utc)
-    threads_db[thread_id] = thread
-    return thread
+    await threads_collection.update_one(
+        {"id": thread_id},
+        {"$set": {"status": status.value, "updated_at": datetime.now(timezone.utc)}}
+    )
+    
+    updated_doc = await threads_collection.find_one({"id": thread_id}, {"_id": 0})
+    return serialize_doc(updated_doc)
 
 
 @router.put("/threads/{thread_id}/pin")
 async def toggle_thread_pin(thread_id: str):
     """Toggle thread pin status"""
-    if thread_id not in threads_db:
+    thread_doc = await threads_collection.find_one({"id": thread_id})
+    if not thread_doc:
         raise HTTPException(status_code=404, detail="Thread not found")
     
-    thread = threads_db[thread_id]
-    thread.is_pinned = not thread.is_pinned
-    thread.updated_at = datetime.now(timezone.utc)
-    threads_db[thread_id] = thread
-    return thread
+    new_pin_status = not thread_doc.get("is_pinned", False)
+    
+    await threads_collection.update_one(
+        {"id": thread_id},
+        {"$set": {"is_pinned": new_pin_status, "updated_at": datetime.now(timezone.utc)}}
+    )
+    
+    updated_doc = await threads_collection.find_one({"id": thread_id}, {"_id": 0})
+    return serialize_doc(updated_doc)
 
 
 @router.post("/threads/{thread_id}/participants")
