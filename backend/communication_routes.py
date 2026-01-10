@@ -7,6 +7,8 @@ from fastapi import APIRouter, HTTPException, Query
 from typing import List, Optional
 from datetime import datetime, timezone, timedelta
 import uuid
+import os
+from motor.motor_asyncio import AsyncIOMotorClient
 
 from communication_models import (
     Thread, ThreadCreate, ThreadType, ThreadStatus,
@@ -17,9 +19,49 @@ from communication_models import (
 
 router = APIRouter(prefix="/api/communications", tags=["Communications"])
 
-# In-memory storage (would be MongoDB in production)
+# Database connection
+MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
+DB_NAME = os.environ.get("DB_NAME", "labyrinth_db")
+client = AsyncIOMotorClient(MONGO_URL)
+db = client[DB_NAME]
+
+# Collections
+threads_collection = db.communication_threads
+messages_collection = db.communication_messages
+
+# Keep in-memory storage for backward compatibility
 threads_db: dict[str, Thread] = {}
 messages_db: dict[str, List[Message]] = {}  # thread_id -> messages
+
+
+def serialize_doc(doc: dict) -> dict:
+    """Convert MongoDB document for JSON serialization"""
+    if doc is None:
+        return None
+    if "_id" in doc:
+        del doc["_id"]
+    for key, value in doc.items():
+        if isinstance(value, datetime):
+            doc[key] = value.isoformat()
+        elif isinstance(value, list):
+            doc[key] = [serialize_doc(v) if isinstance(v, dict) else v for v in value]
+        elif isinstance(value, dict):
+            doc[key] = serialize_doc(value)
+    return doc
+
+
+def thread_to_dict(thread: Thread) -> dict:
+    """Convert Thread model to dict for MongoDB storage"""
+    data = thread.model_dump()
+    data["_id"] = thread.id
+    return data
+
+
+def message_to_dict(message: Message) -> dict:
+    """Convert Message model to dict for MongoDB storage"""
+    data = message.model_dump()
+    data["_id"] = message.id
+    return data
 
 
 def seed_demo_threads():
