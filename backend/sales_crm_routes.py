@@ -614,4 +614,20 @@ async def seed_demo_data():
     
     # Seed in-memory
     seed_demo_leads()
-    return {"message": f"Seeded {len(leads_db)} leads and {len(proposals_db)} proposals"}
+    
+    # Persist to MongoDB
+    for lead in leads_db.values():
+        await leads_collection.update_one(
+            {"id": lead.id},
+            {"$set": lead_to_dict(lead)},
+            upsert=True
+        )
+    
+    for proposal in proposals_db.values():
+        await proposals_collection.update_one(
+            {"id": proposal.id},
+            {"$set": proposal_to_dict(proposal)},
+            upsert=True
+        )
+    
+    return {"message": f"Seeded {len(leads_db)} leads and {len(proposals_db)} proposals to MongoDB"}
