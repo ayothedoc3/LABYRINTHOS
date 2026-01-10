@@ -33,6 +33,7 @@ deals_db: dict[str, Deal] = {}
 external_leads_db: dict[str, ExternalLead] = {}
 tasks_db: dict[str, Task] = {}
 partners_db: dict[str, Partner] = {}
+external_contracts_db: dict[str, dict] = {}  # Contracts created from won deals
 webhook_configs: List[WebhookConfig] = []
 
 # API Keys for authentication
