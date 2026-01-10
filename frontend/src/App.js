@@ -1665,6 +1665,7 @@ function App() {
     { id: "sales", label: "Sales CRM", icon: UserPlus },
     { id: "affiliates", label: "Affiliates", icon: Link },
     { id: "communications", label: "Messages", icon: MessageSquare },
+    { id: "execution", label: "Execution", icon: Zap },
     { id: "library", label: "Library", icon: FolderOpen },
     { id: "templates", label: "Templates", icon: FileText },
     { id: "team", label: "Team", icon: Users },
