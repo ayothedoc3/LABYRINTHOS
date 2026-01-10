@@ -1666,18 +1666,18 @@ function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-background" data-testid="labyrinth-app">
+    <div className="min-h-screen bg-background calm-interface" data-testid="labyrinth-app">
       {/* Header */}
-      <header className="border-b bg-card sticky top-0 z-50">
+      <header className="border-b bg-card/95 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg">
                 <Zap className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="font-bold text-xl">Labyrinth OS</h1>
-                <p className="text-xs text-muted-foreground">7-Gate Constraint System</p>
+                <h1 className="font-bold text-xl tracking-tight">Labyrinth OS</h1>
+                <p className="text-micro">7-Gate Constraint System</p>
               </div>
             </div>
             
@@ -1688,12 +1688,12 @@ function App() {
             
             <div className="flex items-center gap-4">
               <RoleSelector />
-              <Button variant="ghost" size="sm" onClick={fetchData} data-testid="refresh-btn">
-                <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+              <Button variant="ghost" size="sm" onClick={fetchData} data-testid="refresh-btn" className="gap-2">
+                <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
                 Refresh
               </Button>
               {stats?.active_alerts > 0 && (
-                <Badge variant="destructive" className="animate-pulse">
+                <Badge variant="destructive" className="animate-pulse status-badge--overdue">
                   <AlertTriangle className="w-3 h-3 mr-1" />
                   {stats.active_alerts} Alerts
                 </Badge>
@@ -1706,14 +1706,19 @@ function App() {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={handleTabChange}>
-          <TabsList className="mb-6 flex-wrap h-auto gap-1">
+          <div className="labyrinth-nav mb-6 flex-wrap inline-flex">
             {NAV_ITEMS.map(item => (
-              <TabsTrigger key={item.id} value={item.id} className="flex items-center gap-2" data-testid={`tab-${item.id}`}>
+              <button
+                key={item.id}
+                onClick={() => handleTabChange(item.id)}
+                className={`labyrinth-nav__item ${activeTab === item.id ? 'labyrinth-nav__item--active' : ''}`}
+                data-testid={`tab-${item.id}`}
+              >
                 <item.icon className="w-4 h-4" />
                 {item.label}
-              </TabsTrigger>
+              </button>
             ))}
-          </TabsList>
+          </div>
 
           <TabsContent value="dashboard">
             <RoleDashboard />
