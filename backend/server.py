@@ -1152,7 +1152,7 @@ async def seed_all_demo_data():
     Unified endpoint to seed all demo data across all modules.
     Consolidates data seeding for Sales CRM, Affiliate CRM, Communications,
     External API, and Playbook Engine.
-    Data is stored both in-memory and persisted to MongoDB.
+    All data is persisted to MongoDB.
     """
     from seed_all import seed_all_data
     from sales_crm_routes import leads_db, proposals_db, leads_collection, proposals_collection, lead_to_dict, proposal_to_dict
@@ -1161,8 +1161,16 @@ async def seed_all_demo_data():
         affiliates_collection, referrals_collection, commissions_collection,
         affiliate_to_dict, referral_to_dict, commission_to_dict
     )
-    from communication_routes import threads_db, messages_db
-    from external_api_routes import deals_db, external_leads_db, tasks_db, partners_db
+    from communication_routes import (
+        threads_db, messages_db,
+        threads_collection, messages_collection,
+        thread_to_dict, message_to_dict
+    )
+    from external_api_routes import (
+        deals_db, external_leads_db, tasks_db, partners_db,
+        deals_collection, external_leads_collection, tasks_collection, partners_collection,
+        deal_to_dict, lead_to_dict as ext_lead_to_dict, task_to_dict, partner_to_dict
+    )
     from playbook_engine_routes import execution_plans_db, plans_collection, plan_to_dict
     
     # Seed in-memory data
@@ -1200,10 +1208,35 @@ async def seed_all_demo_data():
     for commission in commissions_db.values():
         await commissions_collection.insert_one(commission_to_dict(commission))
     
+    # Persist Communications to MongoDB
+    await threads_collection.delete_many({})
+    await messages_collection.delete_many({})
+    for thread in threads_db.values():
+        await threads_collection.insert_one(thread_to_dict(thread))
+    for thread_id, msgs in messages_db.items():
+        for msg in msgs:
+            await messages_collection.insert_one(message_to_dict(msg))
+    
+    # Persist External API to MongoDB
+    await deals_collection.delete_many({})
+    await external_leads_collection.delete_many({})
+    await tasks_collection.delete_many({})
+    await partners_collection.delete_many({})
+    for deal in deals_db.values():
+        await deals_collection.insert_one(deal_to_dict(deal))
+    for ext_lead in external_leads_db.values():
+        await external_leads_collection.insert_one(ext_lead_to_dict(ext_lead))
+    for task in tasks_db.values():
+        await tasks_collection.insert_one(task_to_dict(task))
+    for partner_item in partners_db.values():
+        await partners_collection.insert_one(partner_to_dict(partner_item))
+    
     # Persist Playbook Engine to MongoDB
     await plans_collection.delete_many({})
     for plan in execution_plans_db.values():
         await plans_collection.insert_one(plan_to_dict(plan))
+    
+    total_messages = sum(len(msgs) for msgs in messages_db.values())
     
     results["mongodb_persisted"] = {
         "sales_leads": len(leads_db),
@@ -1211,6 +1244,12 @@ async def seed_all_demo_data():
         "affiliates": len(affiliates_db),
         "referrals": len(referrals_db),
         "commissions": len(commissions_db),
+        "communication_threads": len(threads_db),
+        "communication_messages": total_messages,
+        "external_deals": len(deals_db),
+        "external_leads": len(external_leads_db),
+        "external_tasks": len(tasks_db),
+        "external_partners": len(partners_db),
         "execution_plans": len(execution_plans_db)
     }
     
