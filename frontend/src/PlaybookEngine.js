@@ -145,6 +145,7 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
   // Filter state
   const [statusFilter, setStatusFilter] = useState('all');
   const [assigneeFilter, setAssigneeFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const loadPlan = async () => {
     setLoading(true);
