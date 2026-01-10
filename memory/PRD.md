@@ -201,6 +201,14 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
   - Checkbox to quickly toggle completed status
   - Color-coded icons for each status
   - Real-time UI updates after status change
+- [x] **Bulk task operations** - DONE (Jan 2026)
+  - Select All / individual task selection checkboxes
+  - Bulk toolbar appears when tasks selected (shows count)
+  - "Mark Complete" - bulk update status to completed
+  - "In Progress" - bulk update status to in_progress
+  - "Assign All" - opens dialog to assign all selected tasks to one person
+  - Shows list of tasks to be assigned in dialog
+  - Backend endpoints: `bulk-status` and `bulk-assign`
 - [x] **Export plans to JSON/CSV** - DONE (Jan 2026)
   - Added Export button in Plan Details header
   - Exports plan metadata, milestones, tasks, and roles
