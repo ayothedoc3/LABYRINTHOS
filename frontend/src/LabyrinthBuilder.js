@@ -172,6 +172,46 @@ const LabyrinthBuilder = ({ onWorkflowCreated }) => {
     setRenderResult(null);
     setWorkflowName("");
     setWorkflowDescription("");
+    setExecutionPlan(null);
+    setClientName("");
+    setPlanBudget("");
+  };
+
+  // Generate Execution Plan (Optimization Plan)
+  const handleGenerateExecutionPlan = async () => {
+    if (!selectedIssue || !selectedCampaign || !selectedSprint || !selectedPlaybook) {
+      return;
+    }
+    
+    setGeneratingPlan(true);
+    try {
+      // Find the issue category from the selected issue
+      const issue = issues.find(i => i.id === selectedIssue);
+      const campaign = campaigns.find(c => c.id === selectedCampaign);
+      const sprint = sprints.find(s => s.id === selectedSprint);
+      const playbook = playbooks.find(p => p.id === selectedPlaybook);
+      
+      // Map builder selections to Playbook Engine strategy inputs
+      const strategyInput = {
+        issue_category: issue?.category || selectedIssue,
+        issue_type_id: selectedCampaign,
+        issue_name: `${issue?.name || selectedIssue} - ${campaign?.name || selectedCampaign}`,
+        sprint_timeline: selectedSprint,
+        tier: playbook?.tier || selectedPlaybook,
+        client_name: clientName || undefined,
+        description: workflowDescription || `Execution plan for ${issue?.name || selectedIssue}`,
+        priority: selectedSprint === "YESTERDAY" || selectedSprint === "THREE_DAYS" ? "HIGH" : "MEDIUM",
+        budget: planBudget ? parseFloat(planBudget) : undefined
+      };
+      
+      const response = await axios.post(`${API}/playbook-engine/generate`, strategyInput);
+      setExecutionPlan(response.data);
+      setShowPlanDialog(true);
+    } catch (error) {
+      console.error("Error generating execution plan:", error);
+      alert(error.response?.data?.detail || "Failed to generate execution plan");
+    }
+    setGeneratingPlan(false);
   };
 
   if (loading) {
