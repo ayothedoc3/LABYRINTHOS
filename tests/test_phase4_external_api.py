@@ -387,13 +387,24 @@ class TestExternalAPITasks:
     
     def test_update_task(self):
         """Test PATCH /api/external/tasks/{task_id} updates task"""
+        # Create a new task first (task_demo1 is already completed in seed data)
+        task_data = {
+            "title": "TEST_Task to Complete",
+            "deal_id": "deal_demo1",
+            "priority": "medium"
+        }
+        create_response = requests.post(f"{BASE_URL}/api/external/tasks", json=task_data, headers=HEADERS)
+        assert create_response.status_code == 200
+        task_id = create_response.json()["id"]
+        
+        # Now update the task to completed
         update_data = {
             "status": "completed",
             "priority": "urgent"
         }
         
         response = requests.patch(
-            f"{BASE_URL}/api/external/tasks/task_demo1",
+            f"{BASE_URL}/api/external/tasks/{task_id}",
             json=update_data,
             headers=HEADERS
         )
