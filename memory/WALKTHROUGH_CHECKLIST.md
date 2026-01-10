@@ -204,6 +204,9 @@
 - **Click "Select All" → See bulk toolbar appear with task count** ⭐
 - **Click "Mark Complete" → All tasks change to completed** ⭐
 - **Click "Assign All" → Select user → Assign multiple tasks at once** ⭐
+- **Select "Completed" from status filter → See only completed tasks** ⭐
+- **Select "Unassigned" from assignee filter → See only unassigned tasks** ⭐
+- **Click "Clear" to reset filters → See all tasks again** ⭐
 
 ---
 
