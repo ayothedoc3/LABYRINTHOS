@@ -193,6 +193,9 @@
 - **Click "Assign" on task → Select user → Confirm assignment** ⭐
 - **Click status dropdown → Change to "In Progress" → See icon change** ⭐
 - **Click checkbox to mark task completed → See strikethrough text** ⭐
+- **Click "Select All" → See bulk toolbar appear with task count** ⭐
+- **Click "Mark Complete" → All tasks change to completed** ⭐
+- **Click "Assign All" → Select user → Assign multiple tasks at once** ⭐
 
 ---
 
