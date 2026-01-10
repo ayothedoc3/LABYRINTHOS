@@ -24,7 +24,7 @@ import {
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-const LabyrinthBuilder = ({ onWorkflowCreated }) => {
+const LabyrinthBuilder = ({ onWorkflowCreated, onNavigateToTab }) => {
   // Data from API
   const [issues, setIssues] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
