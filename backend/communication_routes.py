@@ -519,34 +519,43 @@ async def get_communication_stats():
     if not threads_db:
         seed_demo_threads()
     
-    threads = list(threads_db.values())
+    # Get all from MongoDB
+    threads_docs = await threads_collection.find({}, {"_id": 0}).to_list(1000)
+    messages_docs = await messages_collection.find({}, {"_id": 0}).to_list(10000)
     
     # Threads by type
     type_counts = {}
     for thread_type in ThreadType:
-        type_counts[thread_type.value] = len([t for t in threads if t.thread_type == thread_type])
+        type_counts[thread_type.value] = len([t for t in threads_docs if t.get("thread_type") == thread_type.value])
     
     # Open threads
-    open_count = len([t for t in threads if t.status == ThreadStatus.OPEN])
+    open_count = len([t for t in threads_docs if t.get("status") == ThreadStatus.OPEN.value])
     
     # Total messages
-    total_messages = sum(len(msgs) for msgs in messages_db.values())
+    total_messages = len(messages_docs)
     
     # Messages today
     today = datetime.now(timezone.utc).date()
-    messages_today = sum(
-        len([m for m in msgs if m.created_at.date() == today])
-        for msgs in messages_db.values()
-    )
+    messages_today = 0
+    for msg in messages_docs:
+        created = msg.get("created_at")
+        if created:
+            if isinstance(created, str):
+                try:
+                    created = datetime.fromisoformat(created.replace('Z', '+00:00'))
+                except:
+                    continue
+            if created.date() == today:
+                messages_today += 1
     
     # Active participants
     all_participants = set()
-    for thread in threads:
-        for p in thread.participants:
-            all_participants.add(p.user_id)
+    for thread in threads_docs:
+        for p in thread.get("participants", []):
+            all_participants.add(p.get("user_id"))
     
     return CommunicationStats(
-        total_threads=len(threads),
+        total_threads=len(threads_docs),
         open_threads=open_count,
         threads_by_type=type_counts,
         total_messages=total_messages,
@@ -558,9 +567,25 @@ async def get_communication_stats():
 @router.post("/seed-demo")
 async def seed_demo_data():
     """Seed demo communication data"""
+    # Clear MongoDB collections
+    await threads_collection.delete_many({})
+    await messages_collection.delete_many({})
+    
+    # Clear in-memory
     threads_db.clear()
     messages_db.clear()
+    
+    # Seed in-memory
     seed_demo_threads()
+    
+    # Persist to MongoDB
+    for thread in threads_db.values():
+        await threads_collection.insert_one(thread_to_dict(thread))
+    
+    for thread_id, msgs in messages_db.items():
+        for msg in msgs:
+            await messages_collection.insert_one(message_to_dict(msg))
+    
     return {
-        "message": f"Seeded {len(threads_db)} threads with messages"
+        "message": f"Seeded {len(threads_db)} threads with messages to MongoDB"
     }
