@@ -496,22 +496,99 @@ const LabyrinthBuilder = ({ onWorkflowCreated }) => {
                     </div>
                   </div>
 
-                  {/* 9. Optimization Plan */}
+                  {/* 9. Optimization Plan - Connected to Playbook Engine */}
                   <div>
                     <Label className="text-sm font-medium mb-2 flex items-center gap-2">
                       <span className="w-6 h-6 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center text-xs font-bold">9</span>
-                      Optimization Plan
+                      Optimization Plan (Execution Engine)
                     </Label>
-                    <div className="border rounded-lg p-4 bg-slate-50">
-                      {matchedData?.optimizationPlan ? (
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-green-500" />
-                          <span className="text-sm">{matchedData.optimizationPlan.name}</span>
+                    <div className="border rounded-lg p-4 bg-gradient-to-br from-pink-50 to-purple-50">
+                      {executionPlan ? (
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <CheckCircle2 className="h-5 w-5 text-green-500" />
+                              <span className="font-medium">{executionPlan.name}</span>
+                            </div>
+                            <Badge variant="outline" className="bg-green-50 text-green-700">
+                              {executionPlan.status}
+                            </Badge>
+                          </div>
+                          <div className="grid grid-cols-4 gap-3 text-center text-sm">
+                            <div className="p-2 bg-white rounded-lg">
+                              <div className="font-bold text-lg">{executionPlan.milestones?.length || 0}</div>
+                              <div className="text-xs text-muted-foreground">Milestones</div>
+                            </div>
+                            <div className="p-2 bg-white rounded-lg">
+                              <div className="font-bold text-lg">{executionPlan.tasks?.length || 0}</div>
+                              <div className="text-xs text-muted-foreground">Tasks</div>
+                            </div>
+                            <div className="p-2 bg-white rounded-lg">
+                              <div className="font-bold text-lg">{executionPlan.roles?.length || 0}</div>
+                              <div className="text-xs text-muted-foreground">Roles</div>
+                            </div>
+                            <div className="p-2 bg-white rounded-lg">
+                              <div className="font-bold text-lg text-green-600">${(executionPlan.estimated_budget / 1000).toFixed(0)}k</div>
+                              <div className="text-xs text-muted-foreground">Budget</div>
+                            </div>
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="w-full"
+                            onClick={() => setShowPlanDialog(true)}
+                          >
+                            <Zap className="w-4 h-4 mr-2" />
+                            View Full Execution Plan
+                          </Button>
                         </div>
                       ) : (
-                        <div className="flex items-center gap-2 text-gray-500">
-                          <Info className="h-4 w-4" />
-                          <span className="text-sm">Not configured (Optional - Can be added later)</span>
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-2 text-pink-700">
+                            <Zap className="h-5 w-5" />
+                            <span className="font-medium">Generate Execution Plan</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Transform your configuration into a complete execution plan with milestones, tasks, roles, and contracts.
+                          </p>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label className="text-xs">Client Name (optional)</Label>
+                              <Input 
+                                placeholder="Enter client name"
+                                value={clientName}
+                                onChange={(e) => setClientName(e.target.value)}
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Budget $ (optional)</Label>
+                              <Input 
+                                type="number"
+                                placeholder="e.g., 50000"
+                                value={planBudget}
+                                onChange={(e) => setPlanBudget(e.target.value)}
+                                className="mt-1"
+                              />
+                            </div>
+                          </div>
+                          <Button 
+                            className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600"
+                            onClick={handleGenerateExecutionPlan}
+                            disabled={generatingPlan}
+                          >
+                            {generatingPlan ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Generating Plan...
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles className="w-4 h-4 mr-2" />
+                                Generate Execution Plan
+                              </>
+                            )}
+                          </Button>
                         </div>
                       )}
                     </div>
