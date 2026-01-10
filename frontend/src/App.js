@@ -37,6 +37,7 @@ import ContractLifecycle from "./ContractLifecycle";
 import SalesCRM from "./SalesCRM";
 import AffiliateCRM from "./AffiliateCRM";
 import Communications from "./Communications";
+import PlaybookEngine from "./PlaybookEngine";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
