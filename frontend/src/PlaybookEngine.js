@@ -201,6 +201,15 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
               Resume
             </Button>
           )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleExportPlan('json')}
+            className="ml-2"
+          >
+            <Download className="w-4 h-4 mr-1" />
+            Export
+          </Button>
         </div>
       </div>
 
