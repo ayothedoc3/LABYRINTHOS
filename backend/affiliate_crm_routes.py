@@ -479,60 +479,6 @@ async def pay_commission(commission_id: str, payment_reference: str):
     return commission
 
 
-# ==================== STATS ENDPOINTS ====================
-
-@router.get("/stats", response_model=AffiliateCRMStats)
-async def get_affiliate_stats():
-    """Get affiliate CRM statistics"""
-    if not affiliates_db:
-        seed_demo_affiliates()
-    
-    affiliates = list(affiliates_db.values())
-    referrals = list(referrals_db.values())
-    commissions = list(commissions_db.values())
-    
-    # Affiliates by tier
-    tier_counts = {}
-    for tier in AffiliateTier:
-        tier_counts[tier.value] = len([a for a in affiliates if a.tier == tier])
-    
-    # Active affiliates
-    active_count = len([a for a in affiliates if a.status == AffiliateStatus.ACTIVE])
-    
-    # Referral stats
-    total_referrals = len(referrals)
-    converted = len([r for r in referrals if r.status == ReferralStatus.CONVERTED])
-    conversion_rate = (converted / total_referrals * 100) if total_referrals > 0 else 0
-    
-    # Commission stats
-    paid_commissions = sum(c.amount for c in commissions if c.status == CommissionStatus.PAID)
-    pending_commissions = sum(c.amount for c in commissions if c.status in [CommissionStatus.PENDING, CommissionStatus.APPROVED])
-    
-    # Top affiliates
-    top_affiliates = sorted(affiliates, key=lambda x: x.total_earnings, reverse=True)[:5]
-    
-    return AffiliateCRMStats(
-        total_affiliates=len(affiliates),
-        active_affiliates=active_count,
-        affiliates_by_tier=tier_counts,
-        total_referrals=total_referrals,
-        total_conversions=converted,
-        overall_conversion_rate=round(conversion_rate, 1),
-        total_commissions_paid=paid_commissions,
-        pending_commissions=pending_commissions,
-        top_affiliates=[
-            {
-                "id": a.id,
-                "name": a.name,
-                "tier": a.tier.value,
-                "total_earnings": a.total_earnings,
-                "conversion_rate": a.conversion_rate
-            }
-            for a in top_affiliates
-        ]
-    )
-
-
 @router.post("/seed-demo")
 async def seed_demo_data():
     """Seed demo data for affiliate CRM"""
