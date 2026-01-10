@@ -1733,7 +1733,7 @@ function App() {
           </TabsContent>
 
           <TabsContent value="workflows">
-            <WorkflowsPage />
+            <WorkflowsPage onNavigateToTab={handleTabChange} />
           </TabsContent>
 
           <TabsContent value="contracts">
