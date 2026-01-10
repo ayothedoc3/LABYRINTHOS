@@ -213,7 +213,10 @@ const WorkflowsPage = ({ onNavigateToTab }) => {
 
           {/* Content */}
           {activeSubTab === "builder" && (
-            <LabyrinthBuilder onWorkflowCreated={handleWorkflowCreated} />
+            <LabyrinthBuilder 
+              onWorkflowCreated={handleWorkflowCreated}
+              onNavigateToTab={onNavigateToTab}
+            />
           )}
           
           {activeSubTab === "canvas" && (
