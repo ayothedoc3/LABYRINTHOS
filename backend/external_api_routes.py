@@ -12,6 +12,7 @@ import hashlib
 import httpx
 import os
 import logging
+from motor.motor_asyncio import AsyncIOMotorClient
 
 from external_api_models import (
     Deal, DealCreate, DealUpdate, DealStage, StageValidationResult,
@@ -26,15 +27,70 @@ from external_api_models import (
 router = APIRouter(prefix="/api/external", tags=["External API"])
 logger = logging.getLogger(__name__)
 
-# ==================== IN-MEMORY STORAGE ====================
-# In production, these would be MongoDB collections
+# Database connection
+MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
+DB_NAME = os.environ.get("DB_NAME", "labyrinth_db")
+client = AsyncIOMotorClient(MONGO_URL)
+db = client[DB_NAME]
 
+# Collections
+deals_collection = db.external_deals
+external_leads_collection = db.external_leads
+tasks_collection = db.external_tasks
+partners_collection = db.external_partners
+
+# Keep in-memory storage for backward compatibility
 deals_db: dict[str, Deal] = {}
 external_leads_db: dict[str, ExternalLead] = {}
 tasks_db: dict[str, Task] = {}
 partners_db: dict[str, Partner] = {}
 external_contracts_db: dict[str, dict] = {}  # Contracts created from won deals
 webhook_configs: List[WebhookConfig] = []
+
+
+def serialize_doc(doc: dict) -> dict:
+    """Convert MongoDB document for JSON serialization"""
+    if doc is None:
+        return None
+    if "_id" in doc:
+        del doc["_id"]
+    for key, value in doc.items():
+        if isinstance(value, datetime):
+            doc[key] = value.isoformat()
+        elif isinstance(value, list):
+            doc[key] = [serialize_doc(v) if isinstance(v, dict) else v for v in value]
+        elif isinstance(value, dict):
+            doc[key] = serialize_doc(value)
+    return doc
+
+
+def deal_to_dict(deal: Deal) -> dict:
+    """Convert Deal model to dict for MongoDB storage"""
+    data = deal.model_dump()
+    data["_id"] = deal.id
+    return data
+
+
+def lead_to_dict(lead: ExternalLead) -> dict:
+    """Convert ExternalLead model to dict for MongoDB storage"""
+    data = lead.model_dump()
+    data["_id"] = lead.id
+    return data
+
+
+def task_to_dict(task: Task) -> dict:
+    """Convert Task model to dict for MongoDB storage"""
+    data = task.model_dump()
+    data["_id"] = task.id
+    return data
+
+
+def partner_to_dict(partner: Partner) -> dict:
+    """Convert Partner model to dict for MongoDB storage"""
+    data = partner.model_dump()
+    data["_id"] = partner.id
+    return data
+
 
 # API Keys for authentication
 API_KEYS = {
