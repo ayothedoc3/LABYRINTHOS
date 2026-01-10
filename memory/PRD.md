@@ -158,12 +158,11 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
 
 ## Prioritized Backlog
 
-### P1 (High Priority) - Connect Labyrinth Builder to Playbook Engine
-- [ ] **Optimization Plan Feature**
-  - Make final Labyrinth Builder step functional
-  - Connect to `POST /api/playbook-engine/generate` endpoint
-  - Display generated plan in builder flow
-  - Files: `LabyrinthBuilder.js`
+### P1 (High Priority) - ✅ COMPLETED
+- [x] **Connect Labyrinth Builder to Playbook Engine** - DONE
+  - Step 9 "Optimization Plan" now generates execution plans
+  - Builder selections (Issue, Campaign, Sprint, Playbook) map to Playbook Engine strategy inputs
+  - Generated plans display in dialog with milestones, tasks, roles, and budget
 
 ### P2 (Medium Priority) - Data Layer Improvements
 - [ ] Move hardcoded demo data to MongoDB collections
