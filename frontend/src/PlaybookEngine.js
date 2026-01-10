@@ -138,11 +138,6 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
   const [selectedAssignee, setSelectedAssignee] = useState('');
   const [assigning, setAssigning] = useState(false);
 
-  useEffect(() => {
-    loadPlan();
-    loadUsers();
-  }, [planId]);
-
   const loadPlan = async () => {
     setLoading(true);
     try {
@@ -162,6 +157,12 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
       console.error('Error loading users:', error);
     }
   };
+
+  useEffect(() => {
+    loadPlan();
+    loadUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [planId]);
 
   const handleStatusChange = async (newStatus) => {
     try {
