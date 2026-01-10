@@ -195,6 +195,13 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
 
 ## File Reference
 
+### Backend - Playbook Engine
+- `/app/backend/playbook_engine_models.py` - Strategy, ExecutionPlan, Milestone, Task, Role models
+- `/app/backend/playbook_engine_routes.py` - Playbook Engine API endpoints
+
+### Frontend - Playbook Engine
+- `/app/frontend/src/PlaybookEngine.js` - Playbook Engine component (plan management, generation, detail view)
+
 ### Backend - CRM Modules
 - `/app/backend/sales_crm_models.py` - Lead, Proposal, Stage models
 - `/app/backend/sales_crm_routes.py` - Sales CRM API endpoints
