@@ -12,7 +12,7 @@ import random
 from sales_crm_models import Lead, LeadStage, LeadSource, LeadPriority, Proposal, ProposalStatus, ContactInfo
 from affiliate_crm_models import Affiliate, AffiliateStatus, AffiliateTier, Referral, ReferralStatus, Commission, CommissionStatus
 from communication_models import Thread, Message, Participant, ThreadType, ThreadStatus, MessageType, ParticipantRole
-from external_api_models import Deal, DealStage, ExternalLead, LeadStatus, LeadTier, Task, TaskStatus, Partner
+from external_api_models import Deal, DealStage, ExternalLead, LeadStatus, LeadTier, Task, TaskStatus, TaskPriority, Partner
 from playbook_engine_models import (
     ExecutionPlan, ExecutionMilestone, ExecutionTask, ExecutionRole, ExecutionContract, CommunicationChannel,
     MilestoneStatus, ExecutionPhase
