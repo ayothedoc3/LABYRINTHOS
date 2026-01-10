@@ -216,6 +216,13 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
   - Counter shows "Showing X of Y tasks"
   - Select All works with filtered results
   - Empty state with "Clear filters" link when no matches
+- [x] **Task search** - DONE (Jan 2026)
+  - Search input with icon and placeholder "Search tasks..."
+  - Instant filtering as you type
+  - Searches both task title and assignee name
+  - X button to clear search
+  - Shows search term in empty state message
+  - Works together with status and assignee filters
 - [x] **Export plans to JSON/CSV** - DONE (Jan 2026)
   - Added Export button in Plan Details header
   - Exports plan metadata, milestones, tasks, and roles
