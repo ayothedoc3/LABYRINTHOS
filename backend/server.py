@@ -1156,10 +1156,14 @@ async def seed_all_demo_data():
     """
     from seed_all import seed_all_data
     from sales_crm_routes import leads_db, proposals_db, leads_collection, proposals_collection, lead_to_dict, proposal_to_dict
-    from affiliate_crm_routes import affiliates_db, referrals_db, commissions_db
+    from affiliate_crm_routes import (
+        affiliates_db, referrals_db, commissions_db,
+        affiliates_collection, referrals_collection, commissions_collection,
+        affiliate_to_dict, referral_to_dict, commission_to_dict
+    )
     from communication_routes import threads_db, messages_db
     from external_api_routes import deals_db, external_leads_db, tasks_db, partners_db
-    from playbook_engine_routes import execution_plans_db
+    from playbook_engine_routes import execution_plans_db, plans_collection, plan_to_dict
     
     # Seed in-memory data
     results = seed_all_data(
@@ -1180,20 +1184,38 @@ async def seed_all_demo_data():
     # Persist Sales CRM to MongoDB
     await leads_collection.delete_many({})
     await proposals_collection.delete_many({})
-    
     for lead in leads_db.values():
         await leads_collection.insert_one(lead_to_dict(lead))
-    
     for proposal in proposals_db.values():
         await proposals_collection.insert_one(proposal_to_dict(proposal))
     
+    # Persist Affiliate CRM to MongoDB
+    await affiliates_collection.delete_many({})
+    await referrals_collection.delete_many({})
+    await commissions_collection.delete_many({})
+    for affiliate in affiliates_db.values():
+        await affiliates_collection.insert_one(affiliate_to_dict(affiliate))
+    for referral in referrals_db.values():
+        await referrals_collection.insert_one(referral_to_dict(referral))
+    for commission in commissions_db.values():
+        await commissions_collection.insert_one(commission_to_dict(commission))
+    
+    # Persist Playbook Engine to MongoDB
+    await plans_collection.delete_many({})
+    for plan in execution_plans_db.values():
+        await plans_collection.insert_one(plan_to_dict(plan))
+    
     results["mongodb_persisted"] = {
         "sales_leads": len(leads_db),
-        "sales_proposals": len(proposals_db)
+        "sales_proposals": len(proposals_db),
+        "affiliates": len(affiliates_db),
+        "referrals": len(referrals_db),
+        "commissions": len(commissions_db),
+        "execution_plans": len(execution_plans_db)
     }
     
     return {
-        "message": "All demo data seeded successfully (Sales CRM persisted to MongoDB)",
+        "message": "All demo data seeded successfully and persisted to MongoDB",
         "results": results
     }
 
