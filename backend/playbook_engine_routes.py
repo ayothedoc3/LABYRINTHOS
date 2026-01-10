@@ -711,7 +711,11 @@ async def seed_demo_data():
         first_plan.status = "active"
         execution_plans_db[first_plan.id] = first_plan
     
+    # Persist to MongoDB
+    for plan in execution_plans_db.values():
+        await plans_collection.insert_one(plan_to_dict(plan))
+    
     return {
-        "message": f"Created {len(created_plans)} demo execution plans",
+        "message": f"Created {len(created_plans)} demo execution plans in MongoDB",
         "plan_ids": created_plans
     }
