@@ -1143,6 +1143,44 @@ app.include_router(communication_router)  # Communication routes
 app.include_router(external_router)  # External API for CRM integration
 app.include_router(playbook_engine_router)  # Playbook Engine routes
 
+
+# ==================== UNIFIED SEED ENDPOINT ====================
+
+@app.post("/api/seed-all")
+async def seed_all_demo_data():
+    """
+    Unified endpoint to seed all demo data across all modules.
+    Consolidates data seeding for Sales CRM, Affiliate CRM, Communications,
+    External API, and Playbook Engine.
+    """
+    from seed_all import seed_all_data
+    from sales_crm_routes import leads_db, proposals_db
+    from affiliate_crm_routes import affiliates_db, referrals_db, commissions_db
+    from communication_routes import threads_db, messages_db
+    from external_api_routes import deals_db, external_leads_db, tasks_db, partners_db
+    from playbook_engine_routes import execution_plans_db
+    
+    results = seed_all_data(
+        leads_db=leads_db,
+        proposals_db=proposals_db,
+        affiliates_db=affiliates_db,
+        referrals_db=referrals_db,
+        commissions_db=commissions_db,
+        threads_db=threads_db,
+        messages_db=messages_db,
+        deals_db=deals_db,
+        external_leads_db=external_leads_db,
+        tasks_db=tasks_db,
+        partners_db=partners_db,
+        execution_plans_db=execution_plans_db
+    )
+    
+    return {
+        "message": "All demo data seeded successfully",
+        "results": results
+    }
+
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
