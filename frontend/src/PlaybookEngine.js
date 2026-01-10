@@ -645,23 +645,42 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
               {plan.tasks?.map((task) => (
                 <div 
                   key={task.id} 
-                  className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                  className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors"
+                  data-testid={`task-item-${task.id}`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-1">
                     <input 
                       type="checkbox" 
                       checked={task.status === 'completed'}
                       className="w-4 h-4"
                       readOnly
                     />
-                    <div>
+                    <div className="flex-1">
                       <div className={`text-body ${task.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>
                         {task.title}
                       </div>
-                      <div className="text-micro">{task.estimated_hours}h estimated</div>
+                      <div className="flex items-center gap-3 mt-1">
+                        <span className="text-micro">{task.estimated_hours}h estimated</span>
+                        {task.assignee_name && (
+                          <span className="text-micro flex items-center gap-1 text-primary">
+                            <User className="w-3 h-3" />
+                            {task.assignee_name}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 text-xs"
+                      onClick={() => openAssignDialog(task)}
+                      data-testid={`assign-task-${task.id}`}
+                    >
+                      <UserPlus className="w-3 h-3 mr-1" />
+                      {task.assignee_id ? 'Reassign' : 'Assign'}
+                    </Button>
                     <Badge 
                       variant={task.priority === 'HIGH' || task.priority === 'URGENT' ? 'destructive' : 'outline'}
                       className="text-xs"
@@ -676,6 +695,82 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
               ))}
             </div>
           </ScrollArea>
+
+          {/* Task Assignment Dialog */}
+          <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Assign Task</DialogTitle>
+                <DialogDescription>
+                  {selectedTask?.title}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>Select Assignee</Label>
+                  <Select value={selectedAssignee} onValueChange={setSelectedAssignee}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a team member..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {users.length > 0 ? (
+                        users.map((user) => (
+                          <SelectItem key={user.id} value={user.id}>
+                            <div className="flex items-center gap-2">
+                              <User className="w-4 h-4" />
+                              <span>{user.name}</span>
+                              <Badge variant="outline" className="text-xs ml-2">
+                                {user.role}
+                              </Badge>
+                            </div>
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="no-users" disabled>
+                          No users available
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                  {users.length === 0 && (
+                    <p className="text-micro text-muted-foreground">
+                      No team members found. Seed demo users first via POST /api/roles/seed-demo-users
+                    </p>
+                  )}
+                </div>
+                {selectedTask?.assignee_name && (
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <div className="text-micro text-muted-foreground">Currently assigned to:</div>
+                    <div className="font-medium flex items-center gap-2 mt-1">
+                      <User className="w-4 h-4" />
+                      {selectedTask.assignee_name}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowAssignDialog(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleAssignTask} 
+                  disabled={!selectedAssignee || assigning}
+                >
+                  {assigning ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-1 animate-spin" />
+                      Assigning...
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4 mr-1" />
+                      Assign Task
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </TabsContent>
 
         <TabsContent value="roles" className="mt-4">
