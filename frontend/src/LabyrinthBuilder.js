@@ -191,9 +191,24 @@ const LabyrinthBuilder = ({ onWorkflowCreated }) => {
       const sprint = sprints.find(s => s.id === selectedSprint);
       const playbook = playbooks.find(p => p.id === selectedPlaybook);
       
+      // Map builder issue IDs to Playbook Engine's IssueCategory enum
+      const issueCategoryMap = {
+        "operations": "OPERATIONS",
+        "client_services": "CLIENT_SERVICES",
+        "sales": "CLIENT_SERVICES",  // Sales maps to client services
+        "marketing": "CLIENT_SERVICES",  // Marketing campaigns
+        "development": "APP_DEVELOPMENT",
+        "hr": "OPERATIONS",
+        "finance": "CONSULTATION",
+        "consultation": "CONSULTATION",
+        "crisis": "CRISIS_MANAGEMENT"
+      };
+      
+      const issueCategory = issueCategoryMap[selectedIssue] || "OPERATIONS";
+      
       // Map builder selections to Playbook Engine strategy inputs
       const strategyInput = {
-        issue_category: issue?.category || selectedIssue,
+        issue_category: issueCategory,
         issue_type_id: selectedCampaign,
         issue_name: `${issue?.name || selectedIssue} - ${campaign?.name || selectedCampaign}`,
         sprint_timeline: selectedSprint,
