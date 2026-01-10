@@ -946,14 +946,14 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
             <div className="space-y-2">
               {filteredTasks.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  <Filter className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p>No tasks match the current filters</p>
+                  <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p>No tasks match {searchQuery ? `"${searchQuery}"` : 'the current filters'}</p>
                   <Button
                     variant="link"
                     size="sm"
-                    onClick={() => { setStatusFilter('all'); setAssigneeFilter('all'); }}
+                    onClick={clearAllFilters}
                   >
-                    Clear filters
+                    Clear {searchQuery ? 'search' : 'filters'}
                   </Button>
                 </div>
               ) : (
