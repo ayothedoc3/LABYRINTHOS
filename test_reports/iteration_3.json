@@ -1,0 +1,161 @@
+{
+  "summary": "Phase 4 External API Testing - 27/28 tests passed (1 skipped due to known bug). External API for CRM integration is mostly functional with one critical bug blocking the 'deal won' auto-contract creation flow.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "PATCH /api/external/deals/{id} with status=won",
+        "issue": "Returns 500 error. The create_contract_from_deal() function tries to import 'contracts_db' from contract_lifecycle_routes, but that module uses MongoDB, not in-memory storage. ImportError: cannot import name 'contracts_db' from 'contract_lifecycle_routes'",
+        "priority": "CRITICAL",
+        "file": "/app/backend/external_api_routes.py",
+        "line": 219,
+        "fix_suggestion": "Either: (1) Create an in-memory contracts_db in external_api_routes.py, or (2) Use MongoDB to store contracts via the existing contract_lifecycle_routes module"
+      }
+    ],
+    "minor": [
+      {
+        "endpoint": "POST /api/external/webhooks/register",
+        "issue": "The 'events' query parameter defaults to ['*'] instead of parsing the provided list. FastAPI List query params need special handling (Query(...) with explicit list type)",
+        "priority": "LOW"
+      },
+      {
+        "endpoint": "POST /api/external/seed-demo",
+        "issue": "Seed data creates tasks with status=COMPLETED but doesn't set completed_at timestamp",
+        "priority": "LOW"
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "documentation_issues": [
+    {
+      "file": "/app/memory/EXTERNAL_API_DOCS.md",
+      "issue": "Stage-gate requirements table says 'Discovery -> Qualification' has no requirements (-), but the code requires 'discovery_call_completed' and 'budget_confirmed' tasks to be completed before moving to qualification stage",
+      "priority": "MEDIUM"
+    }
+  ],
+  "test_report_links": [
+    "/app/tests/test_phase4_external_api.py",
+    "/app/test_reports/pytest/pytest_phase4_results.xml"
+  ],
+  "action_items": [
+    "CRITICAL: Fix create_contract_from_deal() in external_api_routes.py - cannot import contracts_db from contract_lifecycle_routes",
+    "Update EXTERNAL_API_DOCS.md to match actual stage-gate requirements (discovery->qualification requires tasks)",
+    "Fix seed-demo to set completed_at for completed tasks",
+    "Consider fixing webhook events parameter parsing"
+  ],
+  "critical_code_review_comments": [
+    "CRITICAL BUG: external_api_routes.py line 219 tries to import 'contracts_db' from contract_lifecycle_routes, but that module uses MongoDB. This breaks the deal won -> auto-create contract flow.",
+    "All External API data is stored in-memory (MOCKED) - deals_db, external_leads_db, tasks_db, partners_db. Not persisted to MongoDB.",
+    "Stage-gate validation checks requirements for TARGET stage, not current stage. This means moving from discovery to qualification requires discovery_call_completed and budget_confirmed tasks."
+  ],
+  "updated_files": [
+    "/app/tests/test_phase4_external_api.py"
+  ],
+  "success_rate": {
+    "backend": "96% (27/28 tests passed, 1 skipped due to known bug)"
+  },
+  "test_credentials": "API Key: elk_f531ebe4a7d24c8fbcde123456789abc (X-API-Key header)",
+  "seed_data_creation": "Demo data seeded via POST /api/external/seed-demo - creates 3 deals, 2 leads, 4 tasks, 1 partner",
+  "retest_needed": true,
+  "main_agent_can_self_test": false,
+  "context_for_next_testing_agent": "Phase 4 External API mostly working. Critical bug: deal won flow fails due to contracts_db import error. All other CRUD operations for deals, leads, tasks, partners work correctly. Stage-gate validation, KPIs, pipeline stats, and webhooks all functional. The stage-gate logic requires tasks to be completed before stage transitions (e.g., discovery->qualification needs discovery_call_completed and budget_confirmed tasks).",
+  "features_tested": {
+    "authentication": {
+      "status": "PASS",
+      "details": "X-API-Key header required, invalid/missing key returns 401"
+    },
+    "deals_crud": {
+      "status": "PASS",
+      "details": "Create, read, update deals working. Stage validation working."
+    },
+    "deal_won_flow": {
+      "status": "FAIL",
+      "details": "PATCH with status=won returns 500 due to contracts_db import error"
+    },
+    "deal_lost_flow": {
+      "status": "PASS",
+      "details": "PATCH with status=lost correctly updates deal"
+    },
+    "leads_crud": {
+      "status": "PASS",
+      "details": "Create, read, update leads working. Auto-thread creation working."
+    },
+    "tasks_crud": {
+      "status": "PASS",
+      "details": "Create, update tasks working. Get deal tasks working."
+    },
+    "partners_crud": {
+      "status": "PASS",
+      "details": "Create partner, list partners working"
+    },
+    "kpis": {
+      "status": "PASS",
+      "details": "GET /api/external/kpis returns correct KPI metrics"
+    },
+    "pipeline": {
+      "status": "PASS",
+      "details": "GET /api/external/pipeline returns stage stats"
+    },
+    "webhooks": {
+      "status": "PASS",
+      "details": "Register and list webhooks working (events param has minor issue)"
+    },
+    "stage_gate_validation": {
+      "status": "PASS",
+      "details": "Stage transitions validated correctly based on completed tasks"
+    }
+  },
+  "mocked_apis": {
+    "has_mocked_apis": true,
+    "mocked_apis_list": [
+      "/api/external/deals - In-memory storage (deals_db)",
+      "/api/external/leads - In-memory storage (external_leads_db)",
+      "/api/external/tasks - In-memory storage (tasks_db)",
+      "/api/external/partners - In-memory storage (partners_db)",
+      "/api/external/kpis - Calculated from in-memory data",
+      "/api/external/pipeline - Calculated from in-memory data"
+    ]
+  },
+  "api_endpoints_tested": {
+    "authentication": [
+      "GET /api/external/kpis (no key) - 401 Missing API key",
+      "GET /api/external/kpis (invalid key) - 401 Invalid API key",
+      "GET /api/external/kpis (valid key) - 200 OK"
+    ],
+    "deals": [
+      "POST /api/external/deals - 200 OK (create)",
+      "GET /api/external/deals/{id} - 200 OK",
+      "GET /api/external/deals/{nonexistent} - 404 Not Found",
+      "PATCH /api/external/deals/{id} - 200 OK (update basic fields)",
+      "PATCH /api/external/deals/{id} status=won - 500 ERROR (BUG)",
+      "PATCH /api/external/deals/{id} status=lost - 200 OK",
+      "GET /api/external/deals/{id}/validate-stage - 200 OK"
+    ],
+    "leads": [
+      "POST /api/external/leads - 200 OK (creates thread automatically)",
+      "GET /api/external/leads/{id} - 200 OK",
+      "GET /api/external/leads/{nonexistent} - 404 Not Found",
+      "PATCH /api/external/leads/{id} - 200 OK"
+    ],
+    "tasks": [
+      "POST /api/external/tasks - 200 OK",
+      "PATCH /api/external/tasks/{id} - 200 OK",
+      "GET /api/external/deals/{id}/tasks - 200 OK"
+    ],
+    "partners": [
+      "POST /api/external/partners - 200 OK",
+      "GET /api/external/partners - 200 OK"
+    ],
+    "kpis_pipeline": [
+      "GET /api/external/kpis - 200 OK",
+      "GET /api/external/pipeline - 200 OK"
+    ],
+    "webhooks": [
+      "POST /api/external/webhooks/register - 200 OK",
+      "GET /api/external/webhooks - 200 OK"
+    ]
+  }
+}
