@@ -481,29 +481,32 @@ async def update_milestone(plan_id: str, milestone_id: str, status: MilestoneSta
 @router.patch("/plans/{plan_id}/tasks/{task_id}")
 async def update_task(plan_id: str, task_id: str, status: str):
     """Update task status"""
-    if plan_id not in execution_plans_db:
+    plan_doc = await plans_collection.find_one({"id": plan_id})
+    if not plan_doc:
         raise HTTPException(status_code=404, detail="Execution plan not found")
     
-    plan = execution_plans_db[plan_id]
+    tasks = plan_doc.get("tasks", [])
+    task_found = False
+    updated_task = None
     
-    for task in plan.tasks:
-        if task.id == task_id:
-            task.status = status
+    for task in tasks:
+        if task.get("id") == task_id:
+            task["status"] = status
             if status == "completed":
-                task.completed_date = datetime.now(timezone.utc)
-            
-            plan.updated_at = datetime.now(timezone.utc)
-            execution_plans_db[plan_id] = plan
-            
-            # Update in MongoDB
-            await plans_collection.update_one(
-                {"id": plan_id},
-                {"$set": plan_to_dict(plan)}
-            )
-            
-            return task
+                task["completed_date"] = datetime.now(timezone.utc).isoformat()
+            task_found = True
+            updated_task = task
+            break
     
-    raise HTTPException(status_code=404, detail="Task not found")
+    if not task_found:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    await plans_collection.update_one(
+        {"id": plan_id},
+        {"$set": {"tasks": tasks, "updated_at": datetime.now(timezone.utc)}}
+    )
+    
+    return {"message": "Task status updated", "task_id": task_id, "status": status, "task": updated_task}
 
 
 @router.patch("/plans/{plan_id}/tasks/{task_id}/assign")
