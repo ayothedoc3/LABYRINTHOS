@@ -279,34 +279,55 @@ async def get_affiliate_stats():
     )
 
 
-@router.get("/", response_model=List[Affiliate])
+@router.get("/")
 async def get_affiliates(
     status: Optional[AffiliateStatus] = None,
     tier: Optional[AffiliateTier] = None
 ):
     """Get all affiliates with optional filtering"""
-    if not affiliates_db:
-        seed_demo_affiliates()
-    
-    affiliates = list(affiliates_db.values())
-    
+    # Build query filter
+    query = {}
     if status:
-        affiliates = [a for a in affiliates if a.status == status]
+        query["status"] = status.value
     if tier:
-        affiliates = [a for a in affiliates if a.tier == tier]
+        query["tier"] = tier.value
     
-    return sorted(affiliates, key=lambda x: x.total_earnings, reverse=True)
+    # Query MongoDB
+    affiliates_docs = await affiliates_collection.find(query, {"_id": 0}).sort("total_earnings", -1).to_list(1000)
+    
+    # If no data in MongoDB, seed and try again
+    if not affiliates_docs:
+        if affiliates_db:
+            for affiliate in affiliates_db.values():
+                await affiliates_collection.update_one(
+                    {"id": affiliate.id},
+                    {"$set": affiliate_to_dict(affiliate)},
+                    upsert=True
+                )
+            affiliates_docs = await affiliates_collection.find(query, {"_id": 0}).sort("total_earnings", -1).to_list(1000)
+        else:
+            seed_demo_affiliates()
+            for affiliate in affiliates_db.values():
+                await affiliates_collection.update_one(
+                    {"id": affiliate.id},
+                    {"$set": affiliate_to_dict(affiliate)},
+                    upsert=True
+                )
+            affiliates_docs = await affiliates_collection.find(query, {"_id": 0}).sort("total_earnings", -1).to_list(1000)
+    
+    return [serialize_doc(doc) for doc in affiliates_docs]
 
 
-@router.get("/{affiliate_id}", response_model=Affiliate)
+@router.get("/{affiliate_id}")
 async def get_affiliate(affiliate_id: str):
     """Get a specific affiliate"""
-    if affiliate_id not in affiliates_db:
+    affiliate_doc = await affiliates_collection.find_one({"id": affiliate_id}, {"_id": 0})
+    if not affiliate_doc:
         raise HTTPException(status_code=404, detail="Affiliate not found")
-    return affiliates_db[affiliate_id]
+    return serialize_doc(affiliate_doc)
 
 
-@router.post("/", response_model=Affiliate)
+@router.post("/")
 async def create_affiliate(affiliate_data: AffiliateCreate):
     """Create a new affiliate"""
     base_url = "https://labyrinth.example.com"
@@ -318,52 +339,66 @@ async def create_affiliate(affiliate_data: AffiliateCreate):
         referral_code=referral_code,
         referral_link=f"{base_url}?ref={referral_code}"
     )
+    
+    # Store in MongoDB
+    await affiliates_collection.insert_one(affiliate_to_dict(affiliate))
     affiliates_db[affiliate.id] = affiliate
+    
     return affiliate
 
 
 @router.put("/{affiliate_id}/status")
 async def update_affiliate_status(affiliate_id: str, status: AffiliateStatus):
     """Update affiliate status"""
-    if affiliate_id not in affiliates_db:
+    affiliate_doc = await affiliates_collection.find_one({"id": affiliate_id})
+    if not affiliate_doc:
         raise HTTPException(status_code=404, detail="Affiliate not found")
     
-    affiliate = affiliates_db[affiliate_id]
-    affiliate.status = status
-    affiliate.updated_at = datetime.now(timezone.utc)
-    affiliates_db[affiliate_id] = affiliate
-    return affiliate
+    await affiliates_collection.update_one(
+        {"id": affiliate_id},
+        {"$set": {"status": status.value, "updated_at": datetime.now(timezone.utc)}}
+    )
+    
+    updated_doc = await affiliates_collection.find_one({"id": affiliate_id}, {"_id": 0})
+    return serialize_doc(updated_doc)
 
 
 @router.put("/{affiliate_id}/tier")
 async def update_affiliate_tier(affiliate_id: str, tier: AffiliateTier):
     """Update affiliate tier"""
-    if affiliate_id not in affiliates_db:
+    affiliate_doc = await affiliates_collection.find_one({"id": affiliate_id})
+    if not affiliate_doc:
         raise HTTPException(status_code=404, detail="Affiliate not found")
     
-    affiliate = affiliates_db[affiliate_id]
-    affiliate.tier = tier
-    affiliate.updated_at = datetime.now(timezone.utc)
-    affiliates_db[affiliate_id] = affiliate
-    return affiliate
+    await affiliates_collection.update_one(
+        {"id": affiliate_id},
+        {"$set": {"tier": tier.value, "updated_at": datetime.now(timezone.utc)}}
+    )
+    
+    updated_doc = await affiliates_collection.find_one({"id": affiliate_id}, {"_id": 0})
+    return serialize_doc(updated_doc)
 
 
-@router.get("/{affiliate_id}/referrals", response_model=List[Referral])
+@router.get("/{affiliate_id}/referrals")
 async def get_affiliate_referrals(affiliate_id: str):
     """Get all referrals for an affiliate"""
-    if affiliate_id not in affiliates_db:
+    affiliate_doc = await affiliates_collection.find_one({"id": affiliate_id})
+    if not affiliate_doc:
         raise HTTPException(status_code=404, detail="Affiliate not found")
     
-    return [r for r in referrals_db.values() if r.affiliate_id == affiliate_id]
+    referrals_docs = await referrals_collection.find({"affiliate_id": affiliate_id}, {"_id": 0}).to_list(1000)
+    return [serialize_doc(doc) for doc in referrals_docs]
 
 
-@router.get("/{affiliate_id}/commissions", response_model=List[Commission])
+@router.get("/{affiliate_id}/commissions")
 async def get_affiliate_commissions(affiliate_id: str):
     """Get all commissions for an affiliate"""
-    if affiliate_id not in affiliates_db:
+    affiliate_doc = await affiliates_collection.find_one({"id": affiliate_id})
+    if not affiliate_doc:
         raise HTTPException(status_code=404, detail="Affiliate not found")
     
-    return [c for c in commissions_db.values() if c.affiliate_id == affiliate_id]
+    commissions_docs = await commissions_collection.find({"affiliate_id": affiliate_id}, {"_id": 0}).to_list(1000)
+    return [serialize_doc(doc) for doc in commissions_docs]
 
 
 # ==================== TIER ENDPOINTS ====================
