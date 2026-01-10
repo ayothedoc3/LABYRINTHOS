@@ -48,6 +48,13 @@ const LabyrinthBuilder = ({ onWorkflowCreated }) => {
   const [rendering, setRendering] = useState(false);
   const [renderResult, setRenderResult] = useState(null);
   
+  // Execution Plan state (Optimization Plan)
+  const [executionPlan, setExecutionPlan] = useState(null);
+  const [generatingPlan, setGeneratingPlan] = useState(false);
+  const [showPlanDialog, setShowPlanDialog] = useState(false);
+  const [clientName, setClientName] = useState("");
+  const [planBudget, setPlanBudget] = useState("");
+  
   // Loading states
   const [loading, setLoading] = useState(true);
 
