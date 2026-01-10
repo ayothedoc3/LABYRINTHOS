@@ -215,17 +215,16 @@ def check_stage_requirements(deal: Deal, next_stage: DealStage) -> StageValidati
 # ==================== AUTO-WORKFLOW HELPERS ====================
 
 async def create_contract_from_deal(deal: Deal, background_tasks: BackgroundTasks) -> str:
-    """Auto-create contract when deal is won"""
-    from contract_lifecycle_routes import contracts_db, Contract
+    """Auto-create contract when deal is won - stores in local contracts storage"""
     
     contract_id = f"contract_{uuid.uuid4().hex[:12]}"
     
-    # Create contract in lifecycle system
-    contract = {
+    # Create contract data
+    contract_data = {
         "id": contract_id,
         "name": f"{deal.name} - Contract",
         "client_name": deal.name.split(" - ")[0] if " - " in deal.name else deal.name,
-        "client_package": "GOLD" if deal.value > 50000 else "SILVER" if deal.value > 20000 else "BRONZE",
+        "client_package": "GOLD" if deal.value > 5000000 else "SILVER" if deal.value > 2000000 else "BRONZE",
         "function": "SALES",
         "contract_type": "service_agreement",
         "stage": "BID_APPROVED",
@@ -235,7 +234,8 @@ async def create_contract_from_deal(deal: Deal, background_tasks: BackgroundTask
         "updated_at": datetime.now(timezone.utc).isoformat()
     }
     
-    contracts_db[contract_id] = contract
+    # Store in external API's contracts storage
+    external_contracts_db[contract_id] = contract_data
     
     # Update deal with contract reference
     deal.contract_id = contract_id
