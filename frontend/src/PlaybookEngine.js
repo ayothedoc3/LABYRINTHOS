@@ -859,12 +859,12 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
             </Select>
 
             {/* Clear Filters */}
-            {(statusFilter !== 'all' || assigneeFilter !== 'all') && (
+            {hasActiveFilters && (
               <Button
                 variant="ghost"
                 size="sm"
                 className="h-8 px-2 text-xs"
-                onClick={() => { setStatusFilter('all'); setAssigneeFilter('all'); }}
+                onClick={clearAllFilters}
                 data-testid="clear-filters"
               >
                 <X className="w-3 h-3 mr-1" />
