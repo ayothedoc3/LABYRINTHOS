@@ -35,7 +35,7 @@ def seed_sales_crm(leads_db: dict, proposals_db: dict) -> dict:
     
     demo_leads = [
         {"name": "Sarah Chen", "email": "sarah.chen@techcorp.com", "company": "TechCorp Industries", "source": LeadSource.WEBSITE, "stage": LeadStage.QUALIFIED, "value": 75000},
-        {"name": "Michael Rodriguez", "email": "m.rodriguez@innovate.io", "company": "Innovate.io", "source": LeadSource.REFERRAL, "stage": LeadStage.PROPOSAL, "value": 120000},
+        {"name": "Michael Rodriguez", "email": "m.rodriguez@innovate.io", "company": "Innovate.io", "source": LeadSource.REFERRAL, "stage": LeadStage.PROPOSAL_SENT, "value": 120000},
         {"name": "Emily Watson", "email": "ewatson@globalfinance.com", "company": "Global Finance Ltd", "source": LeadSource.LINKEDIN, "stage": LeadStage.NEGOTIATION, "value": 200000},
         {"name": "David Kim", "email": "david.kim@startupventures.co", "company": "Startup Ventures", "source": LeadSource.CONFERENCE, "stage": LeadStage.NEW, "value": 45000},
         {"name": "Lisa Thompson", "email": "lisa.t@enterprise.com", "company": "Enterprise Solutions", "source": LeadSource.COLD_CALL, "stage": LeadStage.CONTACTED, "value": 90000},
