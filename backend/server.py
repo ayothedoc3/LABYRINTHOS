@@ -46,6 +46,8 @@ from settings_routes import settings_router, set_db as set_settings_db
 from ai_routes import ai_router, set_db as set_ai_db
 from bulk_routes import bulk_router, set_db as set_bulk_db
 from labyrinth_builder_routes import builder_router
+from role_routes import router as role_router
+from contract_lifecycle_routes import router as lifecycle_router
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
