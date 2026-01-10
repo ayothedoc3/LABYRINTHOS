@@ -180,6 +180,8 @@
 - Click Export → Download PDF → Open and show formatted report
 - Click "New Plan" → Fill form → Generate → See result
 - **Click "Assign" on task → Select user → Confirm assignment** ⭐
+- **Click status dropdown → Change to "In Progress" → See icon change** ⭐
+- **Click checkbox to mark task completed → See strikethrough text** ⭐
 
 ---
 
