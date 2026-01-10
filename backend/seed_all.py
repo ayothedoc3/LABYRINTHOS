@@ -356,7 +356,7 @@ def seed_playbook_engine(execution_plans_db: dict) -> dict:
         
         # Generate milestones
         milestones = []
-        phases = [ExecutionPhase.INITIATION, ExecutionPhase.PLANNING, ExecutionPhase.EXECUTION, ExecutionPhase.REVIEW, ExecutionPhase.CLOSURE]
+        phases = [ExecutionPhase.INITIATION, ExecutionPhase.PLANNING, ExecutionPhase.EXECUTION, ExecutionPhase.MONITORING, ExecutionPhase.CLOSURE]
         for i, phase in enumerate(phases):
             milestone = ExecutionMilestone(
                 id=f"ms_{uuid.uuid4().hex[:8]}",
