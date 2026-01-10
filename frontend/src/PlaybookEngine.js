@@ -666,8 +666,9 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
                     <input 
                       type="checkbox" 
                       checked={task.status === 'completed'}
-                      className="w-4 h-4"
-                      readOnly
+                      className="w-4 h-4 cursor-pointer"
+                      onChange={(e) => handleTaskStatusChange(task.id, e.target.checked ? 'completed' : 'pending')}
+                      data-testid={`task-checkbox-${task.id}`}
                     />
                     <div className="flex-1">
                       <div className={`text-body ${task.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>
@@ -701,9 +702,40 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
                     >
                       {task.priority}
                     </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      {task.status}
-                    </Badge>
+                    <Select 
+                      value={task.status} 
+                      onValueChange={(value) => handleTaskStatusChange(task.id, value)}
+                    >
+                      <SelectTrigger className="w-[120px] h-7 text-xs" data-testid={`task-status-${task.id}`}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-muted-foreground" />
+                            Pending
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="in_progress">
+                          <span className="flex items-center gap-1">
+                            <Play className="w-3 h-3 text-blue-500" />
+                            In Progress
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="completed">
+                          <span className="flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3 text-green-500" />
+                            Completed
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="blocked">
+                          <span className="flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3 text-red-500" />
+                            Blocked
+                          </span>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               ))}
