@@ -1,3 +1,6 @@
+/* Import Labyrinth Design System */
+@import './design-system.css';
+
 .App-logo {
     height: 40vmin;
     pointer-events: none;
