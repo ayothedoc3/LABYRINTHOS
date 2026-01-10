@@ -569,7 +569,11 @@ const ContractLifecycle = () => {
   };
 
   useEffect(() => {
-    loadContracts();
+    // Load contracts on mount
+    const initLoad = async () => {
+      await loadContracts();
+    };
+    initLoad();
   }, []);
 
   // Seed demo data if no contracts
