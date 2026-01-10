@@ -342,7 +342,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "WorkflowViz Layer Guide Bubble Feature"
+    - "Role System and Contract Lifecycle Features"
   stuck_tasks: 
     - "WorkflowViz Layer Guide Bubble Feature"
   test_all: false
