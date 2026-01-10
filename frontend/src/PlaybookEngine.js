@@ -755,6 +755,89 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
         </TabsContent>
 
         <TabsContent value="tasks" className="mt-4">
+          {/* Filter Bar */}
+          <div className="flex items-center gap-3 p-3 mb-3 bg-muted/30 rounded-lg" data-testid="filter-bar">
+            <Filter className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Filters:</span>
+            
+            {/* Status Filter */}
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[140px] h-8 text-xs" data-testid="status-filter">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="pending">
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-muted-foreground" />
+                    Pending
+                  </span>
+                </SelectItem>
+                <SelectItem value="in_progress">
+                  <span className="flex items-center gap-1">
+                    <Play className="w-3 h-3 text-blue-500" />
+                    In Progress
+                  </span>
+                </SelectItem>
+                <SelectItem value="completed">
+                  <span className="flex items-center gap-1">
+                    <CheckCircle className="w-3 h-3 text-green-500" />
+                    Completed
+                  </span>
+                </SelectItem>
+                <SelectItem value="blocked">
+                  <span className="flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3 text-red-500" />
+                    Blocked
+                  </span>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Assignee Filter */}
+            <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
+              <SelectTrigger className="w-[160px] h-8 text-xs" data-testid="assignee-filter">
+                <SelectValue placeholder="Assignee" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Assignees</SelectItem>
+                <SelectItem value="unassigned">
+                  <span className="flex items-center gap-1">
+                    <User className="w-3 h-3 text-muted-foreground" />
+                    Unassigned
+                  </span>
+                </SelectItem>
+                {getTaskAssignees().map(assignee => (
+                  <SelectItem key={assignee.id} value={assignee.id}>
+                    <span className="flex items-center gap-1">
+                      <User className="w-3 h-3 text-primary" />
+                      {assignee.name}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Clear Filters */}
+            {(statusFilter !== 'all' || assigneeFilter !== 'all') && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-xs"
+                onClick={() => { setStatusFilter('all'); setAssigneeFilter('all'); }}
+                data-testid="clear-filters"
+              >
+                <X className="w-3 h-3 mr-1" />
+                Clear
+              </Button>
+            )}
+
+            <div className="flex-1" />
+            <span className="text-xs text-muted-foreground">
+              Showing {filteredTasks.length} of {plan?.tasks?.length || 0} tasks
+            </span>
+          </div>
+
           {/* Bulk Operations Toolbar */}
           {selectedTaskIds.length > 0 && (
             <div className="flex items-center gap-3 p-3 mb-3 bg-primary/10 border border-primary/20 rounded-lg" data-testid="bulk-toolbar">
@@ -803,25 +886,38 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
             </div>
           )}
 
-          <ScrollArea className="h-[350px]">
+          <ScrollArea className="h-[300px]">
             {/* Select All Header */}
             <div className="flex items-center gap-3 p-2 mb-2 border-b">
               <input 
                 type="checkbox" 
-                checked={selectedTaskIds.length === plan?.tasks?.length && plan?.tasks?.length > 0}
+                checked={filteredTasks.length > 0 && selectedTaskIds.length === filteredTasks.length && filteredTasks.every(t => selectedTaskIds.includes(t.id))}
                 onChange={selectAllTasks}
                 className="w-4 h-4 cursor-pointer"
                 data-testid="select-all-tasks"
               />
               <span className="text-sm text-muted-foreground">
-                {selectedTaskIds.length === plan?.tasks?.length && plan?.tasks?.length > 0 
+                {filteredTasks.length > 0 && selectedTaskIds.length === filteredTasks.length 
                   ? 'Deselect All' 
-                  : 'Select All'} ({plan?.tasks?.length || 0} tasks)
+                  : 'Select All'} ({filteredTasks.length} tasks)
               </span>
             </div>
 
             <div className="space-y-2">
-              {plan.tasks?.map((task) => (
+              {filteredTasks.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Filter className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p>No tasks match the current filters</p>
+                  <Button
+                    variant="link"
+                    size="sm"
+                    onClick={() => { setStatusFilter('all'); setAssigneeFilter('all'); }}
+                  >
+                    Clear filters
+                  </Button>
+                </div>
+              ) : (
+                filteredTasks.map((task) => (
                 <div 
                   key={task.id} 
                   className={`flex items-center justify-between p-3 rounded-lg hover:bg-muted/70 transition-colors ${
