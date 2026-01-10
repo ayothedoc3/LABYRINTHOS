@@ -706,6 +706,176 @@ const LabyrinthBuilder = ({ onWorkflowCreated }) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Execution Plan Dialog */}
+      <Dialog open={showPlanDialog} onOpenChange={setShowPlanDialog}>
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-pink-500" />
+              Execution Plan Generated
+            </DialogTitle>
+            <DialogDescription>
+              Complete execution plan with milestones, tasks, and team roles
+            </DialogDescription>
+          </DialogHeader>
+          
+          {executionPlan && (
+            <div className="space-y-4">
+              {/* Plan Header */}
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg">
+                <div>
+                  <h3 className="font-semibold text-lg">{executionPlan.name}</h3>
+                  <p className="text-sm text-muted-foreground">{executionPlan.description}</p>
+                </div>
+                <Badge className="bg-green-100 text-green-700">
+                  {executionPlan.status}
+                </Badge>
+              </div>
+
+              {/* Stats Row */}
+              <div className="grid grid-cols-5 gap-3">
+                <div className="text-center p-3 bg-blue-50 rounded-lg">
+                  <Milestone className="w-5 h-5 mx-auto text-blue-600 mb-1" />
+                  <div className="font-bold text-xl">{executionPlan.milestones?.length || 0}</div>
+                  <div className="text-xs text-muted-foreground">Milestones</div>
+                </div>
+                <div className="text-center p-3 bg-purple-50 rounded-lg">
+                  <ListChecks className="w-5 h-5 mx-auto text-purple-600 mb-1" />
+                  <div className="font-bold text-xl">{executionPlan.tasks?.length || 0}</div>
+                  <div className="text-xs text-muted-foreground">Tasks</div>
+                </div>
+                <div className="text-center p-3 bg-orange-50 rounded-lg">
+                  <Users className="w-5 h-5 mx-auto text-orange-600 mb-1" />
+                  <div className="font-bold text-xl">{executionPlan.roles?.length || 0}</div>
+                  <div className="text-xs text-muted-foreground">Roles</div>
+                </div>
+                <div className="text-center p-3 bg-green-50 rounded-lg">
+                  <DollarSign className="w-5 h-5 mx-auto text-green-600 mb-1" />
+                  <div className="font-bold text-xl">${(executionPlan.estimated_budget / 1000).toFixed(0)}k</div>
+                  <div className="text-xs text-muted-foreground">Budget</div>
+                </div>
+                <div className="text-center p-3 bg-teal-50 rounded-lg">
+                  <Calendar className="w-5 h-5 mx-auto text-teal-600 mb-1" />
+                  <div className="font-bold text-sm">
+                    {executionPlan.target_end_date 
+                      ? new Date(executionPlan.target_end_date).toLocaleDateString() 
+                      : 'TBD'}
+                  </div>
+                  <div className="text-xs text-muted-foreground">Target End</div>
+                </div>
+              </div>
+
+              {/* Tabs for Details */}
+              <Tabs defaultValue="milestones" className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="milestones">Milestones</TabsTrigger>
+                  <TabsTrigger value="tasks">Tasks</TabsTrigger>
+                  <TabsTrigger value="roles">Team Roles</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="milestones" className="mt-4">
+                  <ScrollArea className="h-[250px]">
+                    <div className="space-y-2">
+                      {executionPlan.milestones?.map((milestone, i) => (
+                        <div key={milestone.id} className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                          <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">
+                            {i + 1}
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-medium">{milestone.name}</div>
+                            <div className="text-sm text-muted-foreground">{milestone.description}</div>
+                            <div className="flex gap-2 mt-1">
+                              <Badge variant="outline" className="text-xs">{milestone.phase}</Badge>
+                              <span className="text-xs text-muted-foreground">
+                                Due: {new Date(milestone.due_date).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                          <Badge variant={milestone.status === 'COMPLETED' ? 'default' : 'secondary'}>
+                            {milestone.status}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+
+                <TabsContent value="tasks" className="mt-4">
+                  <ScrollArea className="h-[250px]">
+                    <div className="space-y-2">
+                      {executionPlan.tasks?.map((task) => (
+                        <div key={task.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <input type="checkbox" checked={task.status === 'completed'} readOnly className="w-4 h-4" />
+                            <div>
+                              <div className={`text-sm ${task.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>
+                                {task.title}
+                              </div>
+                              <div className="text-xs text-muted-foreground">{task.estimated_hours}h estimated</div>
+                            </div>
+                          </div>
+                          <Badge 
+                            variant={task.priority === 'HIGH' || task.priority === 'URGENT' ? 'destructive' : 'outline'}
+                            className="text-xs"
+                          >
+                            {task.priority}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+
+                <TabsContent value="roles" className="mt-4">
+                  <ScrollArea className="h-[250px]">
+                    <div className="grid grid-cols-2 gap-3">
+                      {executionPlan.roles?.map((role) => (
+                        <div key={role.id} className="p-3 bg-slate-50 rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
+                              <Users className="w-4 h-4 text-orange-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium text-sm">{role.title}</div>
+                              <Badge variant="outline" className="text-xs">{role.role_type}</Badge>
+                            </div>
+                          </div>
+                          <div className="text-xs text-muted-foreground">{role.time_commitment}</div>
+                          {role.responsibilities?.length > 0 && (
+                            <ul className="mt-2 text-xs text-muted-foreground list-disc list-inside">
+                              {role.responsibilities.slice(0, 2).map((r, i) => (
+                                <li key={i}>{r}</li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+              </Tabs>
+            </div>
+          )}
+          
+          <DialogFooter className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowPlanDialog(false)}>
+              Close
+            </Button>
+            <Button 
+              onClick={() => {
+                // Navigate to Execution tab to see the full plan
+                window.location.hash = '#execution';
+                setShowPlanDialog(false);
+              }}
+              className="bg-gradient-to-r from-pink-500 to-purple-500"
+            >
+              <ArrowRight className="w-4 h-4 mr-2" />
+              View in Execution Tab
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
