@@ -1,70 +1,92 @@
-<analysis>**original_problem_statement:** The user's goal evolved from simple UI tweaks to a complete pivot of the application's purpose. The core requirement is to build a Labyrinth Builder (also referred to as Gate Console), a questionnaire-style tool that generates complex visual workflows based on a series of cascading user selections ( ->  ->  -> ).
+<analysis>**original_problem_statement:** The user provided extensive documentation for a Labyrinth system, outlining a comprehensive vision for the application. The high-level requirements are to evolve the existing Labyrinth Builder into a full-fledged operational CRM.
 
 **PRODUCT REQUIREMENTS:**
-1.  **Labyrinth Builder/Gate Console:** An interface for users to define workflow parameters through a series of dropdowns.
-2.  **Dynamic Preview:** As the user makes selections, the UI must show a preview of the , , and  that will be included in the workflow.
-3.  **Workflow Rendering:** A Generate Workflow button must take the user's selections and automatically render a visual diagram on a canvas, with distinct nodes for each component.
-4.  **Unified Data Model (One Labyrinth):** All data (SOPs, Templates, Contracts, Playbooks, etc.) must come from a single, unified source of truth in the database. Data added in one part of the app (e.g., Templates tab) must be immediately available in the builder.
-5.  **AI Content Generation:** The ability to generate SOPs, Playbooks, and Contracts using AI and save them to the unified database.
-6.  **UI/Navigation:** A restructured top-level navigation: , , , , , .
-7.  **CRUD Functionality:** The ability to delete items like workflows, SOPs, contracts, and team members.
-8.  **Search & Discovery:** A global search function and a way to view saved/rendered workflows.
-9.  **Demo Data:** The application must be pre-seeded with comprehensive data for end-to-end testing.
+1.  **Role System & Role-Based Dashboards:** Implement a system where users can switch between different roles (e.g., Executive, Coordinator, Specialist), with each role having a unique dashboard displaying relevant information and KPIs.
+2.  **Contract Lifecycle Management:** Create a system to manage contracts through a defined lifecycle (e.g., Proposal, Bid, Active, Paused, Completed). This should be a visual, stage-gated process.
+3.  **CRM Modules:** Build out new modules for Sales (leads, qualification, proposals), Affiliates (referral tracking, commissions), and Communication (structured, per-contract threads).
+4.  **Playbook Engine:** Develop the backend logic to translate strategic inputs into structured execution plans, generating the necessary contracts, roles, and milestones.
+5.  **Design System Enhancement:** Refactor the UI to align with a new design system defined in the documentation, emphasizing a calm, premium, structured feel with specific colors, typography, and layout principles.
+6.  **Optimization Plan Feature:** Implement the currently static Optimization Plan step in the Labyrinth Builder.
 
 **User's preferred language**: English
 
 **what currently exists?**
-The application has been successfully transformed to meet the user's new vision. The Labyrinth Builder has been built and then redesigned to the user's exact visual specifications. It features cascading dropdowns and a dynamic preview section that fetches matching templates. The Generate Workflow function is working and correctly renders a visual graph on the canvas.
+The application now includes the foundational features for the Labyrinth operating system. A **Role System** has been implemented, allowing users to switch between different roles via a dropdown in the header. Each role is presented with a unique, role-specific **Dashboard** displaying relevant metrics and tiles.
 
-A major data unification effort was completed, merging multiple disparate collections into a single source of truth. All relevant backend routes (, , ) have been updated to use these unified collections (, , , ). The AI generation feature now correctly saves new content into these unified collections.
+A **Contract Lifecycle** management system has also been built. It features a dedicated Contracts tab with a pipeline view showing contracts at various stages (Proposal, Bid, Active, etc.) and a detailed view for transitioning contracts between stages.
 
-The UI now includes full delete functionality for all major data types (Workflows, SOPs, Playbooks, Contracts, Talents). The Team and Analytics pages have been fleshed out with seed data and are fully functional. A global search bar is present in the header, and a list of saved workflows is visible in the Workflows tab.
+The backend has been updated with new Pydantic models and FastAPI routes to support these features (, ), and demo data for roles and contracts is being served.
 
-All known deployment issues have been resolved, and the application is seeded with comprehensive demo data for testing.
+The agent has just begun **Phase 2**, creating a central  file and applying the new styles to the Role Dashboard and the main app header to give them a more premium feel.
 
 **Last working item**:
-*   **Last item agent was working:** Fixing a bug where the Generate Workflow button on the redesigned Labyrinth Builder was throwing an Invalid selection format error. The agent updated the backend route () to correctly parse the new payload format sent by the redesigned frontend.
-*   **Status:** USER VERIFICATION PENDING
-*   **Agent Testing Done:** Y
-*   **Which testing method agent to use?** Frontend testing agent
+*   **Last item agent was working:** Starting the implementation of **Phase 2: Design System Enhancement**. The agent created a new  file with styles for colors, typography, and layout. It then updated  and the header in  to use these new CSS classes for a cleaner, more premium look.
+*   **Status:** IN PROGRESS
+*   **Agent Testing Done:** N
+*   **Which testing method agent to use?** Screenshot tool
 *   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-*   None.
+*   **Issue 1 (P0): Incomplete Design System Application:** The new  has only been applied to the  and  header. The rest of the application (e.g., Contract Lifecycle view, Labyrinth Builder, Templates view) still uses the old styling, creating a visual inconsistency.
+*   **Issue 2 (P2): Inconsistent Data Display for Contracts:** An issue from a previous session remains, where some contracts in the Templates tab display empty names or Invalid Date due to data schema mismatches.
 
 **Issues Detail:**
-*   None.
+*   **Issue 1: Incomplete Design System Application**
+    *   **Attempted fixes:** None. This is the current work in progress.
+    *   **Next debug checklist:**
+        1.  Review  to understand the available classes (, , , etc.).
+        2.  Systematically go through each major React component (, ,  sub-views).
+        3.  Replace existing Tailwind CSS utility classes and inline styles with the new, more semantic classes from the design system file.
+        4.  Use the screenshot tool to verify visual consistency after updating each component.
+    *   **Why fix this issue and what will be achieved with the fix?** To ensure the entire application adheres to the user's specified design principles for a calm, premium, and visually consistent user experience.
+    *   **Status:** IN PROGRESS
+    *   **Is recurring issue?** N
+    *   **Should Test frontend/backend/both after fix?** Frontend
+    *   **Blocked on other issue:** None.
+*   **Issue 2: Inconsistent Data Display for Contracts**
+    *   **Attempted fixes:** None yet.
+    *   **Next debug checklist:**
+        1.  Inspect the  component logic within .
+        2.  Examine the data being fetched from the  endpoint.
+        3.  Update the  component to gracefully handle cases where fields like  or  might be missing or null, providing sensible fallbacks (e.g., Untitled Contract, Date not set).
+    *   **Why fix this issue and what will be achieved with this?** To improve UI robustness and prevent visual bugs, ensuring a clean and professional data presentation.
+    *   **Status:** NOT STARTED
+    *   **Is recurring issue?** N
+    *   **Should Test frontend/backend/both after fix?** Frontend
+    *   **Blocked on other issue:** None.
 
 **In progress Task List**:
-*   None.
+*   **Task 1 (P0): Complete Phase 2 - Design System Enhancement**
+    *   **Where to resume:** The agent has created  and updated  and the  header. The next step is to continue applying these styles to the remaining components, starting with .
+    *   **What will be achieved with this?** A visually unified application that meets the user's premium design specification.
+    *   **Status:** IN PROGRESS
+    *   **Should Test frontend/backend/both after fix?** Frontend
+    *   **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
-    *   **(P0) User Verification:** User needs to test the end-to-end Generate Workflow functionality from the redesigned Labyrinth Builder to ensure the recent bug fix is working correctly on the deployed version. User should also verify the newly added delete functionalities.
-    *   **(P1) Implement Optimization Plan:** The final preview step in the Labyrinth Builder, Optimization Plan, is currently a static placeholder. This feature needs to be implemented. (Files: , ).
+    *   **(P1) Phase 3: Build CRM Modules:**
+        *   **Sales CRM:** Create backend and frontend for managing leads, qualification, and proposals. (Files: , , ).
+        *   **Affiliate CRM:** Create backend and frontend for referral tracking and commissions. (Files: , , ).
+        *   **Communication Threads:** Implement structured, per-contract communication threads. (Files: , ).
+    *   **(P2) Phase 4: Implement Playbook Engine Logic:** Develop backend logic to translate strategy into execution plans. (Files: , ).
 
 *   **Future Tasks:**
-    *   **(P2) Refine Data Quality in UI:** Some items in the Templates tab (specifically contracts) display empty names or Invalid Date due to data schema mismatches. This requires a data cleanup pass or making the UI components more robust to handle varied data formats. (File:  - ).
-    - **(P3) Consolidate Seeding Scripts:** Refactor the various data seeding logic (e.g., , , and other scripts run via ) into a single, idempotent seeding function for better maintainability.
+    *   **(P3) Implement Optimization Plan Feature:** Make the final step of the Labyrinth Builder functional. (Files: , ).
+    *   **(P4) Consolidate Seeding Scripts:** Refactor scattered data seeding logic into a single script.
 
 **Completed work in this session**
 - **Recently completed:**
-    - **Labyrinth Builder Redesign:** Re-implemented the Labyrinth Builder UI () to match the user's detailed specification, including a multi-section preview. Added supporting backend endpoints (, , ). (DONE)
-    - **Global Search:** Implemented a global search feature () in the main header () to search across all data types. (DONE)
-    - **Saved Workflows List:** Added a sidebar to the  to list and load previously rendered workflows. (DONE)
-    - **Delete Functionality:** Added delete capabilities and confirmation dialogs for Workflows (), SOPs, Playbooks, Contracts, and Talents (). (DONE)
-    - **Team & Analytics Pages:** Seeded the database with team member data and verified that both the Team and Analytics pages are populated and functional. (DONE)
-    - **Data Unification & AI Integration:** Completed the unification of all database collections and updated the AI generation routes () to save content to the unified DB. (DONE)
-    - **Deployment & Data Seeding:** Fixed deployment issues by correcting API URLs and resolved cascading data-loading errors by seeding comprehensive demo data and relaxing Pydantic validation on the  endpoint. (DONE)
-    - **Bug Fix:** Fixed the Generate Workflow button error (Invalid selection format) by updating  to handle the new request format. (DONE)
+    - **Phase 1: Role System & Contract Lifecycle:** (DONE)
+        - **Backend:** Created models and routes for roles and contract management (, ). Seeded demo users for all roles.
+        - **Frontend:** Implemented , a  in the header, a  that renders role-specific tiles, and a  view for managing contracts. Integrated all features into .
+    - **Bug Fix:** Resolved an issue where newly generated workflows failed to load on the canvas by fixing component props, incorrect API URLs, and making data loading more resilient in . (DONE)
+    - **User Verification:** Confirmed the Generate Workflow bug fix from the previous session was working correctly. (DONE)
 
 **Earlier issues found/mentioned but not fixed**
 *   **Issue 1: Inconsistent Data Display for Contracts**
-    *   **Debug checklist:**
-        1.  Inspect the  component in .
-        2.  Compare the data fields it expects (e.g., , ) with the actual fields present in the  collection in MongoDB.
-        3.  Update the  component to gracefully handle missing or differently named fields, or run a one-time script to normalize the data in the database.
-    *   **Why to solve this issue and what will be achieved with this?** To improve UI consistency and user experience by ensuring all data is displayed correctly.
+    *   **Debug checklist:** Inspect  in  and add fallback UI for missing data fields from the  collection.
+    *   **Why to solve this issue and what will be achieved with this?** To improve UI consistency and user experience.
     *   **Should Test frontend/backend/both after fix:** Frontend
     *   **Is recurring issue?** N
 
@@ -75,81 +97,79 @@ All known deployment issues have been resolved, and the application is seeded wi
 
 
 **Key Technical Concepts**
-*   **Frontend:** React, Tailwind CSS, , 
+*   **Frontend:** React, Tailwind CSS, 
 *   **Backend:** FastAPI, Pydantic
 *   **Database:** MongoDB
-*   **AI Integration:**  library for .
-*   **Key Pattern:** A data-driven workflow generator. A significant change was removing strict Pydantic  validation from several  endpoints (, , ) in  to prevent the app from crashing due to data inconsistencies between old and new data schemas.
+*   **Key Pattern (New):**
+    *   **Role-Based Access Control (RBAC) Simulation:** A frontend-driven role system (, ) fetches role-specific data from the backend to simulate different user perspectives.
+    *   **State-Machine UI:** The  component provides a visual state machine for managing contracts through a predefined lifecycle.
+    *   **Centralized Design System:** Starting to move from pure utility classes to a centralized  file for core UI principles.
 
 **key DB schema**
-*   **Unified Collections:**
-    *   : Standard Operating Procedures
-    *   : Deliverable Templates
-    *   : Contracts
-    *   : Playbooks
-    *   : Team Members
-    *   : Key Performance Indicators
-*   **Workflow Collections:**
-    *   : Metadata for each rendered workflow canvas.
-    *   : Nodes for the  canvas, linked by .
+*   No direct schema changes were made, but backend models imply future/intended structure:
+    *   : Will store role definitions (name, permissions, dashboard config). Demo users were seeded.
+    *    (existing): Is now managed with a  field to track its lifecycle position (e.g., 'Proposal', 'Active').
 
 **changes in tech stack**
-*   No new changes in this session.  was introduced previously.
+*   None.
 
 **All files of reference**
-*   : Completely overwritten to match the user's new design specification.
-*   : Heavily modified to include the  component and delete functionality for SOPs, Contracts, Playbooks, and Talents.
-*   : Updated to include delete functionality for workflows and corrected API endpoint paths.
-*   : Overwritten to add the saved workflows sidebar.
-*   : A new file for the global search functionality.
-*   : Heavily modified to add new endpoints for the redesigned builder and to handle multiple request formats for rendering workflows.
-*   : Modified to remove  validation from , , and  to handle schema inconsistencies.
-*   : Updated to save generated content to the unified database collections.
+*   **New Files Created:**
+    *   , : For Role System.
+    *   , : For Contract Lifecycle.
+    *   , , : For Role-Based Dashboard UI.
+    *   : For Contract Management UI.
+    *   : For the new Design System.
+*   **Key Updated Files:**
+    *   : Registered the new routers.
+    *   : Integrated all new role and contract components and tabs.
+    *   : Bug fixes related to props, API URLs, and data loading.
+    *   : Imported the new design system CSS.
 
 **Areas that need refactoring**:
-*   The data seeding logic is scattered across multiple  calls and previous scripts. It should be consolidated into a single, idempotent seeding script for easier management.
-*   The removal of  validation on several endpoints is a temporary fix. A long-term solution would involve a data migration to unify the schemas, allowing for stricter validation to be re-enabled.
+*   The application of  is incomplete and needs to be extended to all components for consistency.
+*   The data for dashboards and contracts is currently hardcoded demo data in the backend routes. This should be moved to a database collection.
 
 **key api endpoints**
-*   : Generates a visual workflow. Handles multiple payload formats.
-*   , , : New endpoints for populating the redesigned builder dropdowns.
-*   : New endpoint to fetch the preview list of templates for the builder.
-*   : New endpoint for the global search feature.
-*   , , , etc.: Endpoints for deleting items.
-*   : The **correct** endpoint for fetching the list of saved workflows.
+*   : Fetches all available roles.
+*   : Fetches dashboard data for a specific role.
+*   : Fetches all contracts.
+*   : Transitions a contract to a new stage.
 
 **Critical Info for New Agent**
-*   **Data Unification is Key:** The One Labyrinth concept is paramount. All features must use the unified collections (, , etc.). The old  collections are deprecated.
-*   **API Endpoint for Workflows:** The correct path for fetching and manipulating rendered workflows is , not . This was a recurring bug; double-check all frontend calls.
-*   **Pragmatic Validation:** Strict Pydantic  validation has been *intentionally removed* from the list endpoints for SOPs, Contracts, and KPIs in . This was a necessary tradeoff to prevent crashes from inconsistent data schemas. Do not re-add it without first cleaning and migrating the database data.
-*   **Render Endpoint Complexity:** The  endpoint in  is complex and handles two different request body formats. Be cautious when modifying it.
+*   **Phased Plan:** The user has approved a multi-phase plan. You are in the middle of **Phase 2 (Design System Enhancement)**. Your immediate task is to finish applying the styles from  to all components. After that, proceed to **Phase 3 (CRM Modules)**.
+*   **Phase 1 Complete:** The foundational backend and frontend for Role-Based Dashboards and the Contract Lifecycle are implemented, tested, and working with demo data.
+*   **Demo Data:** The backend routes for roles and contracts are currently serving hardcoded demo data. This is intentional for now to allow for frontend development.
 
 **documents and test reports created in this job**
 *   
-*    (updated multiple times)
+*   
+*   
+*   
+*   
+*   
+*   
+*   
+*   
+*    (updated)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Reports the Generate Workflow button is broken, showing an Invalid selection format error. (This was the last task the agent fixed).
-2.  **User:** Stated that after a successful deployment fix, the application had no demo data (SOPs, Playbooks) for testing.
-3.  **User:** Reported that the deployed version of the application was not reflecting the latest implemented features.
-4.  **User:** Requested the ability to see saved workflow templates and a global search function to find items across the app.
-5.  **User:** Provided a detailed textual and visual specification for a complete redesign of the Labyrinth Builder (Gate Console).
-6.  **User:** Requested the ability to delete workflows and other items, and asked the agent to flesh out the Team and Analytics pages.
-7.  **User:** Approved the agent's plan to proceed with upcoming tasks after the AI integration was completed.
-8.  **User:** Approved the agent's plan to proceed after the initial data unification was completed.
-9.  **Agent:** (Message asking for verification, no user response needed).
-10. **User:** Provided the critical directive for data unification: Its one labyrinth.
+1.  **User:** continue (Proceeding after Phase 1 completion and testing)
+2.  **Agent:** (ask_human) Proposed a detailed multi-phase plan to implement the user's documentation.
+3.  **User:** Yes proceed. (Approving the agent's plan)
+4.  **User:** (Provided extensive documentation and requested features in a specific order) Do these in that order...
+5.  **Agent:** (ask_human) Finished Phase 1 and asked for verification before starting Phase 2.
 
 **Project Health Check:**
 *   **Broken:** None.
-*   **Mocked:** None.
-*   **Fragile:** The data layer is functional but relies on loosened backend validation ( removed from several endpoints) to accommodate schema inconsistencies. This means the frontend must be robust against receiving objects with potentially missing fields. Minor data quality issues (e.g., empty names for some contracts) are visible in the UI.
+*   **Mocked:** The data for the new Role-Based Dashboards and the Contract Lifecycle view is hardcoded in their respective backend routes (, ) for demonstration purposes.
+*   **Fragile:** The data layer for older features still relies on loosened Pydantic validation in  to prevent crashes from inconsistent data.
 
 **3rd Party Integrations**
 *   **OpenAI GPT-4o-mini** — uses Emergent LLM Key via the  library for AI content generation.
 
 **Testing status**
-*   **Testing agent used after significant changes:** YES (Backend testing agent was used to verify data unification and AI integration).
+*   **Testing agent used after significant changes:** YES (Frontend testing agent verified the Phase 1 features: Role System and Contract Lifecycle).
 *   **Troubleshoot agent used after agent stuck in loop:** NO
 *   **Test files created:** None
 *   **Known regressions:** None.
@@ -158,4 +178,4 @@ All known deployment issues have been resolved, and the application is seeded wi
 *   The  is available in  for AI features. No other credentials are required for testing.
 
 **What agent forgot to execute**
-*   The agent has been thorough and addressed all user requests, including bug fixes and new features. The Optimization Plan feature remains unimplemented, but this was an intentional deferral based on the original user request and is correctly tracked as a future task.</analysis>
+*   The agent correctly followed the user-approved plan, completing Phase 1 and beginning Phase 2. No tasks were forgotten.</analysis>

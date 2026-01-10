@@ -11,7 +11,7 @@ from datetime import datetime
 import uuid
 
 # Base URL from frontend .env
-BASE_URL = "https://labyrinth-maker-1.preview.emergentagent.com/api"
+BASE_URL = "https://role-system-6.preview.emergentagent.com/api"
 
 class BackendTester:
     def __init__(self):
