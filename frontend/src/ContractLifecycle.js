@@ -177,33 +177,33 @@ const ContractDetail = ({ contract, onClose, onTransition, onRefresh }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="contract-detail">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-xl font-semibold">{contract.name}</h2>
-          <p className="text-muted-foreground">{contract.client_name}</p>
+          <h2 className="text-heading">{contract.name}</h2>
+          <p className="text-caption mt-1">{contract.client_name}</p>
         </div>
         <Badge 
-          className="text-sm px-3 py-1"
+          className="status-badge px-3 py-1.5"
           style={{ 
-            backgroundColor: `${stageConfig.color}15`,
+            backgroundColor: `${stageConfig.color}10`,
             color: stageConfig.color,
-            border: `1px solid ${stageConfig.color}30`
+            border: `1px solid ${stageConfig.color}25`
           }}
         >
-          <StageIcon className="w-4 h-4 mr-1" />
+          <StageIcon className="w-4 h-4 mr-1.5" />
           {stageConfig.label}
         </Badge>
       </div>
 
       {/* Stage Pipeline Visual */}
-      <Card>
+      <Card className="labyrinth-card">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">Contract Lifecycle</CardTitle>
+          <CardTitle className="text-body font-medium">Contract Lifecycle</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between">
+          <div className="stage-pipeline flex-wrap justify-center">
             {STAGE_FLOW.map((stage, index) => {
               const config = STAGE_CONFIG[stage];
               const Icon = config.icon;
@@ -212,24 +212,20 @@ const ContractDetail = ({ contract, onClose, onTransition, onRefresh }) => {
               
               return (
                 <React.Fragment key={stage}>
-                  <div className="flex flex-col items-center gap-1">
+                  <div className={`stage-node ${isPast ? 'stage-node--completed' : ''} ${isActive ? 'stage-node--active' : ''}`}>
                     <div 
-                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                        isActive ? 'ring-2 ring-offset-2' : ''
-                      }`}
+                      className="stage-node__icon"
                       style={{ 
-                        backgroundColor: isPast || isActive ? config.color : '#E5E7EB',
-                        ringColor: isActive ? config.color : 'transparent'
+                        backgroundColor: isPast || isActive ? config.color : undefined,
+                        color: isPast || isActive ? 'white' : undefined
                       }}
                     >
-                      <Icon className={`w-4 h-4 ${isPast || isActive ? 'text-white' : 'text-gray-400'}`} />
+                      <Icon className="w-4 h-4" />
                     </div>
-                    <span className={`text-xs ${isActive ? 'font-medium' : 'text-muted-foreground'}`}>
-                      {config.label}
-                    </span>
+                    <span className="stage-node__label">{config.label}</span>
                   </div>
                   {index < STAGE_FLOW.length - 1 && (
-                    <ArrowRight className={`w-4 h-4 ${isPast ? 'text-green-500' : 'text-gray-300'}`} />
+                    <div className={`stage-connector ${isPast ? 'stage-connector--completed' : ''}`} />
                   )}
                 </React.Fragment>
               );
@@ -240,58 +236,70 @@ const ContractDetail = ({ contract, onClose, onTransition, onRefresh }) => {
 
       {/* Contract Details */}
       <div className="grid grid-cols-2 gap-4">
-        <Card>
+        <Card className="labyrinth-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Details</CardTitle>
+            <CardTitle className="text-body font-medium">Details</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Type</span>
-              <span>{contract.contract_type?.replace('_', ' ')}</span>
+          <CardContent className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-caption">Type</span>
+              <span className="text-body">{contract.contract_type?.replace('_', ' ')}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Function</span>
-              <Badge variant="outline">{contract.function}</Badge>
+            <Separator />
+            <div className="flex justify-between items-center">
+              <span className="text-caption">Function</span>
+              <Badge variant="outline" className="function-badge">{contract.function}</Badge>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Package</span>
+            <Separator />
+            <div className="flex justify-between items-center">
+              <span className="text-caption">Package</span>
               <Badge variant="secondary">{contract.client_package}</Badge>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Value</span>
-              <span className="font-medium">
+            <Separator />
+            <div className="flex justify-between items-center">
+              <span className="text-caption">Value</span>
+              <span className="font-semibold" style={{ color: 'var(--function-finance)' }}>
                 ${contract.estimated_value?.toLocaleString() || '—'}
               </span>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="labyrinth-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Timeline</CardTitle>
+            <CardTitle className="text-body font-medium">Timeline</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Created</span>
-              <span>{new Date(contract.created_at).toLocaleDateString()}</span>
+          <CardContent className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-caption">Created</span>
+              <span className="text-body">{new Date(contract.created_at).toLocaleDateString()}</span>
             </div>
             {contract.activated_date && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Activated</span>
-                <span>{new Date(contract.activated_date).toLocaleDateString()}</span>
-              </div>
+              <>
+                <Separator />
+                <div className="flex justify-between items-center">
+                  <span className="text-caption">Activated</span>
+                  <span className="text-body">{new Date(contract.activated_date).toLocaleDateString()}</span>
+                </div>
+              </>
             )}
             {contract.start_date && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Start Date</span>
-                <span>{new Date(contract.start_date).toLocaleDateString()}</span>
-              </div>
+              <>
+                <Separator />
+                <div className="flex justify-between items-center">
+                  <span className="text-caption">Start Date</span>
+                  <span className="text-body">{new Date(contract.start_date).toLocaleDateString()}</span>
+                </div>
+              </>
             )}
             {contract.end_date && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">End Date</span>
-                <span>{new Date(contract.end_date).toLocaleDateString()}</span>
-              </div>
+              <>
+                <Separator />
+                <div className="flex justify-between items-center">
+                  <span className="text-caption">End Date</span>
+                  <span className="text-body">{new Date(contract.end_date).toLocaleDateString()}</span>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
@@ -299,25 +307,25 @@ const ContractDetail = ({ contract, onClose, onTransition, onRefresh }) => {
 
       {/* Description */}
       {contract.description && (
-        <Card>
+        <Card className="labyrinth-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Description</CardTitle>
+            <CardTitle className="text-body font-medium">Description</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">{contract.description}</p>
+            <p className="text-caption">{contract.description}</p>
           </CardContent>
         </Card>
       )}
 
       {/* Actions */}
       {nextStages.length > 0 && (
-        <Card>
+        <Card className="labyrinth-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Actions</CardTitle>
-            <CardDescription>Move contract to next stage</CardDescription>
+            <CardTitle className="text-body font-medium">Actions</CardTitle>
+            <CardDescription className="text-caption">Move contract to next stage</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               {nextStages.map((stage) => {
                 const config = STAGE_CONFIG[stage];
                 const Icon = config.icon;
@@ -329,11 +337,12 @@ const ContractDetail = ({ contract, onClose, onTransition, onRefresh }) => {
                       setSelectedNextStage(stage);
                       setShowTransitionDialog(true);
                     }}
-                    className="gap-2"
+                    className="gap-2 transition-all hover:scale-105"
                     style={{ 
-                      borderColor: `${config.color}50`,
+                      borderColor: `${config.color}40`,
                       color: config.color
                     }}
+                    data-testid={`transition-to-${stage}`}
                   >
                     <Icon className="w-4 h-4" />
                     Move to {config.label}
