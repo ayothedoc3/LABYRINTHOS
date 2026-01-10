@@ -891,7 +891,9 @@ const LabyrinthBuilder = ({ onWorkflowCreated, onNavigateToTab }) => {
             <Button 
               onClick={() => {
                 // Navigate to Execution tab to see the full plan
-                window.location.hash = '#execution';
+                if (onNavigateToTab) {
+                  onNavigateToTab('execution');
+                }
                 setShowPlanDialog(false);
               }}
               className="bg-gradient-to-r from-pink-500 to-purple-500"
