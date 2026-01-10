@@ -717,19 +717,92 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
         </TabsContent>
 
         <TabsContent value="tasks" className="mt-4">
-          <ScrollArea className="h-[400px]">
+          {/* Bulk Operations Toolbar */}
+          {selectedTaskIds.length > 0 && (
+            <div className="flex items-center gap-3 p-3 mb-3 bg-primary/10 border border-primary/20 rounded-lg" data-testid="bulk-toolbar">
+              <span className="text-sm font-medium">
+                {selectedTaskIds.length} task{selectedTaskIds.length > 1 ? 's' : ''} selected
+              </span>
+              <div className="flex-1" />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleBulkStatusChange('completed')}
+                disabled={bulkOperating}
+                data-testid="bulk-complete-btn"
+              >
+                <CheckCircle className="w-3 h-3 mr-1 text-green-500" />
+                Mark Complete
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleBulkStatusChange('in_progress')}
+                disabled={bulkOperating}
+                data-testid="bulk-progress-btn"
+              >
+                <Play className="w-3 h-3 mr-1 text-blue-500" />
+                In Progress
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowBulkAssignDialog(true)}
+                disabled={bulkOperating}
+                data-testid="bulk-assign-btn"
+              >
+                <UserPlus className="w-3 h-3 mr-1" />
+                Assign All
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedTaskIds([])}
+                data-testid="bulk-clear-btn"
+              >
+                Clear
+              </Button>
+            </div>
+          )}
+
+          <ScrollArea className="h-[350px]">
+            {/* Select All Header */}
+            <div className="flex items-center gap-3 p-2 mb-2 border-b">
+              <input 
+                type="checkbox" 
+                checked={selectedTaskIds.length === plan?.tasks?.length && plan?.tasks?.length > 0}
+                onChange={selectAllTasks}
+                className="w-4 h-4 cursor-pointer"
+                data-testid="select-all-tasks"
+              />
+              <span className="text-sm text-muted-foreground">
+                {selectedTaskIds.length === plan?.tasks?.length && plan?.tasks?.length > 0 
+                  ? 'Deselect All' 
+                  : 'Select All'} ({plan?.tasks?.length || 0} tasks)
+              </span>
+            </div>
+
             <div className="space-y-2">
               {plan.tasks?.map((task) => (
                 <div 
                   key={task.id} 
-                  className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors"
+                  className={`flex items-center justify-between p-3 rounded-lg hover:bg-muted/70 transition-colors ${
+                    selectedTaskIds.includes(task.id) ? 'bg-primary/10 border border-primary/20' : 'bg-muted/50'
+                  }`}
                   data-testid={`task-item-${task.id}`}
                 >
                   <div className="flex items-center gap-3 flex-1">
                     <input 
                       type="checkbox" 
-                      checked={task.status === 'completed'}
+                      checked={selectedTaskIds.includes(task.id)}
+                      onChange={() => toggleTaskSelection(task.id)}
                       className="w-4 h-4 cursor-pointer"
+                      data-testid={`task-select-${task.id}`}
+                    />
+                    <input 
+                      type="checkbox" 
+                      checked={task.status === 'completed'}
+                      className="w-4 h-4 cursor-pointer accent-green-500"
                       onChange={(e) => handleTaskStatusChange(task.id, e.target.checked ? 'completed' : 'pending')}
                       data-testid={`task-checkbox-${task.id}`}
                     />
