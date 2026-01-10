@@ -1399,7 +1399,7 @@ const ContractsView = ({ contracts, talents, playbooks, onRefresh }) => {
                 </div>
                 <div className="flex justify-between">
                   <span>Start Date:</span>
-                  <span>{contract.start_date ? new Date(contract.start_date).toLocaleDateString() : 'N/A'}</span>
+                  <span>{contract.start_date && !isNaN(new Date(contract.start_date).getTime()) ? new Date(contract.start_date).toLocaleDateString() : 'Not set'}</span>
                 </div>
                 {contract.hourly_rate > 0 && (
                   <div className="flex justify-between">
