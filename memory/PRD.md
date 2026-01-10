@@ -185,6 +185,7 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
 - Sales CRM leads and proposals
 - Affiliate referrals and commissions
 - Communication threads and messages
+- **Playbook Engine execution plans (in-memory dictionary)**
 
 ### Technical Debt
 - Some components still use raw Tailwind instead of design system classes
