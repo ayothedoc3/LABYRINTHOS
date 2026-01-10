@@ -1791,4 +1791,11 @@ function App() {
   );
 }
 
-export default App;
+// Wrap App with RoleProvider
+const AppWithProvider = () => (
+  <RoleProvider>
+    <App />
+  </RoleProvider>
+);
+
+export default AppWithProvider;
