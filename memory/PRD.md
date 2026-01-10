@@ -164,24 +164,21 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
   - Builder selections (Issue, Campaign, Sprint, Playbook) map to Playbook Engine strategy inputs
   - Generated plans display in dialog with milestones, tasks, roles, and budget
 
-### P2 (Medium Priority) - Data Layer Improvements
+### P2 (Medium Priority) - Data Layer Improvements ✅ COMPLETE
 - [x] **Consolidate seeding scripts** - DONE (Jan 2026)
   - Created `/app/backend/seed_all.py` - unified seeder for all modules
   - Single endpoint `POST /api/seed-all` to seed all demo data
   - Covers: Sales CRM, Affiliate CRM, Communications, External API, Playbook Engine
 - [x] **MongoDB persistence for Sales CRM** - DONE (Jan 2026)
-  - Sales CRM routes updated to use MongoDB (`sales_leads`, `sales_proposals` collections)
-  - Data persisted via `POST /api/seed-all` and individual CRUD operations
-  - Stats endpoint reads from MongoDB
+  - Collections: `sales_leads`, `sales_proposals`
 - [x] **MongoDB persistence for Affiliate CRM** - DONE (Jan 2026)
-  - Routes updated to use MongoDB (`affiliates`, `referrals`, `commissions` collections)
-  - All CRUD operations use MongoDB
+  - Collections: `affiliates`, `referrals`, `commissions`
 - [x] **MongoDB persistence for Playbook Engine** - DONE (Jan 2026)
-  - Routes updated to use MongoDB (`execution_plans` collection)
-  - Plan generation, listing, and analytics all use MongoDB
-- [ ] MongoDB persistence for Communications (threads, messages)
-- [ ] MongoDB persistence for External API (deals, leads, tasks, partners)
-- [ ] Improve Pydantic validation
+  - Collection: `execution_plans`
+- [x] **MongoDB persistence for Communications** - DONE (Jan 2026)
+  - Collections: `communication_threads`, `communication_messages`
+- [x] **MongoDB persistence for External API** - DONE (Jan 2026)
+  - Collections: `external_deals`, `external_leads`, `external_tasks`, `external_partners`
 
 ### P3 (Low Priority) - Future Enhancements
 - [ ] Task assignment to actual talents (not just role IDs)
