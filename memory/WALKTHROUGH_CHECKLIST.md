@@ -185,6 +185,13 @@
   - Select All only selects filtered tasks
   - Empty state message when no tasks match filters
 
+- [ ] **Task Search** ⭐ NEW
+  - Search input with magnifying glass icon
+  - Type to filter instantly by task title or assignee
+  - X button clears search
+  - Works together with status and assignee filters
+  - Shows search term in empty state ("No tasks match 'xyz'")
+
 - [ ] **Export Dropdown** ⭐
   - Export as PDF (formatted report)
   - Export as JSON (full data)
