@@ -225,7 +225,7 @@ def seed_demo_threads():
 
 # ==================== THREAD ENDPOINTS ====================
 
-@router.get("/threads", response_model=List[Thread])
+@router.get("/threads")
 async def get_threads(
     thread_type: Optional[ThreadType] = None,
     status: Optional[ThreadStatus] = None,
@@ -234,34 +234,71 @@ async def get_threads(
     pinned_only: bool = False
 ):
     """Get all threads with optional filtering"""
-    if not threads_db:
-        seed_demo_threads()
-    
-    threads = list(threads_db.values())
-    
+    # Build query filter
+    query = {}
     if thread_type:
-        threads = [t for t in threads if t.thread_type == thread_type]
+        query["thread_type"] = thread_type.value
     if status:
-        threads = [t for t in threads if t.status == status]
+        query["status"] = status.value
     if related_id:
-        threads = [t for t in threads if t.related_id == related_id]
-    if participant_id:
-        threads = [t for t in threads if any(p.user_id == participant_id for p in t.participants)]
+        query["related_id"] = related_id
     if pinned_only:
-        threads = [t for t in threads if t.is_pinned]
+        query["is_pinned"] = True
     
-    return sorted(threads, key=lambda x: (x.is_pinned, x.last_message_at or x.created_at), reverse=True)
+    # Query MongoDB
+    threads_docs = await threads_collection.find(query, {"_id": 0}).sort([("is_pinned", -1), ("last_message_at", -1)]).to_list(1000)
+    
+    # If no data in MongoDB, seed and try again
+    if not threads_docs:
+        if threads_db:
+            for thread in threads_db.values():
+                await threads_collection.update_one(
+                    {"id": thread.id},
+                    {"$set": thread_to_dict(thread)},
+                    upsert=True
+                )
+            for thread_id, msgs in messages_db.items():
+                for msg in msgs:
+                    await messages_collection.update_one(
+                        {"id": msg.id},
+                        {"$set": message_to_dict(msg)},
+                        upsert=True
+                    )
+            threads_docs = await threads_collection.find(query, {"_id": 0}).sort([("is_pinned", -1), ("last_message_at", -1)]).to_list(1000)
+        else:
+            seed_demo_threads()
+            for thread in threads_db.values():
+                await threads_collection.update_one(
+                    {"id": thread.id},
+                    {"$set": thread_to_dict(thread)},
+                    upsert=True
+                )
+            for thread_id, msgs in messages_db.items():
+                for msg in msgs:
+                    await messages_collection.update_one(
+                        {"id": msg.id},
+                        {"$set": message_to_dict(msg)},
+                        upsert=True
+                    )
+            threads_docs = await threads_collection.find(query, {"_id": 0}).sort([("is_pinned", -1), ("last_message_at", -1)]).to_list(1000)
+    
+    # Filter by participant if needed
+    if participant_id:
+        threads_docs = [t for t in threads_docs if any(p.get("user_id") == participant_id for p in t.get("participants", []))]
+    
+    return [serialize_doc(doc) for doc in threads_docs]
 
 
-@router.get("/threads/{thread_id}", response_model=Thread)
+@router.get("/threads/{thread_id}")
 async def get_thread(thread_id: str):
     """Get a specific thread"""
-    if thread_id not in threads_db:
+    thread_doc = await threads_collection.find_one({"id": thread_id}, {"_id": 0})
+    if not thread_doc:
         raise HTTPException(status_code=404, detail="Thread not found")
-    return threads_db[thread_id]
+    return serialize_doc(thread_doc)
 
 
-@router.post("/threads", response_model=Thread)
+@router.post("/threads")
 async def create_thread(thread_data: ThreadCreate, created_by: str = "system"):
     """Create a new thread"""
     thread = Thread(
