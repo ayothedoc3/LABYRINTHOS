@@ -146,16 +146,20 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [assigneeFilter, setAssigneeFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  // Auto-refresh state
+  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
 
-  const loadPlan = async () => {
-    setLoading(true);
+  const loadPlan = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const res = await axios.get(`${API}/api/playbook-engine/plans/${planId}`);
       setPlan(res.data);
+      setLastUpdated(new Date());
     } catch (error) {
       console.error('Error loading plan:', error);
     }
-    setLoading(false);
+    if (!silent) setLoading(false);
   };
 
   const loadUsers = async () => {
@@ -172,6 +176,18 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
     loadUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [planId]);
+
+  // Auto-refresh polling
+  useEffect(() => {
+    if (!autoRefresh) return;
+    
+    const interval = setInterval(() => {
+      loadPlan(true); // Silent refresh
+    }, 10000); // Every 10 seconds
+    
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoRefresh, planId]);
 
   const handleStatusChange = async (newStatus) => {
     try {
