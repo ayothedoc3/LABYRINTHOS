@@ -164,6 +164,77 @@ const PlanDetail = ({ planId, onClose, onRefresh }) => {
     }
   };
 
+  const handleExportPlan = async (format = 'json') => {
+    try {
+      // Create export data
+      const exportData = {
+        plan: {
+          id: plan.id,
+          name: plan.name,
+          description: plan.description,
+          status: plan.status,
+          progress_percent: plan.progress_percent,
+          estimated_budget: plan.estimated_budget,
+          start_date: plan.start_date,
+          target_end_date: plan.target_end_date,
+        },
+        milestones: plan.milestones?.map(m => ({
+          name: m.name,
+          phase: m.phase,
+          status: m.status,
+          due_date: m.due_date,
+          deliverables: m.deliverables
+        })),
+        tasks: plan.tasks?.map(t => ({
+          title: t.title,
+          phase: t.phase,
+          status: t.status,
+          priority: t.priority,
+          estimated_hours: t.estimated_hours
+        })),
+        roles: plan.roles?.map(r => ({
+          title: r.title,
+          role_type: r.role_type,
+          responsibilities: r.responsibilities
+        })),
+        exported_at: new Date().toISOString()
+      };
+
+      if (format === 'json') {
+        // Download as JSON
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${plan.name.replace(/\s+/g, '_')}_export.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } else if (format === 'csv') {
+        // Create CSV for tasks
+        const csvHeaders = ['Task', 'Phase', 'Status', 'Priority', 'Hours'];
+        const csvRows = plan.tasks?.map(t => 
+          [t.title, t.phase, t.status, t.priority, t.estimated_hours].join(',')
+        ) || [];
+        const csvContent = [csvHeaders.join(','), ...csvRows].join('\n');
+        
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${plan.name.replace(/\s+/g, '_')}_tasks.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Error exporting plan:', error);
+      alert('Failed to export plan');
+    }
+  };
+
   if (loading || !plan) {
     return (
       <div className="flex-center h-64">
