@@ -1667,6 +1667,7 @@ function App() {
     { id: "affiliates", label: "Affiliates", icon: Link },
     { id: "communications", label: "Messages", icon: MessageSquare },
     { id: "execution", label: "Execution", icon: Zap },
+    { id: "client-portal", label: "Client Portal", icon: Building2 },
     { id: "library", label: "Library", icon: FolderOpen },
     { id: "templates", label: "Templates", icon: FileText },
     { id: "team", label: "Team", icon: Users },
