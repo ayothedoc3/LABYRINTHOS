@@ -357,73 +357,99 @@ def _estimate_budget(strategy: StrategyInput, tier_mult: dict) -> float:
 
 # ==================== API ENDPOINTS ====================
 
-@router.post("/generate", response_model=ExecutionPlan)
+@router.post("/generate")
 async def generate_plan(strategy: StrategyInput):
     """Generate an execution plan from strategy input"""
     plan = generate_execution_plan(strategy)
+    
+    # Store in MongoDB
+    await plans_collection.insert_one(plan_to_dict(plan))
     execution_plans_db[plan.id] = plan
+    
     return plan
 
 
-@router.get("/plans", response_model=List[ExecutionPlanSummary])
+@router.get("/plans")
 async def list_plans(status: Optional[str] = None):
     """List all execution plans"""
-    plans = list(execution_plans_db.values())
-    
+    # Build query
+    query = {}
     if status:
-        plans = [p for p in plans if p.status == status]
+        query["status"] = status
+    
+    # Query MongoDB
+    plans_docs = await plans_collection.find(query, {"_id": 0}).sort("start_date", -1).to_list(1000)
+    
+    # If no data in MongoDB, check in-memory
+    if not plans_docs and execution_plans_db:
+        for plan in execution_plans_db.values():
+            await plans_collection.update_one(
+                {"id": plan.id},
+                {"$set": plan_to_dict(plan)},
+                upsert=True
+            )
+        plans_docs = await plans_collection.find(query, {"_id": 0}).sort("start_date", -1).to_list(1000)
     
     summaries = []
-    for plan in plans:
-        completed_milestones = len([m for m in plan.milestones if m.status == MilestoneStatus.COMPLETED])
-        completed_tasks = len([t for t in plan.tasks if t.status == "completed"])
+    for plan_doc in plans_docs:
+        milestones = plan_doc.get("milestones", [])
+        tasks = plan_doc.get("tasks", [])
+        completed_milestones = len([m for m in milestones if m.get("status") == MilestoneStatus.COMPLETED.value])
+        completed_tasks = len([t for t in tasks if t.get("status") == "completed"])
         
-        summaries.append(ExecutionPlanSummary(
-            id=plan.id,
-            name=plan.name,
-            status=plan.status,
-            progress_percent=plan.progress_percent,
-            start_date=plan.start_date,
-            target_end_date=plan.target_end_date,
-            total_milestones=len(plan.milestones),
-            completed_milestones=completed_milestones,
-            total_tasks=len(plan.tasks),
-            completed_tasks=completed_tasks,
-            client_name=plan.strategy_input.client_name,
-            issue_category=plan.strategy_input.issue_category
-        ))
+        strategy_input = plan_doc.get("strategy_input", {})
+        
+        summaries.append({
+            "id": plan_doc.get("id"),
+            "name": plan_doc.get("name"),
+            "status": plan_doc.get("status"),
+            "progress_percent": plan_doc.get("progress_percent", 0),
+            "start_date": plan_doc.get("start_date"),
+            "target_end_date": plan_doc.get("target_end_date"),
+            "total_milestones": len(milestones),
+            "completed_milestones": completed_milestones,
+            "total_tasks": len(tasks),
+            "completed_tasks": completed_tasks,
+            "client_name": strategy_input.get("client_name"),
+            "issue_category": strategy_input.get("issue_category")
+        })
     
-    return sorted(summaries, key=lambda x: x.start_date, reverse=True)
+    return summaries
 
 
-@router.get("/plans/{plan_id}", response_model=ExecutionPlan)
+@router.get("/plans/{plan_id}")
 async def get_plan(plan_id: str):
     """Get a specific execution plan"""
-    if plan_id not in execution_plans_db:
+    plan_doc = await plans_collection.find_one({"id": plan_id}, {"_id": 0})
+    if not plan_doc:
         raise HTTPException(status_code=404, detail="Execution plan not found")
-    return execution_plans_db[plan_id]
+    return serialize_doc(plan_doc)
 
 
 @router.patch("/plans/{plan_id}/status")
 async def update_plan_status(plan_id: str, status: str):
     """Update plan status"""
-    if plan_id not in execution_plans_db:
+    plan_doc = await plans_collection.find_one({"id": plan_id})
+    if not plan_doc:
         raise HTTPException(status_code=404, detail="Execution plan not found")
     
     valid_statuses = ["draft", "active", "paused", "completed", "cancelled"]
     if status not in valid_statuses:
         raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {valid_statuses}")
     
-    plan = execution_plans_db[plan_id]
-    plan.status = status
-    plan.updated_at = datetime.now(timezone.utc)
+    update_data = {
+        "status": status,
+        "updated_at": datetime.now(timezone.utc)
+    }
     
     if status == "completed":
-        plan.actual_end_date = datetime.now(timezone.utc)
-        plan.progress_percent = 100
+        update_data["actual_end_date"] = datetime.now(timezone.utc)
+        update_data["progress_percent"] = 100
     
-    execution_plans_db[plan_id] = plan
-    return plan
+    await plans_collection.update_one({"id": plan_id}, {"$set": update_data})
+    
+    updated_doc = await plans_collection.find_one({"id": plan_id}, {"_id": 0})
+    return serialize_doc(updated_doc)
 
 
 @router.patch("/plans/{plan_id}/milestones/{milestone_id}")
