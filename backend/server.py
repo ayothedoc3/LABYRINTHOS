@@ -55,6 +55,9 @@ from external_api_routes import router as external_router
 from playbook_engine_routes import router as playbook_engine_router
 from client_portal_routes import router as client_portal_router
 from trainings_routes import router as trainings_router
+from bidding_routes import router as bidding_router
+from drip_notifications_routes import router as notifications_router
+from ai_ocr_routes import router as ai_ocr_router
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
