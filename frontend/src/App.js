@@ -1815,6 +1815,18 @@ function App() {
             </Card>
           </TabsContent>
 
+          <TabsContent value="bidding">
+            <BiddingSystem />
+          </TabsContent>
+
+          <TabsContent value="notifications">
+            <NotificationsCenter />
+          </TabsContent>
+
+          <TabsContent value="document-scanner">
+            <DocumentScanner />
+          </TabsContent>
+
           <TabsContent value="team">
             <TalentsView talents={talents} onRefresh={fetchData} />
           </TabsContent>
