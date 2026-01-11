@@ -1145,6 +1145,7 @@ app.include_router(communication_router)  # Communication routes
 app.include_router(external_router)  # External API for CRM integration
 app.include_router(playbook_engine_router)  # Playbook Engine routes
 app.include_router(client_portal_router, prefix="/api")  # Client Portal routes
+app.include_router(trainings_router, prefix="/api")  # Team Trainings routes
 
 
 # ==================== UNIFIED SEED ENDPOINT ====================
