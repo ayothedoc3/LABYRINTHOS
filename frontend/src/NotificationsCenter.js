@@ -56,7 +56,7 @@ const NotificationsCenter = () => {
     setLoading(true);
     try {
       const [notifsRes, rulesRes, prefsRes, analyticsRes] = await Promise.all([
-        axios.get(`${API}/api/notifications`, { params: { user_id: userId } }),
+        axios.get(`${API}/api/notifications/`, { params: { user_id: userId } }),
         axios.get(`${API}/api/notifications/rules`),
         axios.get(`${API}/api/notifications/preferences/${userId}`),
         axios.get(`${API}/api/notifications/analytics`)
