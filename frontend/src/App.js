@@ -21,7 +21,8 @@ import {
   BarChart3, Shield, Settings, AlertTriangle, CheckCircle2, 
   XCircle, Clock, TrendingUp, TrendingDown, Play, RefreshCw,
   Plus, ChevronRight, Activity, Zap, Target, ArrowRight, Workflow, Sparkles,
-  FolderOpen, Library, Trash2, GitBranch, UserPlus, Link, MessageSquare, Building2
+  FolderOpen, Library, Trash2, GitBranch, UserPlus, Link, MessageSquare, Building2,
+  GraduationCap
 } from "lucide-react";
 import WorkflowViz from "./WorkflowViz";
 import SettingsPage from "./Settings";
@@ -39,6 +40,7 @@ import SalesCRM from "./SalesCRM";
 import AffiliateCRM from "./AffiliateCRM";
 import Communications from "./Communications";
 import PlaybookEngine from "./PlaybookEngine";
+import TeamTrainings from "./TeamTrainings";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
