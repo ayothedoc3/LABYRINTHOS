@@ -1813,6 +1813,10 @@ function App() {
             <TalentsView talents={talents} onRefresh={fetchData} />
           </TabsContent>
 
+          <TabsContent value="trainings">
+            <TeamTrainings />
+          </TabsContent>
+
           <TabsContent value="analytics">
             <div className="space-y-6">
               <Dashboard stats={stats} alerts={alerts} onRefresh={fetchData} />
