@@ -17,9 +17,11 @@ import { Textarea } from './components/ui/textarea';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from './components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
 import {
   MessageSquare, FileText, Users, Pin, Send, Plus, RefreshCw,
-  Archive, Clock, CheckCircle, AlertCircle, Paperclip, Hash
+  Archive, Clock, CheckCircle, AlertCircle, Paperclip, Hash,
+  Sparkles, Bot, Bell, TrendingUp, Lightbulb, Zap, AlertTriangle
 } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL || '';
