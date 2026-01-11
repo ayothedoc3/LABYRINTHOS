@@ -296,6 +296,324 @@ const ThreadDetail = ({ thread, onClose, onRefresh }) => {
   );
 };
 
+// ==================== AI MANAGER PANEL ====================
+
+const AIManagerPanel = ({ threads, selectedThread, onRefresh }) => {
+  const [activeTab, setActiveTab] = useState('reminders');
+  const [reminders, setReminders] = useState([]);
+  const [escalations, setEscalations] = useState([]);
+  const [summary, setSummary] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const loadReminders = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${API}/api/communications/ai/reminders`);
+      setReminders(res.data.reminders || []);
+    } catch (err) {
+      console.error('Error loading reminders:', err);
+    }
+    setLoading(false);
+  };
+
+  const loadEscalations = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${API}/api/communications/ai/escalation-check`);
+      setEscalations(res.data.escalations || []);
+    } catch (err) {
+      console.error('Error loading escalations:', err);
+    }
+    setLoading(false);
+  };
+
+  const loadSummary = async (threadId) => {
+    setLoading(true);
+    try {
+      const res = await axios.post(`${API}/api/communications/ai/summarize/${threadId}`);
+      setSummary(res.data);
+    } catch (err) {
+      console.error('Error loading summary:', err);
+      setSummary({ error: err.message });
+    }
+    setLoading(false);
+  };
+
+  const loadSuggestions = async (threadId) => {
+    setLoading(true);
+    try {
+      const res = await axios.post(`${API}/api/communications/ai/suggest-response/${threadId}`);
+      setSuggestions(res.data.suggestions || []);
+    } catch (err) {
+      console.error('Error loading suggestions:', err);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (activeTab === 'reminders') loadReminders();
+    else if (activeTab === 'escalations') loadEscalations();
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (selectedThread && activeTab === 'summary') {
+      loadSummary(selectedThread.id);
+    } else if (selectedThread && activeTab === 'suggest') {
+      loadSuggestions(selectedThread.id);
+    }
+  }, [selectedThread, activeTab]);
+
+  const priorityColors = {
+    high: 'text-red-500 bg-red-500/10',
+    medium: 'text-amber-500 bg-amber-500/10',
+    low: 'text-blue-500 bg-blue-500/10'
+  };
+
+  return (
+    <Card className="labyrinth-card" data-testid="ai-manager-panel">
+      <CardHeader className="pb-3">
+        <div className="flex items-center gap-2">
+          <div className="p-2 rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-500/20">
+            <Bot className="w-5 h-5 text-violet-500" />
+          </div>
+          <div>
+            <CardTitle className="text-base">AI Manager</CardTitle>
+            <CardDescription className="text-xs">Proactive insights & suggestions</CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-4 h-8">
+            <TabsTrigger value="reminders" className="text-xs">
+              <Bell className="w-3 h-3 mr-1" />
+              Reminders
+            </TabsTrigger>
+            <TabsTrigger value="escalations" className="text-xs">
+              <AlertTriangle className="w-3 h-3 mr-1" />
+              Escalate
+            </TabsTrigger>
+            <TabsTrigger value="summary" className="text-xs" disabled={!selectedThread}>
+              <Sparkles className="w-3 h-3 mr-1" />
+              Summary
+            </TabsTrigger>
+            <TabsTrigger value="suggest" className="text-xs" disabled={!selectedThread}>
+              <Lightbulb className="w-3 h-3 mr-1" />
+              Suggest
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="reminders" className="mt-3">
+            {loading ? (
+              <div className="flex items-center justify-center py-4">
+                <RefreshCw className="w-4 h-4 animate-spin text-muted-foreground" />
+              </div>
+            ) : reminders.length === 0 ? (
+              <div className="text-center py-4 text-sm text-muted-foreground">
+                <CheckCircle className="w-8 h-8 mx-auto mb-2 text-green-500" />
+                All caught up! No pending reminders.
+              </div>
+            ) : (
+              <ScrollArea className="h-48">
+                <div className="space-y-2">
+                  {reminders.map((reminder, idx) => (
+                    <div key={idx} className="p-2 rounded-lg border bg-card/50">
+                      <div className="flex items-start gap-2">
+                        <Badge className={`text-xs ${priorityColors[reminder.priority]}`}>
+                          {reminder.priority}
+                        </Badge>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{reminder.thread_title}</p>
+                          <p className="text-xs text-muted-foreground">{reminder.message}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            )}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="w-full mt-2" 
+              onClick={loadReminders}
+              disabled={loading}
+            >
+              <RefreshCw className={`w-3 h-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </TabsContent>
+
+          <TabsContent value="escalations" className="mt-3">
+            {loading ? (
+              <div className="flex items-center justify-center py-4">
+                <RefreshCw className="w-4 h-4 animate-spin text-muted-foreground" />
+              </div>
+            ) : escalations.length === 0 ? (
+              <div className="text-center py-4 text-sm text-muted-foreground">
+                <CheckCircle className="w-8 h-8 mx-auto mb-2 text-green-500" />
+                No escalations needed.
+              </div>
+            ) : (
+              <ScrollArea className="h-48">
+                <div className="space-y-2">
+                  {escalations.map((esc, idx) => (
+                    <div key={idx} className="p-2 rounded-lg border bg-card/50">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{esc.thread_title}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{esc.suggested_action}</p>
+                        </div>
+                        <Badge variant={esc.recommendation === 'high' ? 'destructive' : 'secondary'}>
+                          {esc.recommendation}
+                        </Badge>
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {esc.reasons.slice(0, 2).map((reason, i) => (
+                          <span key={i} className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                            {reason}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            )}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="w-full mt-2" 
+              onClick={loadEscalations}
+              disabled={loading}
+            >
+              <RefreshCw className={`w-3 h-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
+              Check Escalations
+            </Button>
+          </TabsContent>
+
+          <TabsContent value="summary" className="mt-3">
+            {!selectedThread ? (
+              <div className="text-center py-4 text-sm text-muted-foreground">
+                Select a thread to generate summary
+              </div>
+            ) : loading ? (
+              <div className="flex items-center justify-center py-4">
+                <Sparkles className="w-4 h-4 animate-pulse text-violet-500" />
+                <span className="ml-2 text-sm text-muted-foreground">Analyzing...</span>
+              </div>
+            ) : summary ? (
+              <div className="space-y-3">
+                <div>
+                  <h4 className="text-xs font-semibold text-muted-foreground mb-1">SUMMARY</h4>
+                  <p className="text-sm">{summary.summary}</p>
+                </div>
+                {summary.key_points?.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-semibold text-muted-foreground mb-1">KEY POINTS</h4>
+                    <ul className="text-xs space-y-1">
+                      {summary.key_points.map((point, i) => (
+                        <li key={i} className="flex items-start gap-1">
+                          <span className="text-primary">•</span>
+                          {point}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {summary.action_items?.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-semibold text-muted-foreground mb-1">ACTION ITEMS</h4>
+                    <ul className="text-xs space-y-1">
+                      {summary.action_items.map((item, i) => (
+                        <li key={i} className="flex items-start gap-1">
+                          <CheckCircle className="w-3 h-3 text-green-500 mt-0.5" />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  {summary.sentiment && (
+                    <Badge variant="outline" className="text-xs">
+                      {summary.sentiment}
+                    </Badge>
+                  )}
+                  {summary.urgency && (
+                    <Badge variant={summary.urgency === 'high' ? 'destructive' : 'secondary'} className="text-xs">
+                      {summary.urgency} urgency
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            ) : null}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="w-full mt-2" 
+              onClick={() => selectedThread && loadSummary(selectedThread.id)}
+              disabled={loading || !selectedThread}
+            >
+              <Sparkles className={`w-3 h-3 mr-1 ${loading ? 'animate-pulse' : ''}`} />
+              Regenerate Summary
+            </Button>
+          </TabsContent>
+
+          <TabsContent value="suggest" className="mt-3">
+            {!selectedThread ? (
+              <div className="text-center py-4 text-sm text-muted-foreground">
+                Select a thread to get suggestions
+              </div>
+            ) : loading ? (
+              <div className="flex items-center justify-center py-4">
+                <Lightbulb className="w-4 h-4 animate-pulse text-amber-500" />
+                <span className="ml-2 text-sm text-muted-foreground">Thinking...</span>
+              </div>
+            ) : suggestions.length > 0 ? (
+              <ScrollArea className="h-48">
+                <div className="space-y-2">
+                  {suggestions.map((sug, idx) => (
+                    <div key={idx} className="p-2 rounded-lg border bg-card/50">
+                      <Badge variant="outline" className="text-xs mb-1 capitalize">
+                        {sug.tone}
+                      </Badge>
+                      <p className="text-sm">{sug.response}</p>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="mt-1 h-6 text-xs"
+                        onClick={() => navigator.clipboard.writeText(sug.response)}
+                      >
+                        Copy
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            ) : (
+              <div className="text-center py-4 text-sm text-muted-foreground">
+                Click to generate response suggestions
+              </div>
+            )}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="w-full mt-2" 
+              onClick={() => selectedThread && loadSuggestions(selectedThread.id)}
+              disabled={loading || !selectedThread}
+            >
+              <Lightbulb className={`w-3 h-3 mr-1 ${loading ? 'animate-pulse' : ''}`} />
+              Generate Suggestions
+            </Button>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
+  );
+};
+
 // ==================== MAIN COMMUNICATIONS COMPONENT ====================
 
 const Communications = () => {
