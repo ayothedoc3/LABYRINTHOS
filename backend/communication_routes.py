@@ -699,12 +699,20 @@ async def ai_get_reminders():
     for thread in threads_docs:
         last_message_at = thread.get("last_message_at")
         if isinstance(last_message_at, str):
-            last_message_at = datetime.fromisoformat(last_message_at.replace('Z', '+00:00'))
+            try:
+                last_message_at = datetime.fromisoformat(last_message_at.replace('Z', '+00:00'))
+            except:
+                continue
+        elif isinstance(last_message_at, datetime) and last_message_at.tzinfo is None:
+            last_message_at = last_message_at.replace(tzinfo=timezone.utc)
         
         if not last_message_at:
             continue
-            
-        hours_since = (now - last_message_at).total_seconds() / 3600
+        
+        try:
+            hours_since = (now - last_message_at).total_seconds() / 3600
+        except:
+            continue
         
         # Determine reminder type and priority
         reminder_type = None
