@@ -1149,6 +1149,9 @@ app.include_router(external_router)  # External API for CRM integration
 app.include_router(playbook_engine_router)  # Playbook Engine routes
 app.include_router(client_portal_router, prefix="/api")  # Client Portal routes
 app.include_router(trainings_router, prefix="/api")  # Team Trainings routes
+app.include_router(bidding_router, prefix="/api")  # Bidding System routes
+app.include_router(notifications_router, prefix="/api")  # Drip Notifications routes
+app.include_router(ai_ocr_router, prefix="/api")  # AI/OCR routes
 
 
 # ==================== UNIFIED SEED ENDPOINT ====================
