@@ -589,3 +589,325 @@ async def seed_demo_data():
     return {
         "message": f"Seeded {len(threads_db)} threads with messages to MongoDB"
     }
+
+
+# ==================== AI MANAGER ENDPOINTS ====================
+
+from ai_service import AIService
+
+@router.post("/ai/summarize/{thread_id}")
+async def ai_summarize_thread(thread_id: str):
+    """Generate an AI summary of a conversation thread"""
+    # Get thread
+    thread_doc = await threads_collection.find_one({"id": thread_id}, {"_id": 0})
+    if not thread_doc:
+        if thread_id in threads_db:
+            thread_doc = threads_db[thread_id].model_dump()
+        else:
+            raise HTTPException(status_code=404, detail="Thread not found")
+    
+    # Get messages
+    messages_docs = await messages_collection.find({"thread_id": thread_id}, {"_id": 0}).sort("created_at", 1).to_list(100)
+    if not messages_docs and thread_id in messages_db:
+        messages_docs = [m.model_dump() for m in messages_db[thread_id]]
+    
+    if not messages_docs:
+        return {
+            "thread_id": thread_id,
+            "summary": "No messages in this thread to summarize.",
+            "key_points": [],
+            "action_items": []
+        }
+    
+    # Build conversation context
+    conversation = "\n".join([
+        f"[{m.get('sender_name', 'Unknown')}]: {m.get('content', '')}"
+        for m in messages_docs
+    ])
+    
+    prompt = f"""Analyze this conversation thread and provide a structured summary.
+
+Thread Title: {thread_doc.get('title', 'Unknown')}
+Thread Type: {thread_doc.get('thread_type', 'Unknown')}
+
+Conversation:
+{conversation}
+
+Provide your response in the following JSON format:
+{{
+    "summary": "A concise 2-3 sentence summary of the conversation",
+    "key_points": ["point 1", "point 2", "point 3"],
+    "action_items": ["action 1", "action 2"],
+    "sentiment": "positive/neutral/negative",
+    "urgency": "low/medium/high"
+}}"""
+
+    try:
+        ai = AIService(provider="openai", model="gpt-4o-mini")
+        response = await ai.generate(
+            prompt=prompt,
+            system_message="You are an AI assistant that analyzes business communication threads and provides structured summaries. Always respond with valid JSON."
+        )
+        
+        # Parse JSON from response
+        import json
+        import re
+        json_match = re.search(r'\{[\s\S]*\}', response)
+        if json_match:
+            result = json.loads(json_match.group())
+        else:
+            result = {
+                "summary": response,
+                "key_points": [],
+                "action_items": [],
+                "sentiment": "neutral",
+                "urgency": "medium"
+            }
+        
+        return {
+            "thread_id": thread_id,
+            "thread_title": thread_doc.get('title'),
+            **result
+        }
+    except Exception as e:
+        return {
+            "thread_id": thread_id,
+            "summary": f"Unable to generate summary: {str(e)}",
+            "key_points": [],
+            "action_items": [],
+            "error": str(e)
+        }
+
+
+@router.get("/ai/reminders")
+async def ai_get_reminders():
+    """Get AI-powered reminders for threads needing attention"""
+    now = datetime.now(timezone.utc)
+    reminders = []
+    
+    # Get all open threads
+    threads_docs = await threads_collection.find(
+        {"status": {"$in": ["OPEN", "PENDING"]}},
+        {"_id": 0}
+    ).to_list(100)
+    
+    if not threads_docs:
+        # Fallback to in-memory
+        threads_docs = [t.model_dump() for t in threads_db.values() 
+                       if t.status in [ThreadStatus.OPEN, ThreadStatus.PENDING]]
+    
+    for thread in threads_docs:
+        last_message_at = thread.get("last_message_at")
+        if isinstance(last_message_at, str):
+            last_message_at = datetime.fromisoformat(last_message_at.replace('Z', '+00:00'))
+        
+        if not last_message_at:
+            continue
+            
+        hours_since = (now - last_message_at).total_seconds() / 3600
+        
+        # Determine reminder type and priority
+        reminder_type = None
+        priority = "low"
+        message = ""
+        
+        if hours_since > 72:  # Over 3 days
+            reminder_type = "stale"
+            priority = "high"
+            message = f"Thread has been inactive for {int(hours_since / 24)} days. Consider following up or resolving."
+        elif hours_since > 48:  # Over 2 days
+            reminder_type = "needs_attention"
+            priority = "medium"
+            message = f"No activity in {int(hours_since)} hours. May need follow-up."
+        elif thread.get("thread_type") == "CLIENT" and hours_since > 24:
+            reminder_type = "client_waiting"
+            priority = "high"
+            message = "Client thread has been waiting over 24 hours for response."
+        elif thread.get("thread_type") == "SUPPORT" and hours_since > 12:
+            reminder_type = "support_sla"
+            priority = "high"
+            message = "Support thread approaching SLA limit. Respond soon."
+        
+        if reminder_type:
+            reminders.append({
+                "thread_id": thread.get("id"),
+                "thread_title": thread.get("title"),
+                "thread_type": thread.get("thread_type"),
+                "reminder_type": reminder_type,
+                "priority": priority,
+                "message": message,
+                "hours_since_activity": round(hours_since, 1),
+                "last_message_at": thread.get("last_message_at")
+            })
+    
+    # Sort by priority
+    priority_order = {"high": 0, "medium": 1, "low": 2}
+    reminders.sort(key=lambda x: priority_order.get(x["priority"], 3))
+    
+    return {
+        "reminders": reminders,
+        "total_count": len(reminders),
+        "high_priority_count": len([r for r in reminders if r["priority"] == "high"]),
+        "generated_at": now.isoformat()
+    }
+
+
+@router.post("/ai/suggest-response/{thread_id}")
+async def ai_suggest_response(thread_id: str):
+    """Generate AI-suggested response for a thread"""
+    # Get thread
+    thread_doc = await threads_collection.find_one({"id": thread_id}, {"_id": 0})
+    if not thread_doc:
+        if thread_id in threads_db:
+            thread_doc = threads_db[thread_id].model_dump()
+        else:
+            raise HTTPException(status_code=404, detail="Thread not found")
+    
+    # Get recent messages
+    messages_docs = await messages_collection.find(
+        {"thread_id": thread_id}, 
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(10)
+    
+    if not messages_docs and thread_id in messages_db:
+        messages_docs = [m.model_dump() for m in messages_db[thread_id][-10:]]
+    
+    messages_docs.reverse()  # Chronological order
+    
+    conversation = "\n".join([
+        f"[{m.get('sender_name', 'Unknown')}]: {m.get('content', '')}"
+        for m in messages_docs
+    ])
+    
+    prompt = f"""Based on this conversation, suggest a professional response.
+
+Thread Title: {thread_doc.get('title', 'Unknown')}
+Thread Type: {thread_doc.get('thread_type', 'Unknown')}
+
+Recent Messages:
+{conversation}
+
+Provide 2-3 suggested responses of varying tones (formal, friendly, brief). Format as JSON:
+{{
+    "suggestions": [
+        {{"tone": "formal", "response": "..."}},
+        {{"tone": "friendly", "response": "..."}},
+        {{"tone": "brief", "response": "..."}}
+    ],
+    "context_note": "Brief note about the conversation context"
+}}"""
+
+    try:
+        ai = AIService(provider="openai", model="gpt-4o-mini")
+        response = await ai.generate(
+            prompt=prompt,
+            system_message="You are an AI assistant helping craft professional business communication responses. Always respond with valid JSON."
+        )
+        
+        import json
+        import re
+        json_match = re.search(r'\{[\s\S]*\}', response)
+        if json_match:
+            result = json.loads(json_match.group())
+        else:
+            result = {
+                "suggestions": [{"tone": "default", "response": response}],
+                "context_note": "AI-generated response"
+            }
+        
+        return {
+            "thread_id": thread_id,
+            **result
+        }
+    except Exception as e:
+        return {
+            "thread_id": thread_id,
+            "suggestions": [],
+            "error": str(e)
+        }
+
+
+@router.get("/ai/escalation-check")
+async def ai_check_escalations():
+    """Check threads for potential escalation needs"""
+    escalations = []
+    
+    # Get all open threads
+    threads_docs = await threads_collection.find(
+        {"status": {"$in": ["OPEN", "PENDING"]}},
+        {"_id": 0}
+    ).to_list(100)
+    
+    if not threads_docs:
+        threads_docs = [t.model_dump() for t in threads_db.values() 
+                       if t.status in [ThreadStatus.OPEN, ThreadStatus.PENDING]]
+    
+    for thread in threads_docs:
+        thread_id = thread.get("id")
+        
+        # Get messages for analysis
+        messages_docs = await messages_collection.find(
+            {"thread_id": thread_id},
+            {"_id": 0}
+        ).sort("created_at", 1).to_list(20)
+        
+        if not messages_docs and thread_id in messages_db:
+            messages_docs = [m.model_dump() for m in messages_db.get(thread_id, [])]
+        
+        if not messages_docs:
+            continue
+        
+        # Check for escalation indicators
+        escalation_score = 0
+        reasons = []
+        
+        # Check message count (long threads may need resolution)
+        if len(messages_docs) > 15:
+            escalation_score += 2
+            reasons.append("Thread has many messages without resolution")
+        
+        # Check for client threads
+        if thread.get("thread_type") == "CLIENT":
+            escalation_score += 1
+            reasons.append("Client-facing thread")
+        
+        # Check for keywords in recent messages
+        recent_content = " ".join([m.get("content", "").lower() for m in messages_docs[-5:]])
+        urgent_keywords = ["urgent", "asap", "immediately", "critical", "escalate", "manager", "disappointed", "unacceptable"]
+        
+        for keyword in urgent_keywords:
+            if keyword in recent_content:
+                escalation_score += 2
+                reasons.append(f"Urgent keyword detected: '{keyword}'")
+                break
+        
+        # Check time since creation
+        created_at = thread.get("created_at")
+        if isinstance(created_at, str):
+            created_at = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
+        
+        if created_at:
+            days_open = (datetime.now(timezone.utc) - created_at).days
+            if days_open > 7:
+                escalation_score += 1
+                reasons.append(f"Thread open for {days_open} days")
+        
+        if escalation_score >= 3:
+            escalations.append({
+                "thread_id": thread_id,
+                "thread_title": thread.get("title"),
+                "thread_type": thread.get("thread_type"),
+                "escalation_score": escalation_score,
+                "reasons": reasons,
+                "recommendation": "high" if escalation_score >= 5 else "medium",
+                "suggested_action": "Escalate to manager for review" if escalation_score >= 5 else "Review and prioritize response"
+            })
+    
+    escalations.sort(key=lambda x: x["escalation_score"], reverse=True)
+    
+    return {
+        "escalations": escalations,
+        "total_flagged": len(escalations),
+        "high_priority": len([e for e in escalations if e["recommendation"] == "high"]),
+        "checked_at": datetime.now(timezone.utc).isoformat()
+    }
