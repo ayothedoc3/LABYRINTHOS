@@ -292,7 +292,7 @@ const TrainingViewer = ({ module, progress, onComplete, onClose, onProgressUpdat
 
 // ==================== MAIN COMPONENT ====================
 const TeamTrainings = () => {
-  const { currentRole } = useContext(RoleContext);
+  const { currentRole } = useRole();
   const [modules, setModules] = useState([]);
   const [progressData, setProgressData] = useState({});
   const [summary, setSummary] = useState(null);
