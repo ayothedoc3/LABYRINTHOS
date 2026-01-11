@@ -303,7 +303,7 @@ class TestDripNotifications:
             "notification_type": "info",
             "channel": "in_app"
         }
-        create_response = requests.post(f"{BASE_URL}/api/notifications", json=notif_data)
+        create_response = requests.post(f"{BASE_URL}/api/notifications/", json=notif_data)
         notif_id = create_response.json()["notification"]["id"]
         
         # Delete
