@@ -884,13 +884,21 @@ async def ai_check_escalations():
         # Check time since creation
         created_at = thread.get("created_at")
         if isinstance(created_at, str):
-            created_at = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
+            try:
+                created_at = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
+            except:
+                created_at = None
+        elif isinstance(created_at, datetime) and created_at.tzinfo is None:
+            created_at = created_at.replace(tzinfo=timezone.utc)
         
         if created_at:
-            days_open = (datetime.now(timezone.utc) - created_at).days
-            if days_open > 7:
-                escalation_score += 1
-                reasons.append(f"Thread open for {days_open} days")
+            try:
+                days_open = (datetime.now(timezone.utc) - created_at).days
+                if days_open > 7:
+                    escalation_score += 1
+                    reasons.append(f"Thread open for {days_open} days")
+            except:
+                pass
         
         if escalation_score >= 3:
             escalations.append({
