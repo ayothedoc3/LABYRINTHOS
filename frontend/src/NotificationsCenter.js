@@ -130,7 +130,7 @@ const NotificationsCenter = () => {
 
   const createRule = async () => {
     try {
-      await axios.post(`${API}/api/notifications/rules`, newRule);
+      await axios.post(`${API}/api/notifications/rules/`, newRule);
       setShowRuleDialog(false);
       setNewRule({
         name: '',
