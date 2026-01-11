@@ -253,7 +253,7 @@ class TestDripNotifications:
             assert notif["read"] == False
     
     def test_create_notification(self):
-        """POST /api/notifications - Create notification"""
+        """POST /api/notifications/ - Create notification"""
         notif_data = {
             "user_id": "test_user",
             "title": "TEST_Test Notification",
@@ -261,7 +261,7 @@ class TestDripNotifications:
             "notification_type": "info",
             "channel": "in_app"
         }
-        response = requests.post(f"{BASE_URL}/api/notifications", json=notif_data)
+        response = requests.post(f"{BASE_URL}/api/notifications/", json=notif_data)
         assert response.status_code == 200
         data = response.json()
         assert data["message"] == "Notification created"
