@@ -22,7 +22,7 @@ import {
   XCircle, Clock, TrendingUp, TrendingDown, Play, RefreshCw,
   Plus, ChevronRight, Activity, Zap, Target, ArrowRight, Workflow, Sparkles,
   FolderOpen, Library, Trash2, GitBranch, UserPlus, Link, MessageSquare, Building2,
-  GraduationCap
+  GraduationCap, Gavel, Bell, Scan
 } from "lucide-react";
 import WorkflowViz from "./WorkflowViz";
 import SettingsPage from "./Settings";
@@ -41,6 +41,9 @@ import AffiliateCRM from "./AffiliateCRM";
 import Communications from "./Communications";
 import PlaybookEngine from "./PlaybookEngine";
 import TeamTrainings from "./TeamTrainings";
+import BiddingSystem from "./BiddingSystem";
+import NotificationsCenter from "./NotificationsCenter";
+import DocumentScanner from "./DocumentScanner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
