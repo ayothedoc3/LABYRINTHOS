@@ -762,7 +762,7 @@ const Communications = () => {
       {/* Main Content */}
       <div className="flex gap-6 h-[60vh]">
         {/* Thread List */}
-        <div className="w-1/3 flex flex-col">
+        <div className="w-1/4 flex flex-col">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-heading">Threads</h2>
