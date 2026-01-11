@@ -813,7 +813,7 @@ const Communications = () => {
         </div>
 
         {/* Thread Detail */}
-        <div className="w-2/3 border-l pl-6">
+        <div className="w-1/2 border-l pl-6">
           {selectedThread ? (
             <ThreadDetail
               thread={selectedThread}
@@ -833,6 +833,15 @@ const Communications = () => {
               </div>
             </div>
           )}
+        </div>
+
+        {/* AI Manager Panel */}
+        <div className="w-1/4 border-l pl-4">
+          <AIManagerPanel 
+            threads={threads}
+            selectedThread={selectedThread}
+            onRefresh={loadData}
+          />
         </div>
       </div>
 
