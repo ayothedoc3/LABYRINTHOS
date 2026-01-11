@@ -306,3 +306,59 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
 **Sales CRM:** GET /api/sales/stats, GET/POST /api/sales/leads, GET /api/sales/stages, GET /api/sales/proposals
 **Affiliate CRM:** GET /api/affiliates/stats, GET/POST /api/affiliates/, GET /api/affiliates/{id}/referrals, GET /api/affiliates/{id}/commissions
 **Communications:** GET /api/communications/stats, GET/POST /api/communications/threads, GET/POST /api/communications/threads/{id}/messages
+
+---
+
+### Phase 5: Client Portal & Client Journey 🟡 IN PROGRESS (Jan 2026)
+
+**Purpose:** Client-facing onboarding journey with sign-up, verification, and engagement hub (Lobby V1 & V2).
+
+**Backend:** `client_portal_routes.py`
+- Router registered in `server.py` with `/api` prefix
+
+**Frontend:** `ClientPortal.js`
+- Sign-up form with company details
+- Lobby V1: 4-step onboarding (Watch Video, Review Audit, Sign Documents, Provide Access)
+- Lobby V2: Engagement hub with tiles (Training, How-To, Insights, Reports, Collaborate, Rewards)
+
+**Completed:**
+- [x] Client sign-up form and backend endpoint - DONE (Jan 2026)
+- [x] Lobby V1 UI with 4 onboarding steps - DONE (Jan 2026)
+- [x] Lobby V2 dashboard with engagement tiles - DONE (Jan 2026)
+- [x] **Fixed:** Router `/api` prefix bug that caused "Not Found" error - DONE (Jan 2026)
+
+**Upcoming:**
+- [ ] SMS/Email verification flow
+- [ ] MongoDB persistence for client data (currently in-memory)
+- [ ] Connect lobby progress to backend API
+- [ ] Real-time audit data integration
+
+**API Endpoints:**
+- `POST /api/client-portal/signup` - Create new client account ✅
+- `GET /api/client-portal/clients/{id}` - Get client details
+- `PATCH /api/client-portal/clients/{id}/lobby-progress` - Update lobby progress
+- `POST /api/client-portal/clients/{id}/provide-access` - Record access provided
+- `GET /api/client-portal/clients/{id}/dashboard` - Get Lobby V2 dashboard
+- `POST /api/client-portal/seed-demo-client` - Seed demo client
+- `GET /api/client-portal/clients` - List all clients (admin)
+
+---
+
+## Prioritized Backlog (Updated Jan 2026)
+
+### P1 (High Priority) - In Progress
+- [ ] **Complete Client Journey Implementation**
+  - SMS/Email verification integration
+  - MongoDB persistence for clients collection
+  - Connect lobby step completion to backend
+
+### P2 (Medium Priority)
+- [ ] **Real-time Progress Tracking Toggle** - Connect auto-refresh toggle to UI in Playbook Engine
+- [ ] **AI Manager** - Proactive reminders, summaries, escalations in Communication module
+- [ ] **Team Trainings Portal** - Role-based training access and tracking
+
+### P3 (Lower Priority)
+- [ ] **Client Dashboard** - Simplified client-facing metrics view
+- [ ] **Bidding System** - Internal contract bidding workflow
+- [ ] **Drip Notifications** - Automated role-based notification system
+- [ ] **AI/OCR/Smart Logic** - Document scanning and intelligent intake
