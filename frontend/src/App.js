@@ -1673,6 +1673,7 @@ function App() {
     { id: "library", label: "Library", icon: FolderOpen },
     { id: "templates", label: "Templates", icon: FileText },
     { id: "team", label: "Team", icon: Users },
+    { id: "trainings", label: "Trainings", icon: GraduationCap },
     { id: "analytics", label: "Analytics", icon: BarChart3 },
     { id: "settings", label: "Settings", icon: Settings }
   ];
