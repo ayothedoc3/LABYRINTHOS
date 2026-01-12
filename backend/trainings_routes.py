@@ -499,7 +499,8 @@ async def reply_to_comment(comment_id: str, comment: TrainingComment):
     if trainings_collection is not None:
         comments_collection = db["training_comments"]
         await comments_collection.insert_one(comment_data)
-        del comment_data["_id"] if "_id" in comment_data else None
+        if "_id" in comment_data:
+            del comment_data["_id"]
     else:
         comments_db[comment_data["id"]] = comment_data
     
