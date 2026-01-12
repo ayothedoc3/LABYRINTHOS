@@ -114,18 +114,38 @@ const BulkUploadDialog = ({ isOpen, onClose, onSuccess, defaultEntityType = null
   };
 
   const downloadTemplate = async (format) => {
+    // Validate format to prevent XSS
+    const allowedFormats = ['csv', 'json', 'xlsx'];
+    if (!allowedFormats.includes(format)) {
+      setError('Invalid format specified');
+      return;
+    }
+    
+    // Validate entityType to prevent path traversal
+    const allowedEntities = Object.keys(ENTITY_CONFIG);
+    if (!allowedEntities.includes(entityType)) {
+      setError('Invalid entity type');
+      return;
+    }
+    
     try {
-      const response = await axios.get(`${API}/bulk/template/${entityType}?format=${format}`, {
+      const response = await axios.get(`${API}/bulk/template/${encodeURIComponent(entityType)}?format=${encodeURIComponent(format)}`, {
         responseType: 'blob'
       });
       
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const blob = new Blob([response.data]);
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `${entityType}_template.${format}`);
+      // Sanitize filename to prevent XSS in download attribute
+      const sanitizedEntityType = entityType.replace(/[^a-zA-Z0-9_-]/g, '');
+      const sanitizedFormat = format.replace(/[^a-zA-Z0-9]/g, '');
+      link.setAttribute('download', `${sanitizedEntityType}_template.${sanitizedFormat}`);
       document.body.appendChild(link);
       link.click();
-      link.parentNode.removeChild(link);
+      // Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
     } catch (err) {
       setError('Failed to download template');
     }
