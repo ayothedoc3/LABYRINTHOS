@@ -465,6 +465,162 @@ async def fill_template_endpoint(template_id: str, data: dict):
         "data_used": data
     }
 
+# In-memory storage for saved documents
+saved_documents_db = {}
+
+@router.post("/templates/{template_id}/fill-from-entity")
+async def fill_template_from_entity(template_id: str, entity_type: str, entity_id: str):
+    """Auto-fill a template using data from a CRM entity (deal, contract, client)"""
+    from motor.motor_asyncio import AsyncIOMotorDatabase
+    
+    # Get the template
+    if template_collection is not None:
+        template = await template_collection.find_one({"id": template_id}, {"_id": 0})
+    else:
+        template = templates_db.get(template_id)
+    
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    
+    # Fetch entity data based on type
+    entity_data = {}
+    
+    if entity_type == "deal":
+        # Fetch from leads/deals collection
+        leads_collection = db["leads"] if db is not None else None
+        if leads_collection is not None:
+            deal = await leads_collection.find_one({"id": entity_id}, {"_id": 0})
+            if deal:
+                entity_data = {
+                    "client.name": deal.get("name", ""),
+                    "client.company": deal.get("company", ""),
+                    "client.email": deal.get("email", ""),
+                    "deal.value": str(deal.get("value", 0)),
+                    "deal.stage": deal.get("stage", ""),
+                    "deal.source": deal.get("source", ""),
+                    "deal.priority": deal.get("priority", ""),
+                    "current_date": datetime.now(timezone.utc).strftime("%Y-%m-%d")
+                }
+    
+    elif entity_type == "contract":
+        # Fetch from contracts collection
+        contracts_collection = db["contracts"] if db is not None else None
+        if contracts_collection is not None:
+            contract = await contracts_collection.find_one({"id": entity_id}, {"_id": 0})
+            if contract:
+                entity_data = {
+                    "client.name": contract.get("client_name", ""),
+                    "contract.title": contract.get("title", ""),
+                    "contract.value": str(contract.get("value", 0)),
+                    "contract.type": contract.get("contract_type", ""),
+                    "contract.stage": contract.get("stage", ""),
+                    "contract.start_date": contract.get("start_date", ""),
+                    "contract.end_date": contract.get("end_date", ""),
+                    "current_date": datetime.now(timezone.utc).strftime("%Y-%m-%d")
+                }
+    
+    elif entity_type == "client":
+        # Fetch from clients collection
+        clients_collection = db["clients"] if db is not None else None
+        if clients_collection is not None:
+            client = await clients_collection.find_one({"id": entity_id}, {"_id": 0})
+            if client:
+                entity_data = {
+                    "client.name": client.get("name", ""),
+                    "client.company": client.get("company", ""),
+                    "client.email": client.get("contact_email", ""),
+                    "client.phone": client.get("contact_phone", ""),
+                    "client.industry": client.get("industry", ""),
+                    "client.tier": client.get("tier", ""),
+                    "current_date": datetime.now(timezone.utc).strftime("%Y-%m-%d")
+                }
+    
+    # Fill template with entity data
+    filled_content = fill_template(template.get("content", ""), entity_data)
+    
+    # Track usage
+    if template_collection is not None:
+        await template_collection.update_one({"id": template_id}, {"$inc": {"uses": 1}})
+    elif template_id in templates_db:
+        templates_db[template_id]["uses"] = templates_db[template_id].get("uses", 0) + 1
+    
+    return {
+        "template_id": template_id,
+        "entity_type": entity_type,
+        "entity_id": entity_id,
+        "filled_content": filled_content,
+        "auto_filled_data": entity_data,
+        "remaining_variables": template.get("variables", [])
+    }
+
+@router.post("/documents/save")
+async def save_filled_document(document: dict):
+    """Save a filled template as a document"""
+    
+    doc_id = f"doc_{uuid.uuid4().hex[:8]}"
+    
+    document_data = {
+        "id": doc_id,
+        "template_id": document.get("template_id"),
+        "title": document.get("title", "Untitled Document"),
+        "content": document.get("content", ""),
+        "entity_type": document.get("entity_type"),
+        "entity_id": document.get("entity_id"),
+        "filled_data": document.get("filled_data", {}),
+        "created_by": document.get("created_by", "system"),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "status": "draft"
+    }
+    
+    # Store in MongoDB if available
+    if db is not None:
+        documents_collection = db["saved_documents"]
+        await documents_collection.insert_one(document_data)
+        document_data.pop("_id", None)
+    else:
+        saved_documents_db[doc_id] = document_data
+    
+    return {"message": "Document saved", "document": document_data}
+
+@router.get("/documents")
+async def list_saved_documents(entity_type: Optional[str] = None, entity_id: Optional[str] = None):
+    """List saved documents, optionally filtered by entity"""
+    
+    if db is not None:
+        documents_collection = db["saved_documents"]
+        query = {}
+        if entity_type:
+            query["entity_type"] = entity_type
+        if entity_id:
+            query["entity_id"] = entity_id
+        cursor = documents_collection.find(query, {"_id": 0}).sort("created_at", -1)
+        documents = await cursor.to_list(length=100)
+    else:
+        documents = list(saved_documents_db.values())
+        if entity_type:
+            documents = [d for d in documents if d.get("entity_type") == entity_type]
+        if entity_id:
+            documents = [d for d in documents if d.get("entity_id") == entity_id]
+        documents.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+    
+    return {"documents": documents, "total": len(documents)}
+
+@router.get("/documents/{doc_id}")
+async def get_saved_document(doc_id: str):
+    """Get a specific saved document"""
+    
+    if db is not None:
+        documents_collection = db["saved_documents"]
+        document = await documents_collection.find_one({"id": doc_id}, {"_id": 0})
+    else:
+        document = saved_documents_db.get(doc_id)
+    
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    return document
+
 # ==================== CHECKLIST ENDPOINTS ====================
 
 @router.get("/checklist-progress/{entity_type}/{entity_id}")
