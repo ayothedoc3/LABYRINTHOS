@@ -1668,22 +1668,57 @@ function App() {
     }
   };
 
-  const NAV_ITEMS = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { id: "workflows", label: "Workflows", icon: Workflow },
-    { id: "pipeline", label: "Pipeline", icon: TrendingUp },
-    { id: "contracts", label: "Contracts", icon: GitBranch },
-    { id: "execution", label: "Execution", icon: Zap },
-    { id: "communications", label: "Messages", icon: MessageSquare },
-    { id: "notifications", label: "Alerts", icon: Bell },
-    { id: "affiliates", label: "Affiliates", icon: Link },
-    { id: "client-portal", label: "Client Portal", icon: Building2 },
-    { id: "bidding", label: "Bidding", icon: Gavel },
-    { id: "knowledge-base", label: "Knowledge", icon: BookOpen },
-    { id: "analytics", label: "Analytics", icon: BarChart3 },
-    { id: "team", label: "Team", icon: Users },
-    { id: "settings", label: "Settings", icon: Settings }
+  // Navigation structure with dropdowns
+  const NAV_GROUPS = [
+    {
+      id: "operations",
+      label: "Operations",
+      icon: Target,
+      items: [
+        { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+        { id: "workflows", label: "Workflows", icon: Workflow },
+        { id: "pipeline", label: "Pipeline", icon: TrendingUp },
+        { id: "contracts", label: "Contracts", icon: GitBranch },
+        { id: "execution", label: "Execution", icon: Zap },
+        { id: "communications", label: "Messages", icon: MessageSquare },
+        { id: "notifications", label: "Alerts", icon: Bell }
+      ]
+    },
+    {
+      id: "systems",
+      label: "Systems",
+      icon: Wrench,
+      items: [
+        { id: "affiliates", label: "Affiliates", icon: Link },
+        { id: "client-portal", label: "Client Portal", icon: Building2 },
+        { id: "bidding", label: "Bidding", icon: Gavel },
+        { id: "knowledge-base", label: "Knowledge", icon: BookOpen }
+      ]
+    },
+    {
+      id: "platform",
+      label: "Platform",
+      icon: Settings,
+      items: [
+        { id: "analytics", label: "Analytics", icon: BarChart3 },
+        { id: "team", label: "Team", icon: Users },
+        { id: "settings", label: "Settings", icon: Settings }
+      ]
+    }
   ];
+
+  // Flatten for backward compatibility
+  const NAV_ITEMS = NAV_GROUPS.flatMap(group => group.items);
+
+  // Find which group contains the active tab
+  const getActiveGroup = () => {
+    for (const group of NAV_GROUPS) {
+      if (group.items.some(item => item.id === activeTab)) {
+        return group.id;
+      }
+    }
+    return "operations";
+  };
 
   return (
     <div className="min-h-screen bg-background calm-interface" data-testid="labyrinth-app">
@@ -1701,23 +1736,76 @@ function App() {
               </div>
             </div>
             
+            {/* Dropdown Navigation */}
+            <nav className="flex items-center gap-1">
+              {NAV_GROUPS.map(group => {
+                const GroupIcon = group.icon;
+                const isActiveGroup = group.items.some(item => item.id === activeTab);
+                const activeItem = group.items.find(item => item.id === activeTab);
+                
+                return (
+                  <DropdownMenu key={group.id}>
+                    <DropdownMenuTrigger asChild>
+                      <Button 
+                        variant={isActiveGroup ? "secondary" : "ghost"} 
+                        className="gap-2 px-3"
+                        data-testid={`nav-group-${group.id}`}
+                      >
+                        <GroupIcon className="w-4 h-4" />
+                        <span className="hidden sm:inline">{group.label}</span>
+                        {isActiveGroup && activeItem && (
+                          <Badge variant="outline" className="ml-1 text-xs hidden md:inline-flex">
+                            {activeItem.label}
+                          </Badge>
+                        )}
+                        <ChevronDown className="w-3 h-3 opacity-50" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-48">
+                      <DropdownMenuLabel className="flex items-center gap-2">
+                        <GroupIcon className="w-4 h-4" />
+                        {group.label}
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {group.items.map(item => {
+                        const ItemIcon = item.icon;
+                        const isActive = activeTab === item.id;
+                        return (
+                          <DropdownMenuItem
+                            key={item.id}
+                            onClick={() => handleTabChange(item.id)}
+                            className={`gap-2 cursor-pointer ${isActive ? 'bg-primary/10 text-primary' : ''}`}
+                            data-testid={`tab-${item.id}`}
+                          >
+                            <ItemIcon className="w-4 h-4" />
+                            {item.label}
+                            {isActive && <CheckCircle className="w-3 h-3 ml-auto" />}
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                );
+              })}
+            </nav>
+            
             {/* Global Search */}
-            <div className="flex-1 max-w-lg mx-8">
+            <div className="flex-1 max-w-md mx-4">
               <GlobalSearch onNavigate={handleSearchNavigate} />
             </div>
             
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <ConnectionStatus />
               <RealTimeNotifications />
               <RoleSelector />
               <Button variant="ghost" size="sm" onClick={fetchData} data-testid="refresh-btn" className="gap-2">
                 <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-                Refresh
+                <span className="hidden sm:inline">Refresh</span>
               </Button>
               {stats?.active_alerts > 0 && (
                 <Badge variant="destructive" className="animate-pulse status-badge--overdue">
                   <AlertTriangle className="w-3 h-3 mr-1" />
-                  {stats.active_alerts} Alerts
+                  {stats.active_alerts}
                 </Badge>
               )}
             </div>
@@ -1728,19 +1816,12 @@ function App() {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={handleTabChange}>
-          <div className="labyrinth-nav mb-6 flex-wrap inline-flex">
+          {/* Hidden TabsList for accessibility */}
+          <TabsList className="sr-only">
             {NAV_ITEMS.map(item => (
-              <button
-                key={item.id}
-                onClick={() => handleTabChange(item.id)}
-                className={`labyrinth-nav__item ${activeTab === item.id ? 'labyrinth-nav__item--active' : ''}`}
-                data-testid={`tab-${item.id}`}
-              >
-                <item.icon className="w-4 h-4" />
-                {item.label}
-              </button>
+              <TabsTrigger key={item.id} value={item.id}>{item.label}</TabsTrigger>
             ))}
-          </div>
+          </TabsList>
 
           <TabsContent value="dashboard">
             <RoleDashboard />
