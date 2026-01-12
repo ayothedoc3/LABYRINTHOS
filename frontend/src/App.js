@@ -1798,6 +1798,9 @@ function App() {
           </TabsContent>
         </Tabs>
       </div>
+      
+      {/* PWA Install Prompt */}
+      <PWAInstallPrompt />
     </div>
   );
 }
