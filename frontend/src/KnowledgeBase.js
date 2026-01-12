@@ -22,7 +22,7 @@ import {
   BookOpen, FileText, Search, Plus, ChevronRight, ChevronDown,
   FolderOpen, RefreshCw, TrendingUp, Users, Settings, DollarSign,
   GraduationCap, Eye, Copy, CheckCircle, Clock, Tag, ExternalLink,
-  ListChecks, Sparkles
+  ListChecks, Sparkles, Save
 } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL || '';
