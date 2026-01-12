@@ -137,11 +137,26 @@ const ContractDetail = ({ contract, onClose, onTransition, onRefresh }) => {
   const [showTransitionDialog, setShowTransitionDialog] = useState(false);
   const [selectedNextStage, setSelectedNextStage] = useState(null);
   const [transitionReason, setTransitionReason] = useState('');
+  const [stageGatePassed, setStageGatePassed] = useState(true);
+  const [stageGateWarning, setStageGateWarning] = useState(null);
   
   if (!contract) return null;
   
   const stageConfig = STAGE_CONFIG[contract.stage] || STAGE_CONFIG.PROPOSAL;
   const StageIcon = stageConfig.icon;
+  
+  // Callback for SOPSidebar stage gate status
+  const handleStageGateStatus = (passed, details) => {
+    setStageGatePassed(passed);
+    if (!passed && details) {
+      const incompleteSOPs = Object.values(details).filter(s => !s.complete);
+      if (incompleteSOPs.length > 0) {
+        setStageGateWarning(`${incompleteSOPs.length} SOP checklist(s) incomplete`);
+      }
+    } else {
+      setStageGateWarning(null);
+    }
+  };
   
   // Get valid next stages
   const validTransitions = {
