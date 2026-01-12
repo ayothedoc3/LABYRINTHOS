@@ -59,6 +59,8 @@ from bidding_routes import router as bidding_router
 from drip_notifications_routes import router as notifications_router
 from ai_ocr_routes import router as ai_ocr_router
 from knowledge_base_routes import router as knowledge_base_router
+from websocket_routes import router as websocket_router
+from websocket_manager import emit_event, EventType
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
