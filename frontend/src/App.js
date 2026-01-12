@@ -1828,7 +1828,7 @@ function App() {
           </TabsList>
 
           <TabsContent value="dashboard">
-            <RoleDashboard />
+            <RoleDashboard onNavigateToTab={handleTabChange} />
           </TabsContent>
 
           <TabsContent value="workflows">
