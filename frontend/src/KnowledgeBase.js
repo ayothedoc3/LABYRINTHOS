@@ -847,107 +847,143 @@ const KnowledgeBase = () => {
 
   return (
     <div className="space-y-6" data-testid="knowledge-base">
-      {/* Header Stats */}
-      <div className="grid grid-cols-4 gap-4">
-        <Card className="bg-primary/5">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <BookOpen className="w-8 h-8 text-primary" />
-              <div>
-                <div className="text-2xl font-bold">{analytics?.total_sops || 0}</div>
-                <div className="text-xs text-muted-foreground">Total SOPs</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-green-500/5">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <FileText className="w-8 h-8 text-green-500" />
-              <div>
-                <div className="text-2xl font-bold">{analytics?.total_templates || 0}</div>
-                <div className="text-xs text-muted-foreground">Templates</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-blue-500/5">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <Eye className="w-8 h-8 text-blue-500" />
-              <div>
-                <div className="text-2xl font-bold">{analytics?.total_views || 0}</div>
-                <div className="text-xs text-muted-foreground">Total Views</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-purple-500/5">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <Sparkles className="w-8 h-8 text-purple-500" />
-              <div>
-                <div className="text-2xl font-bold">{analytics?.total_uses || 0}</div>
-                <div className="text-xs text-muted-foreground">Template Uses</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Search and Actions */}
-      <div className="flex gap-4 items-center">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search SOPs and documentation..."
-            className="pl-10"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            data-testid="sop-search"
-          />
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <BookOpen className="w-6 h-6 text-primary" />
+            Knowledge Base
+          </h2>
+          <p className="text-muted-foreground">SOPs, Training, Templates & Resources</p>
         </div>
-        <Button onClick={() => setShowCreateDialog(true)} data-testid="create-sop-btn">
-          <Plus className="w-4 h-4 mr-2" />
-          New SOP
-        </Button>
-        <Button variant="outline" onClick={fetchData}>
-          <RefreshCw className="w-4 h-4" />
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setShowCreateDialog(true)} data-testid="create-sop-btn">
+            <Plus className="w-4 h-4 mr-2" />
+            New SOP
+          </Button>
+          <Button variant="outline" onClick={fetchData}>
+            <RefreshCw className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex gap-6">
-        {/* Categories Sidebar */}
-        <div className="w-64 flex-shrink-0">
-          <h3 className="font-semibold mb-3">Categories</h3>
-          <div className="space-y-1">
-            {categories.map(cat => {
-              const config = CATEGORY_CONFIG[cat.id] || CATEGORY_CONFIG.general;
-              const Icon = config.icon;
-              const isSelected = selectedCategory === cat.id;
-              
-              return (
-                <Button
-                  key={cat.id}
-                  variant={isSelected ? "secondary" : "ghost"}
-                  className="w-full justify-start"
-                  onClick={() => handleCategorySelect(cat.id)}
-                  data-testid={`category-${cat.id}`}
-                >
-                  <Icon className={`w-4 h-4 mr-2 ${config.color}`} />
-                  <span className="flex-1 text-left">{cat.name}</span>
-                  <Badge variant="outline" className="ml-auto">{cat.count}</Badge>
-                </Button>
-              );
-            })}
+      {/* Main Tabs: SOPs, Training, Templates, Resources */}
+      <Tabs defaultValue="sops" className="w-full">
+        <TabsList className="grid w-full grid-cols-4 max-w-xl">
+          <TabsTrigger value="sops" className="flex items-center gap-2">
+            <BookOpen className="w-4 h-4" />
+            SOPs
+          </TabsTrigger>
+          <TabsTrigger value="training" className="flex items-center gap-2">
+            <GraduationCap className="w-4 h-4" />
+            Training
+          </TabsTrigger>
+          <TabsTrigger value="templates" className="flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            Templates
+          </TabsTrigger>
+          <TabsTrigger value="resources" className="flex items-center gap-2">
+            <FolderOpen className="w-4 h-4" />
+            Resources
+          </TabsTrigger>
+        </TabsList>
+
+        {/* SOPs Tab */}
+        <TabsContent value="sops" className="mt-6">
+          {/* Stats */}
+          <div className="grid grid-cols-4 gap-4 mb-6">
+            <Card className="bg-primary/5">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <BookOpen className="w-8 h-8 text-primary" />
+                  <div>
+                    <div className="text-2xl font-bold">{analytics?.total_sops || 0}</div>
+                    <div className="text-xs text-muted-foreground">Total SOPs</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-green-500/5">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <FileText className="w-8 h-8 text-green-500" />
+                  <div>
+                    <div className="text-2xl font-bold">{analytics?.total_templates || 0}</div>
+                    <div className="text-xs text-muted-foreground">Templates</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-blue-500/5">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <Eye className="w-8 h-8 text-blue-500" />
+                  <div>
+                    <div className="text-2xl font-bold">{analytics?.total_views || 0}</div>
+                    <div className="text-xs text-muted-foreground">Total Views</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-purple-500/5">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <Sparkles className="w-8 h-8 text-purple-500" />
+                  <div>
+                    <div className="text-2xl font-bold">{analytics?.total_uses || 0}</div>
+                    <div className="text-xs text-muted-foreground">Template Uses</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </div>
 
-        {/* SOP List */}
-        <div className="w-80 flex-shrink-0 border-l pl-6">
-          <h3 className="font-semibold mb-3">
-            {selectedCategory ? CATEGORY_CONFIG[selectedCategory]?.label : 'All SOPs'}
+          {/* Search */}
+          <div className="flex gap-4 items-center mb-6">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input 
+                placeholder="Search SOPs and documentation..."
+                className="pl-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                data-testid="sop-search"
+              />
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex gap-6">
+            {/* Categories Sidebar */}
+            <div className="w-64 flex-shrink-0">
+              <h3 className="font-semibold mb-3">Categories</h3>
+              <div className="space-y-1">
+                {categories.map(cat => {
+                  const config = CATEGORY_CONFIG[cat.id] || CATEGORY_CONFIG.general;
+                  const Icon = config.icon;
+                  const isSelected = selectedCategory === cat.id;
+                  
+                  return (
+                    <Button
+                      key={cat.id}
+                      variant={isSelected ? "secondary" : "ghost"}
+                      className="w-full justify-start"
+                      onClick={() => handleCategorySelect(cat.id)}
+                      data-testid={`category-${cat.id}`}
+                    >
+                      <Icon className={`w-4 h-4 mr-2 ${config.color}`} />
+                      <span className="flex-1 text-left">{cat.name}</span>
+                      <Badge variant="outline" className="ml-auto">{cat.count}</Badge>
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* SOP List */}
+            <div className="w-80 flex-shrink-0 border-l pl-6">
+              <h3 className="font-semibold mb-3">
+                {selectedCategory ? CATEGORY_CONFIG[selectedCategory]?.label : 'All SOPs'}
             <span className="text-muted-foreground font-normal ml-2">({filteredSOPs.length})</span>
           </h3>
           <ScrollArea className="h-[500px]">
