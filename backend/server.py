@@ -1156,6 +1156,7 @@ app.include_router(bidding_router, prefix="/api")  # Bidding System routes
 app.include_router(notifications_router, prefix="/api")  # Drip Notifications routes
 app.include_router(ai_ocr_router, prefix="/api")  # AI/OCR routes
 app.include_router(knowledge_base_router, prefix="/api")  # Knowledge Base routes
+app.include_router(websocket_router)  # WebSocket routes (no /api prefix for WS)
 
 
 # ==================== UNIFIED SEED ENDPOINT ====================
