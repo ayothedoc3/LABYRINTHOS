@@ -40,6 +40,7 @@ import { RoleProvider, useRole } from "./RoleContext";
 import { WebSocketProvider } from "./WebSocketContext";
 import RoleDashboard from "./RoleDashboard";
 import TeamDashboard from "./TeamDashboard";
+import AIManager from "./AIManager";
 import RoleSelector from "./RoleSelector";
 import ContractLifecycle from "./ContractLifecycle";
 import SalesCRM from "./SalesCRM";
