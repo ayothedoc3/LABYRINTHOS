@@ -412,3 +412,117 @@ async def create_training_module(module: TrainingModule):
         trainings_db[module.id] = module_data
     
     return {"message": "Module created", "module": module_data}
+
+
+
+# ==================== COMMENTS / Q&A ====================
+
+class TrainingComment(BaseModel):
+    id: str = ""
+    module_id: str
+    user_id: str
+    user_name: str
+    user_role: str
+    content: str
+    is_question: bool = False
+    is_answer: bool = False
+    parent_id: Optional[str] = None  # For replies
+    is_moderator_answer: bool = False
+    created_at: str = ""
+
+# In-memory fallback for comments
+comments_db = {}
+
+@router.get("/comments/{module_id}")
+async def get_module_comments(module_id: str):
+    """Get all comments/Q&A for a training module"""
+    
+    if trainings_collection is not None:
+        comments_collection = db["training_comments"]
+        cursor = comments_collection.find({"module_id": module_id}).sort("created_at", -1)
+        comments = await cursor.to_list(length=100)
+        
+        # Serialize
+        for c in comments:
+            if "_id" in c:
+                del c["_id"]
+        return comments
+    else:
+        return [c for c in comments_db.values() if c.get("module_id") == module_id]
+
+@router.post("/comments")
+async def create_comment(comment: TrainingComment):
+    """Create a new comment or question"""
+    
+    comment_data = {
+        "id": str(uuid.uuid4()),
+        "module_id": comment.module_id,
+        "user_id": comment.user_id,
+        "user_name": comment.user_name,
+        "user_role": comment.user_role,
+        "content": comment.content,
+        "is_question": comment.is_question,
+        "is_answer": comment.is_answer,
+        "parent_id": comment.parent_id,
+        "is_moderator_answer": comment.is_moderator_answer,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    if trainings_collection is not None:
+        comments_collection = db["training_comments"]
+        await comments_collection.insert_one(comment_data)
+        del comment_data["_id"] if "_id" in comment_data else None
+    else:
+        comments_db[comment_data["id"]] = comment_data
+    
+    return {"message": "Comment created", "comment": comment_data}
+
+@router.post("/comments/{comment_id}/reply")
+async def reply_to_comment(comment_id: str, comment: TrainingComment):
+    """Reply to a comment (for moderators answering questions)"""
+    
+    comment_data = {
+        "id": str(uuid.uuid4()),
+        "module_id": comment.module_id,
+        "user_id": comment.user_id,
+        "user_name": comment.user_name,
+        "user_role": comment.user_role,
+        "content": comment.content,
+        "is_question": False,
+        "is_answer": True,
+        "parent_id": comment_id,
+        "is_moderator_answer": comment.user_role in ["Administrator", "Manager", "Executive"],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    if trainings_collection is not None:
+        comments_collection = db["training_comments"]
+        await comments_collection.insert_one(comment_data)
+        del comment_data["_id"] if "_id" in comment_data else None
+    else:
+        comments_db[comment_data["id"]] = comment_data
+    
+    return {"message": "Reply created", "comment": comment_data}
+
+@router.delete("/comments/{comment_id}")
+async def delete_comment(comment_id: str):
+    """Delete a comment (moderators only)"""
+    
+    if trainings_collection is not None:
+        comments_collection = db["training_comments"]
+        result = await comments_collection.delete_one({"id": comment_id})
+        # Also delete replies
+        await comments_collection.delete_many({"parent_id": comment_id})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Comment not found")
+    else:
+        if comment_id in comments_db:
+            del comments_db[comment_id]
+            # Delete replies
+            for cid in list(comments_db.keys()):
+                if comments_db[cid].get("parent_id") == comment_id:
+                    del comments_db[cid]
+        else:
+            raise HTTPException(status_code=404, detail="Comment not found")
+    
+    return {"message": "Comment deleted"}
