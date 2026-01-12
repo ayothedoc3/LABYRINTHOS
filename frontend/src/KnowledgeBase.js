@@ -1023,6 +1023,22 @@ const KnowledgeBase = () => {
             </div>
           )}
         </div>
+
+        {/* AI Recommendations Panel */}
+        <div className="w-80 flex-shrink-0 border-l pl-6">
+          <h3 className="font-semibold mb-3 flex items-center gap-2">
+            <Brain className="w-4 h-4 text-primary" />
+            AI Assistant
+          </h3>
+          <ScrollArea className="h-[500px]">
+            <AIRecommendationsPanel 
+              userId="demo_user"
+              role="coordinator"
+              currentStage={selectedCategory}
+              onSelectSOP={handleSOPSelect}
+            />
+          </ScrollArea>
+        </div>
       </div>
 
       {/* Template Filler Dialog */}
