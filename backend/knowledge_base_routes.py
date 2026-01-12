@@ -959,6 +959,112 @@ We recommend our {deal.proposed_package} package, which includes:
             "views": 89,
             "uses": 45,
             "order": 1
+        },
+        # Contract Lifecycle SOPs
+        {
+            "id": "sop_active_contract_001",
+            "title": "Active Contract Management",
+            "description": "Daily procedures for managing active contracts",
+            "category": SOPCategory.OPERATIONS.value,
+            "content": """# Active Contract Management
+
+## Overview
+This SOP covers daily management procedures for active contracts.
+
+## Daily Checklist
+1. Review pending deliverables
+2. Check client communications
+3. Update progress tracking
+4. Log any issues or blockers
+
+## Weekly Tasks
+- Status report generation
+- Resource allocation review
+- KPI tracking update
+- Client check-in scheduling
+
+## Escalation Protocol
+If issues arise:
+1. Document the issue clearly
+2. Notify project manager within 24 hours
+3. Create action plan
+4. Follow up within 48 hours
+""",
+            "content_type": ContentType.MARKDOWN.value,
+            "relevant_stages": ["active", "queued", "in_queue"],
+            "relevant_deal_types": ["project", "retainer"],
+            "relevant_roles": ["coordinator", "specialist"],
+            "checklist": [
+                {"id": "act_1", "text": "Review pending deliverables", "required": True, "order": 1},
+                {"id": "act_2", "text": "Check client communications", "required": True, "order": 2},
+                {"id": "act_3", "text": "Update progress tracking", "required": True, "order": 3},
+                {"id": "act_4", "text": "Log any issues or blockers", "required": False, "order": 4}
+            ],
+            "template_variables": [],
+            "tags": ["active", "contract", "operations"],
+            "status": SOPStatus.PUBLISHED.value,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "views": 34,
+            "uses": 18,
+            "order": 1
+        },
+        {
+            "id": "sop_proposal_contract_001",
+            "title": "Contract Proposal Guidelines",
+            "description": "Standards for creating and submitting contract proposals",
+            "category": SOPCategory.SALES.value,
+            "content": """# Contract Proposal Guidelines
+
+## Before You Start
+- Verify client requirements are documented
+- Confirm budget range and timeline
+- Check resource availability
+
+## Proposal Structure
+1. Executive Summary
+2. Scope of Work
+3. Timeline & Milestones
+4. Pricing & Terms
+5. Team & Resources
+6. Terms & Conditions
+
+## Approval Workflow
+1. Draft review by team lead
+2. Financial review for pricing
+3. Legal review for terms
+4. Final approval from executive
+
+## Submission Checklist
+- [ ] All sections complete
+- [ ] Pricing verified
+- [ ] Legal terms approved
+- [ ] Client details accurate
+""",
+            "content_type": ContentType.MARKDOWN.value,
+            "relevant_stages": ["proposal", "bid_submitted"],
+            "relevant_deal_types": ["new_business", "upsell"],
+            "relevant_roles": ["executive", "coordinator"],
+            "checklist": [
+                {"id": "prop_1", "text": "Verify client requirements documented", "required": True, "order": 1},
+                {"id": "prop_2", "text": "Confirm budget and timeline", "required": True, "order": 2},
+                {"id": "prop_3", "text": "Check resource availability", "required": True, "order": 3},
+                {"id": "prop_4", "text": "Complete all proposal sections", "required": True, "order": 4},
+                {"id": "prop_5", "text": "Get financial review", "required": True, "order": 5},
+                {"id": "prop_6", "text": "Obtain legal approval", "required": True, "order": 6}
+            ],
+            "template_variables": [
+                {"name": "client.name", "label": "Client Name", "type": "text"},
+                {"name": "project.scope", "label": "Project Scope", "type": "text"},
+                {"name": "project.budget", "label": "Budget", "type": "number"}
+            ],
+            "tags": ["proposal", "contract", "sales"],
+            "status": SOPStatus.PUBLISHED.value,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "views": 67,
+            "uses": 32,
+            "order": 2
         }
     ]
     
