@@ -45,6 +45,7 @@ import BiddingSystem from "./BiddingSystem";
 import NotificationsCenter from "./NotificationsCenter";
 import DocumentScanner from "./DocumentScanner";
 import KnowledgeBase from "./KnowledgeBase";
+import PWAInstallPrompt from "./PWAInstallPrompt";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
