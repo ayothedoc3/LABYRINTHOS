@@ -39,6 +39,7 @@ import GlobalSearch from "./GlobalSearch";
 import { RoleProvider, useRole } from "./RoleContext";
 import { WebSocketProvider } from "./WebSocketContext";
 import RoleDashboard from "./RoleDashboard";
+import TeamDashboard from "./TeamDashboard";
 import RoleSelector from "./RoleSelector";
 import ContractLifecycle from "./ContractLifecycle";
 import SalesCRM from "./SalesCRM";
