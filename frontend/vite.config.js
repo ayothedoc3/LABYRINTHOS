@@ -14,17 +14,23 @@ export default defineConfig({
     port: 3000,
     host: '0.0.0.0',
     strictPort: true,
-    // Handle client-side routing
-    historyApiFallback: true,
   },
   build: {
     outDir: 'build',
     sourcemap: true,
   },
-  // Define env prefix for Vite (VITE_ prefix)
   envPrefix: 'VITE_',
-  // Optimizations
+  esbuild: {
+    loader: 'jsx',
+    include: /src\/.*\.jsx?$/,
+    exclude: [],
+  },
   optimizeDeps: {
+    esbuildOptions: {
+      loader: {
+        '.js': 'jsx',
+      },
+    },
     include: [
       'react',
       'react-dom',
