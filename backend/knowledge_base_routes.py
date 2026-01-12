@@ -11,6 +11,7 @@ from enum import Enum
 import uuid
 import os
 import re
+import json
 
 router = APIRouter(prefix="/knowledge-base", tags=["Knowledge Base"])
 
