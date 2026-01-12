@@ -128,13 +128,25 @@ class LifecycleContractCreate(LifecycleContractBase):
 
 class LifecycleContract(LifecycleContractBase):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    stage: ContractStage = ContractStage.PROPOSAL
+    stage: ContractStage = ContractStage.STRATEGY  # Start at STRATEGY
+    
+    # Strategy & SOW fields
+    strategy_notes: str = ""
+    strategy_goals: List[str] = []
+    sow_document: str = ""  # SOW content/markdown
+    sow_deliverables: List[str] = []
+    sow_timeline: str = ""
+    sow_budget: Optional[float] = None
     
     # Stage timestamps
-    proposal_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    strategy_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    sow_date: Optional[datetime] = None
+    proposal_date: Optional[datetime] = None
     bid_submitted_date: Optional[datetime] = None
     bid_approved_date: Optional[datetime] = None
+    contract_date: Optional[datetime] = None
     activated_date: Optional[datetime] = None
+    execution_date: Optional[datetime] = None
     paused_date: Optional[datetime] = None
     completed_date: Optional[datetime] = None
     closed_date: Optional[datetime] = None
@@ -159,6 +171,14 @@ class LifecycleContract(LifecycleContractBase):
     def get_stage_requirements(self) -> Dict[str, Any]:
         """Get requirements to move to next stage"""
         requirements = {
+            ContractStage.STRATEGY: {
+                "next": ContractStage.SOW,
+                "requirements": ["Define strategy goals", "Identify client needs"],
+            },
+            ContractStage.SOW: {
+                "next": ContractStage.PROPOSAL,
+                "requirements": ["Complete scope of work document", "Define deliverables"],
+            },
             ContractStage.PROPOSAL: {
                 "next": ContractStage.BID_SUBMITTED,
                 "requirements": ["At least one bid must be submitted"],
@@ -168,8 +188,12 @@ class LifecycleContract(LifecycleContractBase):
                 "requirements": ["Manager must approve at least one bid"],
             },
             ContractStage.BID_APPROVED: {
-                "next": ContractStage.INACTIVE,
+                "next": ContractStage.CONTRACT,
                 "requirements": ["Contract details must be finalized"],
+            },
+            ContractStage.CONTRACT: {
+                "next": ContractStage.INACTIVE,
+                "requirements": ["Legal review complete", "Terms finalized"],
             },
             ContractStage.INACTIVE: {
                 "next": ContractStage.QUEUED,
