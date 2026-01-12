@@ -262,6 +262,7 @@ async def get_user_progress(user_id: str, role: Optional[str] = None):
     }
 
 @router.post("/progress/{user_id}/{module_id}")
+@router.post("/progress/{user_id}/{module_id}/start")
 async def start_training(user_id: str, module_id: str):
     """Start a training module"""
     
