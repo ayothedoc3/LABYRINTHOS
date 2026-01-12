@@ -1,6 +1,8 @@
 """
 Labyrinth Contract Lifecycle - Data Models
 Stage-gated contract progression system
+
+WORKFLOW: Strategy → SOW → Bids/Proposals → Contracts → Milestones → Execution
 """
 
 from pydantic import BaseModel, Field
@@ -13,27 +15,38 @@ import uuid
 # ==================== CONTRACT LIFECYCLE ENUMS ====================
 
 class ContractStage(str, Enum):
-    """Contract lifecycle stages - CANNOT skip stages"""
-    PROPOSAL = "PROPOSAL"           # Initial proposal created
-    BID_SUBMITTED = "BID_SUBMITTED" # Internal bids submitted
-    BID_APPROVED = "BID_APPROVED"   # Bids approved by manager
-    INACTIVE = "INACTIVE"           # Contract created but not started
-    QUEUED = "QUEUED"               # Approved, waiting for capacity
-    ACTIVE = "ACTIVE"               # Currently executing
-    PAUSED = "PAUSED"               # Temporarily halted
-    COMPLETED = "COMPLETED"         # Successfully finished
-    CLOSED = "CLOSED"               # Archived
+    """Contract lifecycle stages - CANNOT skip stages
+    
+    WORKFLOW: Strategy → SOW → Bids/Proposals → Contracts → Milestones → Execution
+    """
+    STRATEGY = "STRATEGY"               # Initial strategy development
+    SOW = "SOW"                         # Scope of Work creation
+    PROPOSAL = "PROPOSAL"               # Proposal created from SOW
+    BID_SUBMITTED = "BID_SUBMITTED"     # Internal bids submitted
+    BID_APPROVED = "BID_APPROVED"       # Bids approved by manager
+    CONTRACT = "CONTRACT"               # Contract finalization
+    INACTIVE = "INACTIVE"               # Contract created but not started
+    QUEUED = "QUEUED"                   # Approved, waiting for capacity
+    ACTIVE = "ACTIVE"                   # Currently executing (Milestones)
+    EXECUTION = "EXECUTION"             # Full execution phase
+    PAUSED = "PAUSED"                   # Temporarily halted
+    COMPLETED = "COMPLETED"             # Successfully finished
+    CLOSED = "CLOSED"                   # Archived
 
 
 # Valid stage transitions (stage-gating enforcement)
 VALID_STAGE_TRANSITIONS: Dict[ContractStage, List[ContractStage]] = {
-    ContractStage.PROPOSAL: [ContractStage.BID_SUBMITTED],
-    ContractStage.BID_SUBMITTED: [ContractStage.BID_APPROVED, ContractStage.PROPOSAL],  # Can go back
-    ContractStage.BID_APPROVED: [ContractStage.INACTIVE],
+    ContractStage.STRATEGY: [ContractStage.SOW],
+    ContractStage.SOW: [ContractStage.PROPOSAL, ContractStage.STRATEGY],  # Can go back
+    ContractStage.PROPOSAL: [ContractStage.BID_SUBMITTED, ContractStage.SOW],
+    ContractStage.BID_SUBMITTED: [ContractStage.BID_APPROVED, ContractStage.PROPOSAL],
+    ContractStage.BID_APPROVED: [ContractStage.CONTRACT],
+    ContractStage.CONTRACT: [ContractStage.INACTIVE, ContractStage.BID_APPROVED],
     ContractStage.INACTIVE: [ContractStage.QUEUED],
-    ContractStage.QUEUED: [ContractStage.ACTIVE, ContractStage.INACTIVE],  # Can go back if capacity issue
-    ContractStage.ACTIVE: [ContractStage.PAUSED, ContractStage.COMPLETED],
-    ContractStage.PAUSED: [ContractStage.ACTIVE, ContractStage.CLOSED],  # Resume or cancel
+    ContractStage.QUEUED: [ContractStage.ACTIVE, ContractStage.INACTIVE],
+    ContractStage.ACTIVE: [ContractStage.EXECUTION, ContractStage.PAUSED],
+    ContractStage.EXECUTION: [ContractStage.COMPLETED, ContractStage.PAUSED],
+    ContractStage.PAUSED: [ContractStage.ACTIVE, ContractStage.EXECUTION, ContractStage.CLOSED],
     ContractStage.COMPLETED: [ContractStage.CLOSED],
     ContractStage.CLOSED: [],  # Terminal state
 }
