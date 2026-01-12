@@ -22,7 +22,8 @@ import {
   BookOpen, FileText, Search, Plus, ChevronRight, ChevronDown,
   FolderOpen, RefreshCw, TrendingUp, Users, Settings, DollarSign,
   GraduationCap, Eye, Copy, CheckCircle, Clock, Tag, ExternalLink,
-  ListChecks, Sparkles, Save
+  ListChecks, Sparkles, Save, Bell, Brain, AlertTriangle, ArrowRight,
+  Lightbulb, Wand2
 } from 'lucide-react';
 
 const API = process.env.REACT_APP_BACKEND_URL || '';
