@@ -38,7 +38,7 @@ import {
 import {
   FileText, Play, Pause, CheckCircle, Clock, Archive, Send,
   Plus, ChevronRight, AlertTriangle, ArrowRight, RefreshCw,
-  Users, DollarSign, Calendar, MessageSquare, BookOpen
+  Users, DollarSign, Calendar, MessageSquare, BookOpen, Lock
 } from 'lucide-react';
 import SOPSidebar from './SOPSidebar';
 
