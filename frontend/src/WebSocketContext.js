@@ -54,6 +54,9 @@ const getWebSocketUrl = () => {
   return `${wsUrl}/ws/connect`;
 };
 
+// Fallback polling interval (when WebSocket is unavailable)
+const POLL_INTERVAL = 10000; // 10 seconds
+
 export const WebSocketProvider = ({ children, userId, role, name }) => {
   const [connectionState, setConnectionState] = useState(WS_STATE.DISCONNECTED);
   const [lastMessage, setLastMessage] = useState(null);
