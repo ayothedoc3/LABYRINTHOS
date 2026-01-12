@@ -58,6 +58,7 @@ from trainings_routes import router as trainings_router
 from bidding_routes import router as bidding_router
 from drip_notifications_routes import router as notifications_router
 from ai_ocr_routes import router as ai_ocr_router
+from knowledge_base_routes import router as knowledge_base_router
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -1152,6 +1153,7 @@ app.include_router(trainings_router, prefix="/api")  # Team Trainings routes
 app.include_router(bidding_router, prefix="/api")  # Bidding System routes
 app.include_router(notifications_router, prefix="/api")  # Drip Notifications routes
 app.include_router(ai_ocr_router, prefix="/api")  # AI/OCR routes
+app.include_router(knowledge_base_router, prefix="/api")  # Knowledge Base routes
 
 
 # ==================== UNIFIED SEED ENDPOINT ====================
