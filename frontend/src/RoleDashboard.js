@@ -5,10 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
+  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription
+} from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import {
   Shield, Crown, Users, CheckCircle, Briefcase, ListTodo, BookOpen,
   Wrench, Link, User, Activity, TrendingUp, AlertTriangle, Clock,
   FileText, DollarSign, Target, BarChart3, Play, Pause, Archive,
-  ChevronRight, RefreshCw, Settings, Zap
+  ChevronRight, RefreshCw, Settings, Zap, X
 } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -22,17 +27,70 @@ const ICONS = {
   ChevronRight, RefreshCw, Settings, Zap
 };
 
+// Navigation mapping for tiles
+const TILE_NAVIGATION = {
+  system_overview: { tab: 'analytics', detail: 'users' },
+  contract_lifecycle: { tab: 'contracts', detail: 'overview' },
+  active_tasks: { tab: 'execution', detail: 'tasks' },
+  my_tasks: { tab: 'execution', detail: 'my-tasks' },
+  executive_summary: { tab: 'analytics', detail: 'executive' },
+  overdue_items: { tab: 'notifications', detail: 'overdue' },
+  commissions: { tab: 'affiliates', detail: 'commissions' },
+  all_contracts: { tab: 'contracts', detail: 'list' },
+  all_users: { tab: 'team', detail: 'users' },
+  automations: { tab: 'workflows', detail: 'automations' },
+  settings: { tab: 'settings', detail: 'general' },
+  analytics: { tab: 'analytics', detail: 'reports' },
+  finance_overview: { tab: 'analytics', detail: 'finance' },
+  sales_pipeline: { tab: 'pipeline', detail: 'overview' },
+  operations_health: { tab: 'analytics', detail: 'operations' },
+  project_health: { tab: 'contracts', detail: 'health' },
+  strategic_kpis: { tab: 'analytics', detail: 'kpis' },
+  my_projects: { tab: 'contracts', detail: 'my-projects' },
+  client_communications: { tab: 'communications', detail: 'inbox' },
+  deliverables: { tab: 'execution', detail: 'deliverables' },
+  timeline: { tab: 'execution', detail: 'timeline' },
+  team_status: { tab: 'team', detail: 'status' },
+  compliance_dashboard: { tab: 'analytics', detail: 'compliance' },
+  escalations: { tab: 'notifications', detail: 'escalations' },
+  performance_metrics: { tab: 'analytics', detail: 'performance' },
+  function_overview: { tab: 'analytics', detail: 'department' },
+  team_bids: { tab: 'bidding', detail: 'pending' },
+  proposals: { tab: 'pipeline', detail: 'proposals' },
+  strategy_inputs: { tab: 'workflows', detail: 'strategy' },
+  sop_library: { tab: 'knowledge-base', detail: 'sops' },
+  team_assignments: { tab: 'execution', detail: 'assignments' },
+  milestone_tracker: { tab: 'contracts', detail: 'milestones' },
+  training_content: { tab: 'knowledge-base', detail: 'training' },
+  contract_overview: { tab: 'contracts', detail: 'overview' },
+  guidance_requests: { tab: 'communications', detail: 'requests' },
+  my_deliverables: { tab: 'execution', detail: 'my-deliverables' },
+  instructions: { tab: 'knowledge-base', detail: 'instructions' },
+  referral_link: { tab: 'affiliates', detail: 'referral' },
+  leads_overview: { tab: 'affiliates', detail: 'leads' },
+  conversions: { tab: 'affiliates', detail: 'conversions' },
+  marketing_resources: { tab: 'affiliates', detail: 'resources' },
+  training: { tab: 'knowledge-base', detail: 'training' },
+  project_dashboard: { tab: 'contracts', detail: 'dashboard' },
+  reports: { tab: 'analytics', detail: 'reports' },
+  support: { tab: 'knowledge-base', detail: 'support' },
+};
+
 // ==================== TILE WRAPPER ====================
 
-const TileWrapper = ({ title, iconName, color, children }) => {
+const TileWrapper = ({ title, iconName, color, children, onClick, hasDetail }) => {
   const Icon = ICONS[iconName] || Activity;
   return (
     <Card 
-      className="labyrinth-tile cursor-pointer hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 border-l-4 bg-white"
+      className={`labyrinth-tile border-l-4 bg-white transition-all duration-200 ${
+        onClick ? 'cursor-pointer hover:shadow-lg hover:-translate-y-0.5 group' : ''
+      }`}
       style={{ 
         borderLeftColor: color,
         '--tile-accent-color': color 
       }}
+      onClick={onClick}
+      data-testid={`tile-${title.toLowerCase().replace(/\s+/g, '-')}`}
     >
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
@@ -45,7 +103,9 @@ const TileWrapper = ({ title, iconName, color, children }) => {
             </div>
             <span className="text-neutral-700">{title}</span>
           </CardTitle>
-          <ChevronRight className="w-4 h-4 text-neutral-400 transition-transform group-hover:translate-x-0.5" />
+          {(onClick || hasDetail) && (
+            <ChevronRight className="w-4 h-4 text-neutral-400 transition-transform group-hover:translate-x-1" />
+          )}
         </div>
       </CardHeader>
       <CardContent className="pt-0">{children}</CardContent>
@@ -55,8 +115,8 @@ const TileWrapper = ({ title, iconName, color, children }) => {
 
 // ==================== STATS TILE ====================
 
-const StatsTile = ({ title, iconName, color, value, subtitle, trend }) => (
-  <TileWrapper title={title} iconName={iconName} color={color}>
+const StatsTile = ({ title, iconName, color, value, subtitle, trend, onClick, hasDetail }) => (
+  <TileWrapper title={title} iconName={iconName} color={color} onClick={onClick} hasDetail={hasDetail}>
     <div className="space-y-1 mt-2">
       <div className="text-2xl font-bold text-neutral-900">{value}</div>
       {subtitle && <div className="text-sm text-neutral-500">{subtitle}</div>}
