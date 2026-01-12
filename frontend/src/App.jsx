@@ -1849,8 +1849,8 @@ function App() {
             <AffiliateCRM />
           </TabsContent>
 
-          <TabsContent value="communications">
-            <Communications />
+          <TabsContent value="ai-manager">
+            <AIManager />
           </TabsContent>
 
           <TabsContent value="execution">
