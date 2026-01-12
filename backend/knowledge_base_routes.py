@@ -1297,3 +1297,502 @@ If issues arise:
         "sops": len(demo_sops),
         "templates": len(demo_templates)
     }
+
+# ==================== AI-POWERED RECOMMENDATIONS ====================
+
+# Import AI service
+try:
+    from ai_service import AIService
+    HAS_AI = True
+except ImportError:
+    HAS_AI = False
+
+# In-memory storage for user behavior tracking
+user_behavior_db = {}
+
+class RecommendationRequest(BaseModel):
+    user_id: str
+    role: Optional[str] = None
+    current_stage: Optional[str] = None
+    entity_type: Optional[str] = None
+    entity_id: Optional[str] = None
+    recent_activity: Optional[List[str]] = []
+
+class ChecklistGenerationRequest(BaseModel):
+    sop_title: str
+    sop_description: str
+    category: str
+    relevant_stages: Optional[List[str]] = []
+
+@router.post("/ai/track-behavior")
+async def track_user_behavior(
+    user_id: str,
+    action: str,  # view, use, complete, search
+    sop_id: Optional[str] = None,
+    search_query: Optional[str] = None,
+    context: Optional[Dict[str, Any]] = None
+):
+    """Track user behavior for AI recommendations"""
+    
+    behavior_id = f"beh_{uuid.uuid4().hex[:8]}"
+    behavior_data = {
+        "id": behavior_id,
+        "user_id": user_id,
+        "action": action,
+        "sop_id": sop_id,
+        "search_query": search_query,
+        "context": context or {},
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+    
+    if db is not None:
+        behavior_collection = db["user_behavior"]
+        await behavior_collection.insert_one(behavior_data)
+    else:
+        if user_id not in user_behavior_db:
+            user_behavior_db[user_id] = []
+        user_behavior_db[user_id].append(behavior_data)
+    
+    return {"message": "Behavior tracked", "id": behavior_id}
+
+@router.get("/ai/user-insights/{user_id}")
+async def get_user_insights(user_id: str):
+    """Get insights about user's SOP usage patterns"""
+    
+    behaviors = []
+    if db is not None:
+        behavior_collection = db["user_behavior"]
+        cursor = behavior_collection.find({"user_id": user_id}, {"_id": 0}).sort("timestamp", -1).limit(100)
+        behaviors = await cursor.to_list(length=100)
+    else:
+        behaviors = user_behavior_db.get(user_id, [])[-100:]
+    
+    # Analyze patterns
+    sop_views = {}
+    sop_uses = {}
+    searches = []
+    
+    for b in behaviors:
+        if b.get("action") == "view" and b.get("sop_id"):
+            sop_views[b["sop_id"]] = sop_views.get(b["sop_id"], 0) + 1
+        elif b.get("action") == "use" and b.get("sop_id"):
+            sop_uses[b["sop_id"]] = sop_uses.get(b["sop_id"], 0) + 1
+        elif b.get("action") == "search" and b.get("search_query"):
+            searches.append(b["search_query"])
+    
+    # Get most viewed/used SOPs
+    top_viewed = sorted(sop_views.items(), key=lambda x: x[1], reverse=True)[:5]
+    top_used = sorted(sop_uses.items(), key=lambda x: x[1], reverse=True)[:5]
+    
+    return {
+        "user_id": user_id,
+        "total_actions": len(behaviors),
+        "top_viewed_sops": [{"sop_id": s[0], "views": s[1]} for s in top_viewed],
+        "top_used_sops": [{"sop_id": s[0], "uses": s[1]} for s in top_used],
+        "recent_searches": searches[-10:],
+        "activity_summary": {
+            "views": sum(sop_views.values()),
+            "uses": sum(sop_uses.values()),
+            "searches": len(searches)
+        }
+    }
+
+@router.post("/ai/recommendations")
+async def get_ai_recommendations(request: RecommendationRequest):
+    """Get AI-powered SOP recommendations based on user context and behavior"""
+    
+    if not HAS_AI:
+        # Fallback to rule-based recommendations
+        return await get_rule_based_recommendations(request)
+    
+    try:
+        # Gather context for AI
+        # Get user's recent behavior
+        behaviors = []
+        if db is not None:
+            behavior_collection = db["user_behavior"]
+            cursor = behavior_collection.find({"user_id": request.user_id}, {"_id": 0}).sort("timestamp", -1).limit(20)
+            behaviors = await cursor.to_list(length=20)
+        else:
+            behaviors = user_behavior_db.get(request.user_id, [])[-20:]
+        
+        # Get all available SOPs
+        all_sops = []
+        if sop_collection is not None:
+            cursor = sop_collection.find({"status": SOPStatus.PUBLISHED.value}, {"_id": 0, "content": 0})
+            all_sops = await cursor.to_list(length=100)
+        else:
+            all_sops = [{"id": s["id"], "title": s["title"], "description": s["description"], 
+                        "category": s["category"], "relevant_stages": s.get("relevant_stages", []),
+                        "tags": s.get("tags", [])} 
+                       for s in sops_db.values() if s.get("status") == SOPStatus.PUBLISHED.value]
+        
+        # Build context for AI
+        recent_sop_ids = [b.get("sop_id") for b in behaviors if b.get("sop_id")]
+        recent_searches = [b.get("search_query") for b in behaviors if b.get("search_query")]
+        
+        ai_context = f"""
+You are an AI assistant helping recommend relevant SOPs (Standard Operating Procedures) to a user.
+
+User Context:
+- Role: {request.role or 'Not specified'}
+- Current Stage: {request.current_stage or 'Not specified'}
+- Entity Type: {request.entity_type or 'Not specified'}
+- Recent Activity: {', '.join(request.recent_activity) if request.recent_activity else 'None'}
+- Recently Viewed SOPs: {', '.join(recent_sop_ids[:5]) if recent_sop_ids else 'None'}
+- Recent Searches: {', '.join(recent_searches[:5]) if recent_searches else 'None'}
+
+Available SOPs:
+{chr(10).join([f"- {s['id']}: {s['title']} ({s['category']}) - {s['description'][:100]}" for s in all_sops[:30]])}
+
+Based on the user's context and behavior, recommend the TOP 5 most relevant SOPs they should review.
+For each recommendation, explain WHY it's relevant to their current situation.
+
+Respond in JSON format:
+{{
+  "recommendations": [
+    {{"sop_id": "...", "reason": "...", "priority": "high|medium|low", "action": "Review this SOP because..."}},
+    ...
+  ],
+  "insights": "Brief insight about the user's workflow patterns",
+  "suggested_action": "One key action the user should take"
+}}
+"""
+        
+        ai_service = AIService()
+        response = await ai_service.generate_response(ai_context, max_tokens=1000)
+        
+        # Parse AI response
+        try:
+            # Extract JSON from response
+            json_match = re.search(r'\{[\s\S]*\}', response)
+            if json_match:
+                ai_result = json.loads(json_match.group())
+            else:
+                ai_result = {"recommendations": [], "insights": response, "suggested_action": "Review relevant SOPs"}
+        except json.JSONDecodeError:
+            ai_result = {"recommendations": [], "insights": response, "suggested_action": "Review relevant SOPs"}
+        
+        # Enrich recommendations with full SOP data
+        enriched_recommendations = []
+        sop_map = {s["id"]: s for s in all_sops}
+        
+        for rec in ai_result.get("recommendations", [])[:5]:
+            sop_id = rec.get("sop_id", "")
+            if sop_id in sop_map:
+                enriched_recommendations.append({
+                    **rec,
+                    "sop": sop_map[sop_id]
+                })
+        
+        return {
+            "recommendations": enriched_recommendations,
+            "insights": ai_result.get("insights", ""),
+            "suggested_action": ai_result.get("suggested_action", ""),
+            "context_used": {
+                "role": request.role,
+                "stage": request.current_stage,
+                "entity_type": request.entity_type
+            },
+            "ai_powered": True
+        }
+        
+    except Exception as e:
+        print(f"AI recommendation error: {e}")
+        return await get_rule_based_recommendations(request)
+
+async def get_rule_based_recommendations(request: RecommendationRequest):
+    """Fallback rule-based recommendations when AI is unavailable"""
+    
+    recommendations = []
+    
+    # Get SOPs matching user's current stage
+    if sop_collection is not None:
+        query = {"status": SOPStatus.PUBLISHED.value}
+        if request.current_stage:
+            query["relevant_stages"] = {"$in": [request.current_stage]}
+        cursor = sop_collection.find(query, {"_id": 0, "content": 0}).limit(5)
+        sops = await cursor.to_list(length=5)
+    else:
+        sops = [s for s in sops_db.values() if s.get("status") == SOPStatus.PUBLISHED.value]
+        if request.current_stage:
+            sops = [s for s in sops if request.current_stage in s.get("relevant_stages", [])]
+        sops = sops[:5]
+    
+    for sop in sops:
+        recommendations.append({
+            "sop_id": sop["id"],
+            "reason": f"Relevant to your current stage: {request.current_stage or 'general'}",
+            "priority": "medium",
+            "action": f"Review '{sop['title']}' for guidance",
+            "sop": {k: v for k, v in sop.items() if k != "content"}
+        })
+    
+    return {
+        "recommendations": recommendations,
+        "insights": "Based on your current workflow stage",
+        "suggested_action": "Review the SOPs relevant to your current work",
+        "context_used": {
+            "role": request.role,
+            "stage": request.current_stage,
+            "entity_type": request.entity_type
+        },
+        "ai_powered": False
+    }
+
+@router.post("/ai/generate-checklist")
+async def generate_checklist_items(request: ChecklistGenerationRequest):
+    """AI-powered checklist generation based on SOP context"""
+    
+    if not HAS_AI:
+        return {
+            "checklist": [
+                {"id": f"auto_{i}", "text": f"Step {i}: [Define specific action]", "required": True, "order": i}
+                for i in range(1, 6)
+            ],
+            "ai_powered": False,
+            "message": "AI unavailable - generic checklist generated"
+        }
+    
+    try:
+        ai_context = f"""
+You are an expert at creating actionable checklists for business processes.
+
+Create a detailed checklist for the following SOP:
+
+Title: {request.sop_title}
+Description: {request.sop_description}
+Category: {request.category}
+Relevant Stages: {', '.join(request.relevant_stages) if request.relevant_stages else 'General'}
+
+Generate 5-8 specific, actionable checklist items that someone following this SOP should complete.
+Each item should be:
+- Clear and specific (not vague)
+- Actionable (starts with a verb)
+- Measurable (you can tell when it's done)
+
+Respond in JSON format:
+{{
+  "checklist": [
+    {{"text": "Action item text", "required": true/false, "order": 1}},
+    ...
+  ],
+  "rationale": "Brief explanation of the checklist logic"
+}}
+
+Mark items as "required": true if they are critical to the process, false if they are optional best practices.
+"""
+        
+        ai_service = AIService()
+        response = await ai_service.generate_response(ai_context, max_tokens=800)
+        
+        # Parse AI response
+        try:
+            json_match = re.search(r'\{[\s\S]*\}', response)
+            if json_match:
+                ai_result = json.loads(json_match.group())
+            else:
+                raise ValueError("No JSON found in response")
+        except (json.JSONDecodeError, ValueError):
+            # Generate from response text
+            lines = [l.strip() for l in response.split('\n') if l.strip() and not l.strip().startswith('{')]
+            ai_result = {
+                "checklist": [
+                    {"text": line.lstrip('0123456789.-) '), "required": True, "order": i+1}
+                    for i, line in enumerate(lines[:8]) if len(line) > 10
+                ],
+                "rationale": "Generated from AI response"
+            }
+        
+        # Add IDs to checklist items
+        checklist = ai_result.get("checklist", [])
+        for i, item in enumerate(checklist):
+            item["id"] = f"ai_gen_{uuid.uuid4().hex[:6]}"
+            item["order"] = i + 1
+        
+        return {
+            "checklist": checklist,
+            "rationale": ai_result.get("rationale", ""),
+            "ai_powered": True,
+            "sop_context": {
+                "title": request.sop_title,
+                "category": request.category
+            }
+        }
+        
+    except Exception as e:
+        print(f"AI checklist generation error: {e}")
+        return {
+            "checklist": [
+                {"id": f"auto_1", "text": f"Review {request.sop_title} requirements", "required": True, "order": 1},
+                {"id": f"auto_2", "text": "Gather necessary resources and information", "required": True, "order": 2},
+                {"id": f"auto_3", "text": "Execute main process steps", "required": True, "order": 3},
+                {"id": f"auto_4", "text": "Verify completion and quality", "required": True, "order": 4},
+                {"id": f"auto_5", "text": "Document results and next steps", "required": False, "order": 5}
+            ],
+            "ai_powered": False,
+            "message": f"AI error: {str(e)}"
+        }
+
+@router.post("/ai/suggest-sop-improvements")
+async def suggest_sop_improvements(sop_id: str):
+    """AI-powered suggestions to improve an existing SOP"""
+    
+    # Get the SOP
+    if sop_collection is not None:
+        sop = await sop_collection.find_one({"id": sop_id}, {"_id": 0})
+    else:
+        sop = sops_db.get(sop_id)
+    
+    if not sop:
+        raise HTTPException(status_code=404, detail="SOP not found")
+    
+    if not HAS_AI:
+        return {
+            "suggestions": [
+                "Add more specific action items to the checklist",
+                "Include examples or templates",
+                "Add links to related SOPs",
+                "Consider breaking into smaller sections"
+            ],
+            "ai_powered": False
+        }
+    
+    try:
+        ai_context = f"""
+Analyze this SOP and suggest improvements:
+
+Title: {sop.get('title', '')}
+Description: {sop.get('description', '')}
+Category: {sop.get('category', '')}
+Content Preview: {sop.get('content', '')[:1500]}
+Current Checklist Items: {len(sop.get('checklist', []))}
+Template Variables: {len(sop.get('template_variables', []))}
+
+Provide 5-7 specific, actionable suggestions to improve this SOP.
+Consider:
+- Clarity and readability
+- Completeness of checklist
+- Useful template variables
+- Missing sections or steps
+- Best practices
+
+Respond in JSON format:
+{{
+  "suggestions": [
+    {{"category": "clarity|completeness|templates|checklist|structure", "suggestion": "...", "priority": "high|medium|low"}},
+    ...
+  ],
+  "overall_score": 1-10,
+  "strengths": ["...", "..."],
+  "key_improvement": "The single most important improvement"
+}}
+"""
+        
+        ai_service = AIService()
+        response = await ai_service.generate_response(ai_context, max_tokens=800)
+        
+        try:
+            json_match = re.search(r'\{[\s\S]*\}', response)
+            if json_match:
+                ai_result = json.loads(json_match.group())
+            else:
+                ai_result = {"suggestions": [{"category": "general", "suggestion": response, "priority": "medium"}]}
+        except json.JSONDecodeError:
+            ai_result = {"suggestions": [{"category": "general", "suggestion": response, "priority": "medium"}]}
+        
+        return {
+            **ai_result,
+            "sop_id": sop_id,
+            "sop_title": sop.get("title", ""),
+            "ai_powered": True
+        }
+        
+    except Exception as e:
+        print(f"AI improvement suggestion error: {e}")
+        return {
+            "suggestions": [
+                {"category": "general", "suggestion": "Review and update content regularly", "priority": "medium"}
+            ],
+            "ai_powered": False,
+            "error": str(e)
+        }
+
+@router.get("/ai/proactive-alerts/{user_id}")
+async def get_proactive_alerts(user_id: str, role: Optional[str] = None, current_stage: Optional[str] = None):
+    """Get proactive alerts and suggestions for the user"""
+    
+    alerts = []
+    
+    # Check for incomplete checklists
+    if checklist_progress_collection is not None:
+        incomplete = await checklist_progress_collection.find(
+            {"user_id": user_id},
+            {"_id": 0}
+        ).to_list(length=50)
+    else:
+        incomplete = [p for p in checklist_progress_db.values()]
+    
+    # Get SOPs with incomplete checklists
+    for progress in incomplete:
+        sop_id = progress.get("sop_id")
+        completed = len(progress.get("completed_items", []))
+        
+        # Get the SOP to check total items
+        if sop_collection is not None:
+            sop = await sop_collection.find_one({"id": sop_id}, {"_id": 0})
+        else:
+            sop = sops_db.get(sop_id)
+        
+        if sop:
+            total = len(sop.get("checklist", []))
+            required = len([c for c in sop.get("checklist", []) if c.get("required", True)])
+            if completed < required:
+                alerts.append({
+                    "type": "incomplete_checklist",
+                    "priority": "high",
+                    "message": f"Incomplete checklist: {sop.get('title', sop_id)}",
+                    "details": f"{completed}/{required} required items complete",
+                    "sop_id": sop_id,
+                    "action": "Complete required checklist items"
+                })
+    
+    # Stage-specific alerts
+    if current_stage:
+        relevant_sops = []
+        if sop_collection is not None:
+            cursor = sop_collection.find(
+                {"relevant_stages": {"$in": [current_stage]}, "status": SOPStatus.PUBLISHED.value},
+                {"_id": 0, "id": 1, "title": 1}
+            )
+            relevant_sops = await cursor.to_list(length=10)
+        else:
+            relevant_sops = [{"id": s["id"], "title": s["title"]} 
+                           for s in sops_db.values() 
+                           if current_stage in s.get("relevant_stages", [])]
+        
+        if relevant_sops:
+            alerts.append({
+                "type": "stage_guidance",
+                "priority": "medium",
+                "message": f"SOPs available for '{current_stage}' stage",
+                "details": f"{len(relevant_sops)} relevant SOPs found",
+                "sop_ids": [s["id"] for s in relevant_sops],
+                "action": "Review stage-specific guidance"
+            })
+    
+    # New SOP alerts (mock - would track last seen in real impl)
+    alerts.append({
+        "type": "new_content",
+        "priority": "low",
+        "message": "New SOPs and templates available",
+        "details": "Check the Knowledge Base for latest updates",
+        "action": "Explore new content"
+    })
+    
+    return {
+        "user_id": user_id,
+        "alerts": alerts,
+        "total_alerts": len(alerts),
+        "high_priority_count": len([a for a in alerts if a["priority"] == "high"])
+    }
