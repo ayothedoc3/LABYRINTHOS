@@ -246,9 +246,23 @@ class CommunicationThread(BaseModel):
 # ==================== STAGE INFO ====================
 
 STAGE_INFO: Dict[ContractStage, Dict[str, Any]] = {
+    ContractStage.STRATEGY: {
+        "display_name": "Strategy",
+        "description": "Initial strategy development and client discovery",
+        "color": "#8B5CF6",  # Purple
+        "icon": "Lightbulb",
+        "allowed_roles": ["ADMIN", "EXECUTIVE", "PROJECT_DIRECTOR", "SALES"],
+    },
+    ContractStage.SOW: {
+        "display_name": "Scope of Work",
+        "description": "Defining deliverables, timeline, and requirements",
+        "color": "#6366F1",  # Indigo
+        "icon": "FileSignature",
+        "allowed_roles": ["ADMIN", "EXECUTIVE", "PROJECT_DIRECTOR", "MANAGER"],
+    },
     ContractStage.PROPOSAL: {
         "display_name": "Proposal",
-        "description": "Initial proposal created, awaiting bids",
+        "description": "Formal proposal created from SOW, awaiting bids",
         "color": "#64748B",  # Slate
         "icon": "FileText",
         "allowed_roles": ["ADMIN", "EXECUTIVE", "MANAGER", "SALES"],
@@ -267,6 +281,13 @@ STAGE_INFO: Dict[ContractStage, Dict[str, Any]] = {
         "icon": "CheckCircle",
         "allowed_roles": ["ADMIN", "EXECUTIVE", "ACCOUNTABILITY"],
     },
+    ContractStage.CONTRACT: {
+        "display_name": "Contract",
+        "description": "Contract finalization and legal review",
+        "color": "#0EA5E9",  # Sky
+        "icon": "FileCheck",
+        "allowed_roles": ["ADMIN", "EXECUTIVE", "ACCOUNTABILITY"],
+    },
     ContractStage.INACTIVE: {
         "display_name": "Inactive",
         "description": "Contract created, awaiting client signature",
@@ -282,10 +303,17 @@ STAGE_INFO: Dict[ContractStage, Dict[str, Any]] = {
         "allowed_roles": ["ADMIN", "ACCOUNTABILITY"],
     },
     ContractStage.ACTIVE: {
-        "display_name": "Active",
-        "description": "Currently executing",
+        "display_name": "Milestones",
+        "description": "Active milestone tracking and delivery",
         "color": "#22C55E",  # Green
-        "icon": "Play",
+        "icon": "Target",
+        "allowed_roles": ["ADMIN", "ACCOUNTABILITY", "COORDINATOR"],
+    },
+    ContractStage.EXECUTION: {
+        "display_name": "Execution",
+        "description": "Full execution phase with deliverables",
+        "color": "#14B8A6",  # Teal
+        "icon": "Rocket",
         "allowed_roles": ["ADMIN", "ACCOUNTABILITY", "COORDINATOR"],
     },
     ContractStage.PAUSED: {
