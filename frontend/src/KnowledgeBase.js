@@ -156,6 +156,65 @@ const TemplateFiller = ({ sop, onClose, onGenerate }) => {
   const [formData, setFormData] = useState({});
   const [generatedContent, setGeneratedContent] = useState('');
   const [generating, setGenerating] = useState(false);
+  const [autoFillMode, setAutoFillMode] = useState(false);
+  const [entityType, setEntityType] = useState('');
+  const [entityId, setEntityId] = useState('');
+  const [availableEntities, setAvailableEntities] = useState([]);
+  const [loadingEntities, setLoadingEntities] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [documentTitle, setDocumentTitle] = useState('');
+  const [savedSuccessfully, setSavedSuccessfully] = useState(false);
+
+  // Fetch available entities when entity type changes
+  useEffect(() => {
+    if (entityType) {
+      fetchEntities();
+    }
+  }, [entityType]);
+
+  const fetchEntities = async () => {
+    setLoadingEntities(true);
+    try {
+      let endpoint = '';
+      if (entityType === 'deal') {
+        endpoint = `${API}/api/leads`;
+      } else if (entityType === 'contract') {
+        endpoint = `${API}/api/contracts`;
+      } else if (entityType === 'client') {
+        endpoint = `${API}/api/clients`;
+      }
+      
+      if (endpoint) {
+        const res = await axios.get(endpoint);
+        const data = res.data.leads || res.data.contracts || res.data.clients || [];
+        setAvailableEntities(data.slice(0, 20)); // Limit to 20
+      }
+    } catch (err) {
+      console.error('Error fetching entities:', err);
+      setAvailableEntities([]);
+    }
+    setLoadingEntities(false);
+  };
+
+  const handleAutoFill = async () => {
+    if (!entityType || !entityId) return;
+    
+    setGenerating(true);
+    try {
+      const res = await axios.post(
+        `${API}/api/knowledge-base/templates/${sop.id}/fill-from-entity?entity_type=${entityType}&entity_id=${entityId}`
+      );
+      
+      // Pre-fill form data with auto-filled values
+      setFormData(res.data.auto_filled_data || {});
+      setGeneratedContent(res.data.filled_content || '');
+      setDocumentTitle(`${sop.title} - ${entityType.charAt(0).toUpperCase() + entityType.slice(1)} ${entityId}`);
+    } catch (err) {
+      console.error('Error auto-filling:', err);
+      alert('Failed to auto-fill from entity. You can still fill manually.');
+    }
+    setGenerating(false);
+  };
 
   const handleGenerate = async () => {
     setGenerating(true);
@@ -176,16 +235,96 @@ const TemplateFiller = ({ sop, onClose, onGenerate }) => {
     setGenerating(false);
   };
 
+  const handleSaveDocument = async () => {
+    if (!generatedContent) return;
+    
+    setSaving(true);
+    try {
+      await axios.post(`${API}/api/knowledge-base/documents/save`, {
+        template_id: sop.id,
+        title: documentTitle || `${sop.title} - ${new Date().toLocaleDateString()}`,
+        content: generatedContent,
+        entity_type: entityType || null,
+        entity_id: entityId || null,
+        filled_data: formData
+      });
+      setSavedSuccessfully(true);
+      setTimeout(() => setSavedSuccessfully(false), 3000);
+    } catch (err) {
+      console.error('Error saving document:', err);
+      alert('Failed to save document');
+    }
+    setSaving(false);
+  };
+
   const handleCopy = () => {
     navigator.clipboard.writeText(generatedContent);
   };
 
   return (
     <div className="space-y-4">
+      {/* Auto-Fill Section */}
+      <Card className="bg-muted/30">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <span className="font-medium text-sm">Auto-Fill from CRM</span>
+            <Badge variant="outline" className="text-xs">Optional</Badge>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs">Entity Type</Label>
+              <Select value={entityType} onValueChange={setEntityType}>
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Select type..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="deal">Deal / Lead</SelectItem>
+                  <SelectItem value="contract">Contract</SelectItem>
+                  <SelectItem value="client">Client</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs">Select Record</Label>
+              <Select 
+                value={entityId} 
+                onValueChange={setEntityId}
+                disabled={!entityType || loadingEntities}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder={loadingEntities ? "Loading..." : "Select record..."} />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableEntities.map(entity => (
+                    <SelectItem key={entity.id} value={entity.id}>
+                      {entity.name || entity.title || entity.client_name || entity.id}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <Button 
+            size="sm" 
+            variant="outline"
+            onClick={handleAutoFill}
+            disabled={!entityType || !entityId || generating}
+            className="mt-3"
+          >
+            <RefreshCw className={`w-3 h-3 mr-2 ${generating ? 'animate-spin' : ''}`} />
+            Auto-Fill Data
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Manual Form Fields */}
       <div className="grid grid-cols-2 gap-4">
         {sop.template_variables?.map(variable => (
           <div key={variable.name}>
-            <Label>{variable.label}</Label>
+            <Label className="text-sm">{variable.label}</Label>
             {variable.type === 'text' || variable.type === 'number' || variable.type === 'date' ? (
               <Input 
                 type={variable.type}
@@ -217,24 +356,57 @@ const TemplateFiller = ({ sop, onClose, onGenerate }) => {
         ))}
       </div>
 
-      <Button onClick={handleGenerate} disabled={generating} className="w-full">
+      <Button onClick={handleGenerate} disabled={generating} className="w-full" data-testid="generate-document-btn">
         {generating ? 'Generating...' : 'Generate Document'}
       </Button>
 
       {generatedContent && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
             <Label>Generated Content</Label>
-            <Button variant="ghost" size="sm" onClick={handleCopy}>
-              <Copy className="w-4 h-4 mr-1" />
-              Copy
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="ghost" size="sm" onClick={handleCopy}>
+                <Copy className="w-4 h-4 mr-1" />
+                Copy
+              </Button>
+            </div>
           </div>
           <ScrollArea className="h-64 border rounded-lg p-4 bg-muted/30">
             <div className="prose prose-sm dark:prose-invert max-w-none">
               <ReactMarkdown>{generatedContent}</ReactMarkdown>
             </div>
           </ScrollArea>
+          
+          {/* Save Document Section */}
+          <Card className="border-primary/30">
+            <CardContent className="p-3">
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <Input 
+                    placeholder="Document title..."
+                    value={documentTitle}
+                    onChange={(e) => setDocumentTitle(e.target.value)}
+                    className="h-9"
+                  />
+                </div>
+                <Button 
+                  onClick={handleSaveDocument} 
+                  disabled={saving}
+                  size="sm"
+                  data-testid="save-document-btn"
+                >
+                  {saving ? (
+                    <RefreshCw className="w-4 h-4 mr-1 animate-spin" />
+                  ) : savedSuccessfully ? (
+                    <CheckCircle className="w-4 h-4 mr-1 text-green-500" />
+                  ) : (
+                    <Save className="w-4 h-4 mr-1" />
+                  )}
+                  {savedSuccessfully ? 'Saved!' : saving ? 'Saving...' : 'Save Document'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>
