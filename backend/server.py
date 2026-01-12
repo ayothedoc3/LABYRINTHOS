@@ -1158,6 +1158,7 @@ app.include_router(notifications_router, prefix="/api")  # Drip Notifications ro
 app.include_router(ai_ocr_router, prefix="/api")  # AI/OCR routes
 app.include_router(knowledge_base_router, prefix="/api")  # Knowledge Base routes
 app.include_router(websocket_router)  # WebSocket routes (no /api prefix for WS)
+app.include_router(team_dashboard_router, prefix="/api")  # Team Dashboard routes
 
 
 # ==================== UNIFIED SEED ENDPOINT ====================
