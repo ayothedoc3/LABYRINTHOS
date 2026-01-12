@@ -9,7 +9,7 @@ import time
 import random
 import string
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://clientpath-1.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://op-manual-system.preview.emergentagent.com').rstrip('/')
 
 # ==================== FIXTURES ====================
 
