@@ -45,22 +45,26 @@ import SOPSidebar from './SOPSidebar';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Stage configuration
+// Stage configuration - Full workflow: Strategy → SOW → Bids/Proposals → Contracts → Milestones → Execution
 const STAGE_CONFIG = {
+  STRATEGY: { color: '#8B5CF6', icon: FileText, label: 'Strategy' },
+  SOW: { color: '#6366F1', icon: FileText, label: 'Scope of Work' },
   PROPOSAL: { color: '#64748B', icon: FileText, label: 'Proposal' },
   BID_SUBMITTED: { color: '#F59E0B', icon: Send, label: 'Bid Submitted' },
   BID_APPROVED: { color: '#10B981', icon: CheckCircle, label: 'Bid Approved' },
+  CONTRACT: { color: '#0EA5E9', icon: FileCheck, label: 'Contract' },
   INACTIVE: { color: '#6B7280', icon: Pause, label: 'Inactive' },
   QUEUED: { color: '#3B82F6', icon: Clock, label: 'In Queue' },
-  ACTIVE: { color: '#22C55E', icon: Play, label: 'Active' },
+  ACTIVE: { color: '#22C55E', icon: Play, label: 'Milestones' },
+  EXECUTION: { color: '#14B8A6', icon: Play, label: 'Execution' },
   PAUSED: { color: '#EAB308', icon: Pause, label: 'Paused' },
   COMPLETED: { color: '#8B5CF6', icon: CheckCircle, label: 'Completed' },
   CLOSED: { color: '#1F2937', icon: Archive, label: 'Closed' },
 };
 
-// Stage flow for visual pipeline
+// Stage flow for visual pipeline - Strategy → SOW → Bids/Proposals → Contracts → Milestones → Execution
 const STAGE_FLOW = [
-  'PROPOSAL', 'BID_SUBMITTED', 'BID_APPROVED', 'INACTIVE', 'QUEUED', 'ACTIVE', 'COMPLETED'
+  'STRATEGY', 'SOW', 'PROPOSAL', 'BID_SUBMITTED', 'BID_APPROVED', 'CONTRACT', 'INACTIVE', 'QUEUED', 'ACTIVE', 'EXECUTION', 'COMPLETED'
 ];
 
 // ==================== CONTRACT CARD ====================
