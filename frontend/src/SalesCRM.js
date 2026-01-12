@@ -310,6 +310,27 @@ const LeadDetail = ({ lead, onClose, onRefresh }) => {
         </Card>
       )}
 
+      {/* SOP Guidance */}
+      <Card className="labyrinth-card border-primary/20">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-body font-medium flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-primary" />
+            Guidance & SOPs
+          </CardTitle>
+          <CardDescription className="text-caption">
+            Relevant procedures for the {stageConfig.label} stage
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <SOPSidebar
+            stage={lead.stage?.toLowerCase().replace('_', '')}
+            dealType="new_business"
+            entityType="deal"
+            entityId={lead.id}
+          />
+        </CardContent>
+      </Card>
+
       {/* Activity Log */}
       <Card className="labyrinth-card">
         <CardHeader className="pb-2">
