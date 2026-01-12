@@ -1749,7 +1749,7 @@ function App() {
             <ContractLifecycle />
           </TabsContent>
 
-          <TabsContent value="sales">
+          <TabsContent value="pipeline">
             <SalesCRM />
           </TabsContent>
 
@@ -1769,50 +1769,6 @@ function App() {
             <ClientPortal />
           </TabsContent>
 
-          <TabsContent value="library">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FolderOpen className="w-5 h-5" />
-                  Workflow Library
-                </CardTitle>
-                <CardDescription>
-                  Your saved workflows organized by category
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <WorkflowViz />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="templates">
-            <Card>
-              <CardHeader>
-                <CardTitle>Templates</CardTitle>
-                <CardDescription>All deliverable templates, SOPs, and playbooks</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Tabs defaultValue="playbooks">
-                  <TabsList>
-                    <TabsTrigger value="playbooks">Playbooks</TabsTrigger>
-                    <TabsTrigger value="sops">SOPs</TabsTrigger>
-                    <TabsTrigger value="contracts">Contracts</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="playbooks">
-                    <PlaybooksView playbooks={playbooks} onRefresh={fetchData} />
-                  </TabsContent>
-                  <TabsContent value="sops">
-                    <SOPsView sops={sops} onRefresh={fetchData} />
-                  </TabsContent>
-                  <TabsContent value="contracts">
-                    <ContractsView contracts={contracts} talents={talents} playbooks={playbooks} onRefresh={fetchData} />
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           <TabsContent value="bidding">
             <BiddingSystem />
           </TabsContent>
@@ -1821,20 +1777,12 @@ function App() {
             <NotificationsCenter />
           </TabsContent>
 
-          <TabsContent value="document-scanner">
-            <DocumentScanner />
-          </TabsContent>
-
           <TabsContent value="knowledge-base">
             <KnowledgeBase />
           </TabsContent>
 
           <TabsContent value="team">
             <TalentsView talents={talents} onRefresh={fetchData} />
-          </TabsContent>
-
-          <TabsContent value="trainings">
-            <TeamTrainings />
           </TabsContent>
 
           <TabsContent value="analytics">
