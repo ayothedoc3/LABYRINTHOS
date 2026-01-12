@@ -339,6 +339,9 @@ const ContractDetail = ({ contract, onClose, onTransition, onRefresh }) => {
           <CardTitle className="text-body font-medium flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-primary" />
             Guidance & SOPs
+            {!stageGatePassed && (
+              <Badge variant="destructive" className="text-xs">Incomplete</Badge>
+            )}
           </CardTitle>
           <CardDescription className="text-caption">
             Relevant procedures for this stage
@@ -350,9 +353,23 @@ const ContractDetail = ({ contract, onClose, onTransition, onRefresh }) => {
             dealType={contract.contract_type?.toLowerCase().replace('_based', '')}
             entityType="contract"
             entityId={contract.id}
+            onStageGateCheck={handleStageGateStatus}
           />
         </CardContent>
       </Card>
+
+      {/* Stage Gate Warning */}
+      {stageGateWarning && (
+        <Card className="labyrinth-card border-yellow-500/30 bg-yellow-500/5">
+          <CardContent className="p-3 flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-yellow-500" />
+            <div>
+              <p className="text-sm font-medium">Stage Gate Warning</p>
+              <p className="text-xs text-muted-foreground">{stageGateWarning}. Complete required checklist items before transitioning.</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Actions */}
       {nextStages.length > 0 && (
