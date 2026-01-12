@@ -947,29 +947,65 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
 
 ## Remaining Priority Tasks (From User Roadmap)
 
-### Phase 2: Contracts Workflow Enhancement
-- Strategy → SOW → Bids/Proposals → Contracts → Milestones → Execution workflow
+### Phase 2: Contracts Workflow Enhancement ✅ COMPLETE (Jan 2026)
+- ✅ Full workflow: Strategy → SOW → Bids/Proposals → Contracts → Milestones → Execution
+- ✅ 13 stages in contract lifecycle
+- ✅ Stage-gating with valid transitions
+- ✅ Updated backend models and frontend pipeline view
 
-### Phase 3: AI Manager Enhancement  
-- Task tracking with tagging system
-- Automated reminders
-- KPI/performance feedback
-- Client report analysis
+### Phase 3: AI Manager Enhancement ✅ COMPLETE (Jan 2026)
+- ✅ Task tracking with auto-tagging system (meetings, data requests, documents, timeline, etc.)
+- ✅ Automated reminders and notifications
+- ✅ KPI/performance feedback generation
+- ✅ AI-to-Personnel messaging (team comms remain on Discord)
+- **Backend:** `ai_manager_routes.py`
+- **Frontend:** `AIManager.jsx`
 
-### Phase 4: Access Control & Permissions
-- Admin-only workflow access
-- Position-specific SOP/workflow visibility
-- Role-based bidding access (Manager & Accountability = edit)
+### Phase 4: Access Control & Permissions ✅ COMPLETE (Jan 2026)
+- ✅ Admin-only workflow full access
+- ✅ Position-specific SOP/workflow visibility
+- ✅ Role-based bidding access (Manager & Accountability = edit, others = view only)
+- ✅ Training role-based access
+- **Backend:** `permissions_routes.py`
 
-### Phase 5: Training Enhancements
-- Comments/Q&A section with moderator
-- Quick Start tab + Full Training tab
-- Video learning database
-- Quizzes
+### Phase 5: Training Enhancements ✅ PARTIAL (Jan 2026)
+- ✅ Comments/Q&A API endpoints for moderator responses
+- ⏳ Quick Start tab + Full Training tab (frontend pending)
+- ⏳ Video learning database (structure exists)
+- ⏳ Quizzes (backend exists, frontend enhancement pending)
 
-### Phase 6: Client Journey & CRM
-- Onboarding flow
-- Password board for resource logins
-- Client dashboard
-- Communication channel with Project Directors/Executives
+### Phase 6: Client Journey & CRM (Pending)
+- ⏳ Onboarding flow
+- ⏳ Password board for resource logins
+- ⏳ Client dashboard
+- ⏳ Communication channel with Project Directors/Executives
+
+---
+
+## New API Endpoints Added (Jan 2026)
+
+### Team Dashboard
+- `GET /api/team-dashboard/overview` - Full dashboard data
+- `POST /api/team-dashboard/resource-requests` - Create resource request
+- `GET /api/team-dashboard/events` - Get company events
+
+### AI Manager  
+- `GET /api/ai-manager/tasks` - Get tasks with filters
+- `POST /api/ai-manager/tasks` - Create task with auto-tagging
+- `GET /api/ai-manager/messages/{user_id}` - Get AI messages
+- `POST /api/ai-manager/messages/send` - Send AI message
+- `GET /api/ai-manager/dashboard/{user_id}` - AI dashboard summary
+- `POST /api/ai-manager/performance/generate/{user_id}` - Generate performance feedback
+
+### Permissions
+- `GET /api/permissions/check` - Check specific permission
+- `GET /api/permissions/role/{role_name}` - Get role permissions
+- `GET /api/permissions/feature/{feature_name}` - Get feature access
+- `GET /api/permissions/roles` - Get all roles with access levels
+
+### Training Comments
+- `GET /api/trainings/comments/{module_id}` - Get module comments
+- `POST /api/trainings/comments` - Create comment/question
+- `POST /api/trainings/comments/{id}/reply` - Reply to comment
+- `DELETE /api/trainings/comments/{id}` - Delete comment
 
