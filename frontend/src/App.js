@@ -33,6 +33,7 @@ import LabyrinthBuilder from "./LabyrinthBuilder";
 import WorkflowsPage from "./WorkflowsPage";
 import GlobalSearch from "./GlobalSearch";
 import { RoleProvider, useRole } from "./RoleContext";
+import { WebSocketProvider } from "./WebSocketContext";
 import RoleDashboard from "./RoleDashboard";
 import RoleSelector from "./RoleSelector";
 import ContractLifecycle from "./ContractLifecycle";
@@ -46,6 +47,7 @@ import NotificationsCenter from "./NotificationsCenter";
 import DocumentScanner from "./DocumentScanner";
 import KnowledgeBase from "./KnowledgeBase";
 import PWAInstallPrompt from "./PWAInstallPrompt";
+import { ConnectionStatus, RealTimeNotifications, ToastNotifications } from "./RealTimeNotifications";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
