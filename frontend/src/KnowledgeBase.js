@@ -1075,7 +1075,134 @@ const KnowledgeBase = () => {
             />
           </ScrollArea>
         </div>
-      </div>
+          </div>
+        </TabsContent>
+
+        {/* Training Tab */}
+        <TabsContent value="training" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <GraduationCap className="w-5 h-5 text-orange-500" />
+                Training Materials
+              </CardTitle>
+              <CardDescription>
+                Role-based training modules and completion tracking
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TeamTrainings />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Templates Tab */}
+        <TabsContent value="templates" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-green-500" />
+                Templates Library
+              </CardTitle>
+              <CardDescription>
+                All deliverable templates, playbooks, and contract templates
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="playbooks">
+                <TabsList>
+                  <TabsTrigger value="playbooks">Playbooks</TabsTrigger>
+                  <TabsTrigger value="sop-templates">SOP Templates</TabsTrigger>
+                  <TabsTrigger value="contracts">Contract Templates</TabsTrigger>
+                </TabsList>
+                <TabsContent value="playbooks" className="mt-4">
+                  <div className="text-muted-foreground text-center py-8">
+                    <FileText className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                    <p>Playbook templates will be displayed here</p>
+                    <p className="text-sm mt-2">Integrate with Workflows module for full functionality</p>
+                  </div>
+                </TabsContent>
+                <TabsContent value="sop-templates" className="mt-4">
+                  <div className="space-y-3">
+                    {sops.filter(s => s.template_variables?.length > 0).map(sop => (
+                      <Card key={sop.id} className="cursor-pointer hover:border-primary/50 transition-colors"
+                            onClick={() => { setTemplateSOP(sop); setShowTemplateDialog(true); }}>
+                        <CardContent className="p-4 flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">{sop.title}</p>
+                            <p className="text-sm text-muted-foreground">{sop.description}</p>
+                          </div>
+                          <Badge variant="outline">
+                            {sop.template_variables.length} variables
+                          </Badge>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    {sops.filter(s => s.template_variables?.length > 0).length === 0 && (
+                      <div className="text-center text-muted-foreground py-8">
+                        <p>No template SOPs found</p>
+                        <p className="text-sm">Create SOPs with template variables to use them here</p>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+                <TabsContent value="contracts" className="mt-4">
+                  <div className="text-muted-foreground text-center py-8">
+                    <FileText className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                    <p>Contract templates will be displayed here</p>
+                    <p className="text-sm mt-2">Integrate with Contracts module for full functionality</p>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Resources Tab */}
+        <TabsContent value="resources" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FolderOpen className="w-5 h-5 text-blue-500" />
+                Resources & Documents
+              </CardTitle>
+              <CardDescription>
+                Additional documentation, guides, and reference materials
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-4">
+                <Card className="cursor-pointer hover:border-primary/50 transition-colors">
+                  <CardContent className="p-6 text-center">
+                    <FileText className="w-10 h-10 mx-auto mb-3 text-blue-500" />
+                    <p className="font-medium">Policy Documents</p>
+                    <p className="text-sm text-muted-foreground mt-1">Company policies and guidelines</p>
+                  </CardContent>
+                </Card>
+                <Card className="cursor-pointer hover:border-primary/50 transition-colors">
+                  <CardContent className="p-6 text-center">
+                    <BookOpen className="w-10 h-10 mx-auto mb-3 text-green-500" />
+                    <p className="font-medium">User Guides</p>
+                    <p className="text-sm text-muted-foreground mt-1">System and process documentation</p>
+                  </CardContent>
+                </Card>
+                <Card className="cursor-pointer hover:border-primary/50 transition-colors">
+                  <CardContent className="p-6 text-center">
+                    <FolderOpen className="w-10 h-10 mx-auto mb-3 text-purple-500" />
+                    <p className="font-medium">Shared Resources</p>
+                    <p className="text-sm text-muted-foreground mt-1">Team files and shared documents</p>
+                  </CardContent>
+                </Card>
+              </div>
+              <div className="mt-6 p-4 bg-muted/50 rounded-lg text-center">
+                <p className="text-muted-foreground">
+                  Resource library coming soon. Upload and organize team documents.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Template Filler Dialog */}
       <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
