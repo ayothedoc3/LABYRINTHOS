@@ -751,6 +751,37 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
 
 ---
 
+### Phase 14: Progressive Web App (PWA) ✅ COMPLETE (Jan 2026)
+
+**Purpose:** Enable mobile-like experience with installability and offline support.
+
+**Files Created:**
+- `public/manifest.json` - PWA manifest with app metadata, icons, shortcuts
+- `public/service-worker.js` - Caching and offline support
+- `public/icons/` - 8 icon sizes (72-512px)
+- `src/PWAInstallPrompt.js` - Install prompt component
+
+**PWA Features:**
+- **Installable** - "Add to Home Screen" on mobile and desktop
+- **Offline Support** - Service worker caches static assets
+- **App Shortcuts** - Quick access to Dashboard, Pipeline, Contracts, Messages
+- **Native Feel** - Standalone display mode, custom theme color
+- **iOS Support** - Apple touch icons and meta tags
+- **Install Prompt** - Custom UI prompting users to install
+
+**Technical Details:**
+- Theme Color: #7c3aed (violet)
+- Background: #0f0f23 (dark navy)
+- Display Mode: standalone
+- Orientation: any
+- Cache Strategy: Network first, fallback to cache
+
+**Updated Files:**
+- `public/index.html` - Added PWA meta tags, manifest link, service worker registration
+- `src/App.js` - Added PWAInstallPrompt component
+
+---
+
 ## Updated Future Enhancements (Post-MVP)
 
 - [ ] **Mobile Application** - React Native or Flutter mobile app
