@@ -1686,7 +1686,7 @@ function App() {
         { id: "pipeline", label: "Pipeline", icon: TrendingUp },
         { id: "contracts", label: "Contracts", icon: GitBranch },
         { id: "execution", label: "Execution", icon: Zap },
-        { id: "communications", label: "Messages", icon: MessageSquare },
+        { id: "ai-manager", label: "AI Manager", icon: MessageSquare },
         { id: "notifications", label: "Alerts", icon: Bell }
       ]
     },
