@@ -11,10 +11,10 @@ from websocket_manager import manager, emit_event, EventType
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/ws", tags=["websocket"])
+router = APIRouter(tags=["websocket"])
 
 
-@router.websocket("/connect")
+@router.websocket("/ws/connect")
 async def websocket_endpoint(
     websocket: WebSocket,
     user_id: str = Query(...),
