@@ -34,6 +34,7 @@ const SOPSidebar = ({
   entityType = 'deal',
   entityId,
   onUseTemplate,
+  onStageGateCheck,
   className = ''
 }) => {
   const [sops, setSOPs] = useState([]);
@@ -67,9 +68,42 @@ const SOPSidebar = ({
     setLoading(false);
   };
 
+  // Check stage gates when progress changes
+  const checkStageGates = async () => {
+    if (!entityType || !entityId || !onStageGateCheck) return;
+    
+    const gateStatuses = {};
+    let allPassed = true;
+    
+    for (const sop of sops) {
+      if (sop.checklist?.length > 0) {
+        try {
+          const res = await axios.get(
+            `${API}/api/knowledge-base/checklist-complete/${entityType}/${entityId}/${sop.id}`
+          );
+          gateStatuses[sop.id] = res.data;
+          if (!res.data.complete) {
+            allPassed = false;
+          }
+        } catch (err) {
+          console.error(`Error checking stage gate for ${sop.id}:`, err);
+        }
+      }
+    }
+    
+    onStageGateCheck(allPassed, gateStatuses);
+  };
+
   useEffect(() => {
     fetchRelevantSOPs();
   }, [stage, dealType, entityType, entityId]);
+
+  // Check stage gates after SOPs load or progress changes
+  useEffect(() => {
+    if (sops.length > 0 && onStageGateCheck) {
+      checkStageGates();
+    }
+  }, [sops, checklistProgress]);
 
   const toggleExpand = (sopId) => {
     setExpandedSOPs(prev => ({
