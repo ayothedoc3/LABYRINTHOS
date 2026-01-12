@@ -44,6 +44,7 @@ import TeamTrainings from "./TeamTrainings";
 import BiddingSystem from "./BiddingSystem";
 import NotificationsCenter from "./NotificationsCenter";
 import DocumentScanner from "./DocumentScanner";
+import KnowledgeBase from "./KnowledgeBase";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -1676,6 +1677,7 @@ function App() {
     { id: "bidding", label: "Bidding", icon: Gavel },
     { id: "notifications", label: "Alerts", icon: Bell },
     { id: "document-scanner", label: "AI Scanner", icon: Scan },
+    { id: "knowledge-base", label: "Knowledge", icon: BookOpen },
     { id: "library", label: "Library", icon: FolderOpen },
     { id: "templates", label: "Templates", icon: FileText },
     { id: "team", label: "Team", icon: Users },
@@ -1825,6 +1827,10 @@ function App() {
 
           <TabsContent value="document-scanner">
             <DocumentScanner />
+          </TabsContent>
+
+          <TabsContent value="knowledge-base">
+            <KnowledgeBase />
           </TabsContent>
 
           <TabsContent value="team">
