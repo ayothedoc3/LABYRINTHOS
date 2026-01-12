@@ -38,8 +38,9 @@ import {
 import {
   FileText, Play, Pause, CheckCircle, Clock, Archive, Send,
   Plus, ChevronRight, AlertTriangle, ArrowRight, RefreshCw,
-  Users, DollarSign, Calendar, MessageSquare
+  Users, DollarSign, Calendar, MessageSquare, BookOpen
 } from 'lucide-react';
+import SOPSidebar from './SOPSidebar';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
