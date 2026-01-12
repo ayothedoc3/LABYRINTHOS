@@ -562,7 +562,7 @@ const TeamTrainings = () => {
     setLoading(true);
     try {
       // Seed modules
-      await axios.post(`${API}/api/trainings/seed`).catch(() => {});
+      await axios.post(`${API}/api/trainings/seed-modules`).catch(() => {});
       
       const [modulesRes, progressRes, summaryRes] = await Promise.all([
         axios.get(`${API}/api/trainings/modules`),
@@ -570,10 +570,13 @@ const TeamTrainings = () => {
         axios.get(`${API}/api/trainings/summary/${userId}`)
       ]);
       
-      setModules(modulesRes.data);
+      // Handle both array and {modules: [...]} response formats
+      const modulesData = modulesRes.data?.modules || modulesRes.data || [];
+      setModules(Array.isArray(modulesData) ? modulesData : []);
       
       const progressMap = {};
-      progressRes.data.forEach(p => {
+      const progressArray = progressRes.data?.progress || progressRes.data || [];
+      (Array.isArray(progressArray) ? progressArray : []).forEach(p => {
         progressMap[p.module_id] = p;
       });
       setProgressData(progressMap);
