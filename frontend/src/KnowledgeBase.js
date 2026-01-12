@@ -25,6 +25,7 @@ import {
   ListChecks, Sparkles, Save, Bell, Brain, AlertTriangle, ArrowRight,
   Lightbulb, Wand2
 } from 'lucide-react';
+import TeamTrainings from './TeamTrainings';
 
 const API = process.env.REACT_APP_BACKEND_URL || '';
 
