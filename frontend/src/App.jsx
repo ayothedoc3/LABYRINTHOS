@@ -1829,7 +1829,7 @@ function App() {
           </TabsList>
 
           <TabsContent value="dashboard">
-            <RoleDashboard onNavigateToTab={handleTabChange} />
+            <TeamDashboard />
           </TabsContent>
 
           <TabsContent value="workflows">
