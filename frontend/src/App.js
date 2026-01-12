@@ -1805,15 +1805,32 @@ function App() {
       
       {/* PWA Install Prompt */}
       <PWAInstallPrompt />
+      
+      {/* Toast Notifications */}
+      <ToastNotifications />
     </div>
   );
 }
 
-// Wrap App with RoleProvider
-const AppWithProvider = () => (
-  <RoleProvider>
-    <App />
-  </RoleProvider>
-);
+// Wrap App with providers
+const AppWithProvider = () => {
+  // Generate a unique user ID for this session (in production, use actual auth)
+  const userId = React.useMemo(() => {
+    let id = sessionStorage.getItem('labyrinth_user_id');
+    if (!id) {
+      id = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      sessionStorage.setItem('labyrinth_user_id', id);
+    }
+    return id;
+  }, []);
+
+  return (
+    <RoleProvider>
+      <WebSocketProvider userId={userId} role="coordinator" name="Demo User">
+        <App />
+      </WebSocketProvider>
+    </RoleProvider>
+  );
+};
 
 export default AppWithProvider;
