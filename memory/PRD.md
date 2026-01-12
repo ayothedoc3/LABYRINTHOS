@@ -782,6 +782,59 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
 
 ---
 
+### Phase 15: Real-Time WebSocket Updates ✅ COMPLETE (Jan 2026)
+
+**Purpose:** Enable real-time updates, live notifications, and collaborative features.
+
+**Backend Files:**
+- `websocket_manager.py` - Connection manager, room management, event broadcasting
+- `websocket_routes.py` - WebSocket endpoint and status APIs
+
+**Frontend Files:**
+- `src/WebSocketContext.js` - React context and hooks for WebSocket
+- `src/RealTimeNotifications.js` - UI components for real-time updates
+
+**Features Implemented:**
+
+#### WebSocket Server ✅
+- Connection management with user tracking
+- Room/channel support for scoped broadcasts
+- Event types for all data changes (contracts, tasks, leads, messages)
+- Heartbeat/ping-pong for connection health
+- Automatic reconnection with exponential backoff
+
+#### Real-Time Events ✅
+- `contract.created/updated/stage_changed`
+- `task.created/updated/completed`
+- `lead.created/updated/stage_changed`
+- `message.received/read`
+- `notification.new`, `alert.triggered`
+- `sla.warning`, `sla.breach`
+- `user.joined/left`, `typing.start/stop`
+- `cursor.move`, `presence.update`
+
+#### Frontend Components ✅
+- **ConnectionStatus** - Shows Live/Connecting/Polling status
+- **RealTimeNotifications** - Slide-out panel with notification history
+- **ToastNotifications** - Floating toast for important events
+- **OnlineUsers** - Shows currently connected users
+
+#### API Endpoints ✅
+- `WS /ws/connect` - WebSocket connection endpoint
+- `GET /api/ws/status` - Server status and connection count
+- `GET /api/ws/users` - List of connected users
+- `GET /api/ws/rooms` - List of active rooms
+
+**Integration:**
+- WebSocketProvider wraps entire app
+- useWebSocket hook for subscribing to events
+- useWebSocketEvent hook for specific event listeners
+- emit_event function for backend to broadcast updates
+
+**Note:** WebSocket connections require proper infrastructure support. Falls back to polling mode in environments without WebSocket support.
+
+---
+
 ## Updated Future Enhancements (Post-MVP)
 
 - [ ] **Mobile Application** - React Native or Flutter mobile app
