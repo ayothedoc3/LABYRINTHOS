@@ -204,6 +204,10 @@ class LifecycleContract(LifecycleContractBase):
                 "requirements": ["Capacity available", "Team assigned", "Playbooks loaded"],
             },
             ContractStage.ACTIVE: {
+                "next": ContractStage.EXECUTION,
+                "requirements": ["All milestones defined", "Team fully onboarded"],
+            },
+            ContractStage.EXECUTION: {
                 "next": ContractStage.COMPLETED,
                 "requirements": ["All milestones completed", "Final deliverables approved"],
             },
