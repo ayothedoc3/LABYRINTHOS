@@ -16,24 +16,26 @@ import {
 export const ConnectionStatus = () => {
   const { isConnected, connectionState, connectedUsers } = useWebSocket();
 
+  // Show simplified status
+  const getStatusDisplay = () => {
+    if (isConnected) {
+      return { icon: Wifi, text: 'Live', className: 'bg-green-500/10 text-green-500' };
+    }
+    if (connectionState === 'RECONNECTING' || connectionState === 'CONNECTING') {
+      return { icon: Wifi, text: 'Connecting...', className: 'bg-yellow-500/10 text-yellow-500' };
+    }
+    // When disconnected, we fallback to polling mode
+    return { icon: Wifi, text: 'Polling', className: 'bg-blue-500/10 text-blue-500' };
+  };
+
+  const status = getStatusDisplay();
+  const StatusIcon = status.icon;
+
   return (
     <div className="flex items-center gap-2">
-      <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs ${
-        isConnected 
-          ? 'bg-green-500/10 text-green-500' 
-          : 'bg-red-500/10 text-red-500'
-      }`}>
-        {isConnected ? (
-          <>
-            <Wifi className="w-3 h-3" />
-            <span>Live</span>
-          </>
-        ) : (
-          <>
-            <WifiOff className="w-3 h-3" />
-            <span>{connectionState}</span>
-          </>
-        )}
+      <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs ${status.className}`}>
+        <StatusIcon className="w-3 h-3" />
+        <span>{status.text}</span>
       </div>
       {isConnected && connectedUsers.length > 0 && (
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
