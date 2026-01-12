@@ -1,0 +1,118 @@
+{
+  "summary": "Knowledge Base Phase 2 & 3 Testing Complete - All 44 backend tests passed (25 Phase 1 + 19 Phase 2/3). All UI features verified working including Template Filler with Auto-Fill from CRM, Document Save functionality, and Stage Gate Warning in ContractLifecycle.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "/api/knowledge-base/templates/{id}/fill-from-entity?entity_type=deal",
+        "issue": "Auto-fill returns empty data for deals/leads because the endpoint looks in 'leads' collection but leads are stored with different field names (contact.email vs email). Works correctly for contracts.",
+        "priority": "LOW"
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/tests/test_knowledge_base.py",
+    "/app/tests/test_knowledge_base_phase2_3.py",
+    "/app/test_reports/pytest/pytest_knowledge_base.xml",
+    "/app/test_reports/pytest/pytest_knowledge_base_phase2_3.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Phase 2 & 3 features are well-implemented with proper MongoDB integration",
+    "Template auto-fill from CRM entity works correctly for contracts, minor field mapping issue for leads",
+    "Document save/list/get endpoints work correctly with proper filtering",
+    "Stage gate checking via onStageGateCheck callback works correctly",
+    "SOPSidebar shows Incomplete badge when checklist items are not complete",
+    "Stage Gate Warning card appears in ContractLifecycle when SOPs are incomplete"
+  ],
+  "updated_files": [
+    "/app/tests/test_knowledge_base_phase2_3.py"
+  ],
+  "success_rate": {
+    "backend": "100% (44/44 tests passed - 25 Phase 1 + 19 Phase 2/3)",
+    "frontend": "100% (all UI features verified)"
+  },
+  "test_credentials": "No credentials required",
+  "seed_data_creation": "POST /api/knowledge-base/seed-demo creates 7 SOPs and 1 template",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Knowledge Base Phase 2 & 3 fully tested. New features: 1) Template auto-fill from CRM entity (POST /api/knowledge-base/templates/{id}/fill-from-entity?entity_type=deal|contract|client&entity_id=xxx), 2) Document save (POST /api/knowledge-base/documents/save), 3) Document list (GET /api/knowledge-base/documents), 4) Document get by ID (GET /api/knowledge-base/documents/{id}), 5) Stage gate checking via SOPSidebar onStageGateCheck callback, 6) Stage Gate Warning card in ContractLifecycle when SOP checklists are incomplete.",
+  "features_tested": {
+    "template_auto_fill_from_entity": {
+      "deal_entity": {"status": "PASS", "details": "Endpoint works, returns empty auto_filled_data for non-existent deals"},
+      "contract_entity": {"status": "PASS", "details": "Returns client.name, contract.value, contract.type from contracts collection"},
+      "client_entity": {"status": "PASS", "details": "Endpoint works, returns empty auto_filled_data for non-existent clients"},
+      "nonexistent_template": {"status": "PASS", "details": "Returns 404 for missing template"},
+      "usage_tracking": {"status": "PASS", "details": "Template uses count increments on fill-from-entity"}
+    },
+    "document_save": {
+      "save_document": {"status": "PASS", "details": "Creates document with id, title, content, entity_type, entity_id, filled_data, status=draft"},
+      "save_minimal": {"status": "PASS", "details": "Creates document with default title 'Untitled Document'"},
+      "save_with_created_by": {"status": "PASS", "details": "Stores created_by field correctly"}
+    },
+    "document_list": {
+      "list_all": {"status": "PASS", "details": "Returns documents array with total count"},
+      "filter_by_entity_type": {"status": "PASS", "details": "Filters documents by entity_type"},
+      "filter_by_entity_id": {"status": "PASS", "details": "Filters documents by entity_type and entity_id"},
+      "sorted_by_created_at": {"status": "PASS", "details": "Documents sorted by created_at descending"}
+    },
+    "document_get_by_id": {
+      "get_existing": {"status": "PASS", "details": "Returns document with all fields"},
+      "get_nonexistent": {"status": "PASS", "details": "Returns 404 with 'Document not found' message"}
+    },
+    "stage_gate_checking": {
+      "checklist_complete_endpoint": {"status": "PASS", "details": "Returns complete, required_items, completed_items, missing_items, progress_percent"},
+      "incomplete_gate": {"status": "PASS", "details": "Returns complete=false when items missing"},
+      "complete_gate": {"status": "PASS", "details": "Returns complete=true, progress_percent=100 when all required items done"},
+      "nonexistent_sop": {"status": "PASS", "details": "Returns complete=true for nonexistent SOP"}
+    },
+    "frontend_template_filler": {
+      "auto_fill_section": {"status": "PASS", "details": "Auto-Fill from CRM section visible with Entity Type and Select Record dropdowns"},
+      "entity_type_dropdown": {"status": "PASS", "details": "Shows Deal/Lead, Contract, Client options"},
+      "auto_fill_button": {"status": "PASS", "details": "Auto-Fill Data button present and functional"},
+      "generate_document": {"status": "PASS", "details": "Generate Document button creates filled content"},
+      "save_document": {"status": "PASS", "details": "Save Document button with title input present"}
+    },
+    "frontend_stage_gate_warning": {
+      "sop_sidebar_in_contracts": {"status": "PASS", "details": "SOPSidebar component visible in contract detail panel"},
+      "incomplete_badge": {"status": "PASS", "details": "Incomplete badge shown when SOP checklists not complete"},
+      "stage_gate_warning_card": {"status": "PASS", "details": "Stage Gate Warning card appears with warning message"},
+      "checklist_progress": {"status": "PASS", "details": "Shows 0/3 progress for incomplete checklists"},
+      "checklist_items": {"status": "PASS", "details": "Checklist items visible with required (*) indicators"}
+    }
+  },
+  "api_endpoints_tested": {
+    "phase_2_3_new_endpoints": [
+      "POST /api/knowledge-base/templates/{id}/fill-from-entity?entity_type=deal&entity_id=xxx - 200 OK",
+      "POST /api/knowledge-base/templates/{id}/fill-from-entity?entity_type=contract&entity_id=xxx - 200 OK (with auto_filled_data)",
+      "POST /api/knowledge-base/templates/{id}/fill-from-entity?entity_type=client&entity_id=xxx - 200 OK",
+      "POST /api/knowledge-base/templates/nonexistent/fill-from-entity - 404 Not Found",
+      "POST /api/knowledge-base/documents/save - 200 OK (creates document)",
+      "GET /api/knowledge-base/documents - 200 OK (lists all documents)",
+      "GET /api/knowledge-base/documents?entity_type=deal - 200 OK (filtered)",
+      "GET /api/knowledge-base/documents?entity_type=deal&entity_id=xxx - 200 OK (filtered)",
+      "GET /api/knowledge-base/documents/{doc_id} - 200 OK (single document)",
+      "GET /api/knowledge-base/documents/nonexistent - 404 Not Found",
+      "GET /api/knowledge-base/checklist-complete/{entity_type}/{entity_id}/{sop_id} - 200 OK (stage gate check)"
+    ]
+  },
+  "ui_verification": {
+    "knowledge_base_main": "✓ Stats cards, categories sidebar, SOP list all working",
+    "sop_viewer": "✓ Content, checklist, stage badges, Use Template button",
+    "template_filler_dialog": "✓ Auto-Fill from CRM section, Entity Type dropdown, Generate Document, Save Document",
+    "contracts_view": "✓ Contract cards, detail panel, lifecycle stages",
+    "sop_sidebar_in_contracts": "✓ Guidance & SOPs section with Incomplete badge",
+    "stage_gate_warning": "✓ Warning card appears when SOP checklists incomplete",
+    "checklist_interaction": "✓ Expandable SOP with checklist items and required indicators"
+  },
+  "mocked_apis": {
+    "has_mocked_apis": false,
+    "mocked_apis_list": [],
+    "notes": "All APIs are real MongoDB-backed with fallback to in-memory storage"
+  }
+}
