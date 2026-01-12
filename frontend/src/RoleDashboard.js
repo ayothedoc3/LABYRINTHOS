@@ -208,10 +208,11 @@ const getTileConfig = (tileId, data) => {
 
 // ==================== MAIN DASHBOARD COMPONENT ====================
 
-const RoleDashboard = () => {
+const RoleDashboard = ({ onNavigateToTab }) => {
   const { currentRole, getRoleConfig, getDashboardTiles, loading: roleLoading } = useRole();
   const [dashboardData, setDashboardData] = useState({});
   const [loading, setLoading] = useState(true);
+  const [detailSheet, setDetailSheet] = useState({ open: false, tileId: null, data: null });
   
   const roleConfig = getRoleConfig(currentRole);
   const tiles = getDashboardTiles();
@@ -245,6 +246,7 @@ const RoleDashboard = () => {
           contracts: lifecycleRes.data.total_contracts || 0,
           leads: 25,
           conversions: 8,
+          active_users: usersRes.data.filter(u => u.status === 'active').length || usersRes.data.length,
         });
       } catch (error) {
         console.error('Error loading dashboard data:', error);
@@ -254,6 +256,22 @@ const RoleDashboard = () => {
     
     loadDashboardData();
   }, [currentRole]);
+
+  // Handle tile click - navigate to tab or show detail
+  const handleTileClick = (tileId, config) => {
+    const nav = TILE_NAVIGATION[tileId];
+    if (nav && onNavigateToTab) {
+      // Navigate to the target tab
+      onNavigateToTab(nav.tab);
+    } else {
+      // Show detail sheet for tiles without navigation
+      setDetailSheet({
+        open: true,
+        tileId,
+        data: config
+      });
+    }
+  };
 
   if (roleLoading || loading) {
     return (
@@ -285,6 +303,7 @@ const RoleDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {tiles.map((tileId, index) => {
           const config = getTileConfig(tileId, dashboardData);
+          const hasNavigation = !!TILE_NAVIGATION[tileId];
           return (
             <div key={tileId} style={{ animationDelay: `${index * 50}ms` }} className="animate-fade-in">
               <StatsTile
@@ -294,11 +313,66 @@ const RoleDashboard = () => {
                 value={config.value}
                 subtitle={config.subtitle}
                 trend={config.trend}
+                onClick={() => handleTileClick(tileId, config)}
+                hasDetail={hasNavigation}
               />
             </div>
           );
         })}
       </div>
+
+      {/* Detail Sheet for tiles that don't navigate */}
+      <Sheet open={detailSheet.open} onOpenChange={(open) => setDetailSheet({ ...detailSheet, open })}>
+        <SheetContent className="w-[400px]">
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
+              {detailSheet.data && (
+                <>
+                  {(() => {
+                    const Icon = ICONS[detailSheet.data.iconName] || Activity;
+                    return <Icon className="w-5 h-5" style={{ color: detailSheet.data.color }} />;
+                  })()}
+                  {detailSheet.data.title}
+                </>
+              )}
+            </SheetTitle>
+            <SheetDescription>
+              {detailSheet.data?.subtitle}
+            </SheetDescription>
+          </SheetHeader>
+          <div className="mt-6 space-y-4">
+            {detailSheet.data && (
+              <>
+                <div className="text-center py-6 bg-muted/30 rounded-lg">
+                  <div className="text-4xl font-bold" style={{ color: detailSheet.data.color }}>
+                    {detailSheet.data.value}
+                  </div>
+                  <div className="text-sm text-muted-foreground mt-2">{detailSheet.data.subtitle}</div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="font-medium text-sm">Quick Actions</h4>
+                  {TILE_NAVIGATION[detailSheet.tileId] && (
+                    <Button 
+                      className="w-full" 
+                      onClick={() => {
+                        const nav = TILE_NAVIGATION[detailSheet.tileId];
+                        if (nav && onNavigateToTab) {
+                          onNavigateToTab(nav.tab);
+                          setDetailSheet({ open: false, tileId: null, data: null });
+                        }
+                      }}
+                    >
+                      View Full Details
+                      <ChevronRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
