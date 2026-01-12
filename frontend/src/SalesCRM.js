@@ -20,8 +20,9 @@ import {
 import {
   UserPlus, Phone, CheckCircle, FileText, MessageSquare, Trophy, XCircle, Heart,
   DollarSign, Building, Mail, Globe, Filter, Plus, RefreshCw, TrendingUp,
-  ArrowRight, Clock, Tag, User, ChevronRight
+  ArrowRight, Clock, Tag, User, ChevronRight, BookOpen
 } from 'lucide-react';
+import SOPSidebar from './SOPSidebar';
 
 const API = process.env.REACT_APP_BACKEND_URL || '';
 
