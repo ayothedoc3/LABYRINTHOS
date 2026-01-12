@@ -16,7 +16,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import LabyrinthBuilder from "./LabyrinthBuilder";
 import WorkflowViz from "./WorkflowViz";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 /**

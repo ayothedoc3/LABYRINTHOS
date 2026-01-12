@@ -21,7 +21,7 @@ import {
   Plus, RefreshCw, TrendingUp, Calendar, Award, AlertTriangle, Building2
 } from 'lucide-react';
 
-const API = process.env.REACT_APP_BACKEND_URL || '';
+const API = import.meta.env.VITE_BACKEND_URL || '';
 
 const STATUS_CONFIG = {
   open: { label: 'Open', color: 'bg-green-500/20 text-green-500', icon: Clock },

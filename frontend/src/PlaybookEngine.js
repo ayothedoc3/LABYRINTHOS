@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 import GanttChart from './GanttChart';
 
-const API = process.env.REACT_APP_BACKEND_URL || '';
+const API = import.meta.env.VITE_BACKEND_URL || '';
 
 // Status colors
 const STATUS_CONFIG = {

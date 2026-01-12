@@ -21,7 +21,7 @@ import {
   Plus, RefreshCw, ExternalLink, Copy, ArrowUpRight, UserPlus, Percent
 } from 'lucide-react';
 
-const API = process.env.REACT_APP_BACKEND_URL || '';
+const API = import.meta.env.VITE_BACKEND_URL || '';
 
 // Tier configuration
 const TIER_CONFIG = {

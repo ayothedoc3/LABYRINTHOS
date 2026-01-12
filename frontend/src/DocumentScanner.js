@@ -21,7 +21,7 @@ import {
   RefreshCw, Eye, FileSearch, Sparkles, AlertTriangle, Download
 } from 'lucide-react';
 
-const API = process.env.REACT_APP_BACKEND_URL || '';
+const API = import.meta.env.VITE_BACKEND_URL || '';
 
 const DOC_TYPE_CONFIG = {
   invoice: { label: 'Invoice', icon: FileText, color: 'text-blue-500' },

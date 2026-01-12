@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import TeamTrainings from './TeamTrainings';
 
-const API = process.env.REACT_APP_BACKEND_URL || '';
+const API = import.meta.env.VITE_BACKEND_URL || '';
 
 const CATEGORY_CONFIG = {
   sales: { label: 'Sales SOPs', icon: TrendingUp, color: 'text-blue-500', bg: 'bg-blue-500/10' },

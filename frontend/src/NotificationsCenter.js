@@ -20,7 +20,7 @@ import {
   RefreshCw, Settings, Mail, MessageSquare, Clock, Zap, Plus
 } from 'lucide-react';
 
-const API = process.env.REACT_APP_BACKEND_URL || '';
+const API = import.meta.env.VITE_BACKEND_URL || '';
 
 const TYPE_CONFIG = {
   info: { icon: Info, color: 'text-blue-500', bg: 'bg-blue-500/10' },

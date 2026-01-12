@@ -14,7 +14,7 @@ import {
   Sparkles, ExternalLink, FileText, Clock
 } from 'lucide-react';
 
-const API = process.env.REACT_APP_BACKEND_URL || '';
+const API = import.meta.env.VITE_BACKEND_URL || '';
 
 /**
  * SOPSidebar - Contextual SOP display for deals, contracts, and other entities

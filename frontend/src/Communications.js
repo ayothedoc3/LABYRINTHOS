@@ -24,7 +24,7 @@ import {
   Sparkles, Bot, Bell, TrendingUp, Lightbulb, Zap, AlertTriangle
 } from 'lucide-react';
 
-const API = process.env.REACT_APP_BACKEND_URL || '';
+const API = import.meta.env.VITE_BACKEND_URL || '';
 
 // Thread type configuration
 const THREAD_TYPE_CONFIG = {

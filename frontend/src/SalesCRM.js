@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import SOPSidebar from './SOPSidebar';
 
-const API = process.env.REACT_APP_BACKEND_URL || '';
+const API = import.meta.env.VITE_BACKEND_URL || '';
 
 // Stage configuration
 const STAGE_CONFIG = {

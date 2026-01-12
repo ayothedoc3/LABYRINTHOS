@@ -29,7 +29,7 @@ import {
   ChevronRight, Lock, RefreshCw, HelpCircle, Zap
 } from 'lucide-react';
 
-const API = process.env.REACT_APP_BACKEND_URL || '';
+const API = import.meta.env.VITE_BACKEND_URL || '';
 
 // Category configuration
 const CATEGORY_CONFIG = {

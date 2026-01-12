@@ -48,7 +48,7 @@ const WebSocketContext = createContext(null);
 
 // Get WebSocket URL from environment
 const getWebSocketUrl = () => {
-  const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || '';
   // Convert HTTP(S) to WS(S)
   const wsUrl = backendUrl.replace(/^http/, 'ws');
   return `${wsUrl}/ws/connect`;
