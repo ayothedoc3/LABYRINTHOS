@@ -413,6 +413,326 @@ const TemplateFiller = ({ sop, onClose, onGenerate }) => {
   );
 };
 
+// ==================== AI RECOMMENDATIONS PANEL ====================
+const AIRecommendationsPanel = ({ userId = 'demo_user', role, currentStage, onSelectSOP }) => {
+  const [recommendations, setRecommendations] = useState([]);
+  const [alerts, setAlerts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [insights, setInsights] = useState('');
+  const [suggestedAction, setSuggestedAction] = useState('');
+  const [showGenerateDialog, setShowGenerateDialog] = useState(false);
+  const [newChecklistRequest, setNewChecklistRequest] = useState({ title: '', description: '', category: 'general' });
+  const [generatedChecklist, setGeneratedChecklist] = useState(null);
+  const [generating, setGenerating] = useState(false);
+
+  useEffect(() => {
+    fetchRecommendations();
+    fetchAlerts();
+  }, [userId, role, currentStage]);
+
+  const fetchRecommendations = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.post(`${API}/api/knowledge-base/ai/recommendations`, {
+        user_id: userId,
+        role: role,
+        current_stage: currentStage,
+        recent_activity: []
+      });
+      setRecommendations(res.data.recommendations || []);
+      setInsights(res.data.insights || '');
+      setSuggestedAction(res.data.suggested_action || '');
+    } catch (err) {
+      console.error('Error fetching AI recommendations:', err);
+    }
+    setLoading(false);
+  };
+
+  const fetchAlerts = async () => {
+    try {
+      const params = new URLSearchParams({ role: role || '', current_stage: currentStage || '' });
+      const res = await axios.get(`${API}/api/knowledge-base/ai/proactive-alerts/${userId}?${params}`);
+      setAlerts(res.data.alerts || []);
+    } catch (err) {
+      console.error('Error fetching alerts:', err);
+    }
+  };
+
+  const handleGenerateChecklist = async () => {
+    if (!newChecklistRequest.title) return;
+    
+    setGenerating(true);
+    try {
+      const res = await axios.post(`${API}/api/knowledge-base/ai/generate-checklist`, {
+        sop_title: newChecklistRequest.title,
+        sop_description: newChecklistRequest.description,
+        category: newChecklistRequest.category,
+        relevant_stages: []
+      });
+      setGeneratedChecklist(res.data);
+    } catch (err) {
+      console.error('Error generating checklist:', err);
+      alert('Failed to generate checklist');
+    }
+    setGenerating(false);
+  };
+
+  const priorityColors = {
+    high: 'text-red-500 bg-red-500/10',
+    medium: 'text-yellow-500 bg-yellow-500/10',
+    low: 'text-blue-500 bg-blue-500/10'
+  };
+
+  const alertIcons = {
+    incomplete_checklist: AlertTriangle,
+    stage_guidance: BookOpen,
+    new_content: Sparkles
+  };
+
+  return (
+    <div className="space-y-4" data-testid="ai-recommendations-panel">
+      {/* Proactive Alerts */}
+      {alerts.length > 0 && (
+        <Card className="border-yellow-500/30 bg-yellow-500/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Bell className="w-4 h-4 text-yellow-500" />
+              Proactive Alerts
+              <Badge variant="outline" className="text-xs">{alerts.length}</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {alerts.slice(0, 3).map((alert, idx) => {
+              const AlertIcon = alertIcons[alert.type] || Bell;
+              return (
+                <div 
+                  key={idx} 
+                  className={`flex items-start gap-2 p-2 rounded-lg ${priorityColors[alert.priority] || 'bg-muted'}`}
+                >
+                  <AlertIcon className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">{alert.message}</p>
+                    <p className="text-xs text-muted-foreground">{alert.details}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* AI Recommendations */}
+      <Card>
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Brain className="w-4 h-4 text-primary" />
+              AI Recommendations
+            </CardTitle>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={fetchRecommendations}
+              disabled={loading}
+            >
+              <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
+          {insights && (
+            <CardDescription className="text-xs">{insights}</CardDescription>
+          )}
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {loading ? (
+            <div className="flex items-center justify-center py-4">
+              <RefreshCw className="w-5 h-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : recommendations.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              No recommendations available
+            </p>
+          ) : (
+            <>
+              {recommendations.map((rec, idx) => (
+                <div 
+                  key={idx}
+                  className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                  onClick={() => onSelectSOP && rec.sop && onSelectSOP(rec.sop)}
+                  data-testid={`ai-recommendation-${idx}`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{rec.sop?.title || rec.sop_id}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{rec.reason}</p>
+                    </div>
+                    <Badge variant="outline" className={`text-xs ${priorityColors[rec.priority]}`}>
+                      {rec.priority}
+                    </Badge>
+                  </div>
+                  {rec.action && (
+                    <p className="text-xs text-primary mt-2 flex items-center gap-1">
+                      <ArrowRight className="w-3 h-3" />
+                      {rec.action}
+                    </p>
+                  )}
+                </div>
+              ))}
+              
+              {suggestedAction && (
+                <div className="mt-3 p-2 bg-primary/5 rounded-lg">
+                  <p className="text-xs font-medium text-primary flex items-center gap-1">
+                    <Lightbulb className="w-3 h-3" />
+                    {suggestedAction}
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* AI Checklist Generator */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Wand2 className="w-4 h-4 text-purple-500" />
+            AI Checklist Generator
+          </CardTitle>
+          <CardDescription className="text-xs">
+            Auto-generate checklist items for new SOPs
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full"
+            onClick={() => setShowGenerateDialog(true)}
+            data-testid="open-checklist-generator"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Generate Checklist
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Generate Checklist Dialog */}
+      <Dialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Wand2 className="w-5 h-5 text-purple-500" />
+              AI Checklist Generator
+            </DialogTitle>
+            <DialogDescription>
+              Describe your SOP and let AI generate a comprehensive checklist
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <Label>SOP Title</Label>
+              <Input 
+                value={newChecklistRequest.title}
+                onChange={(e) => setNewChecklistRequest({...newChecklistRequest, title: e.target.value})}
+                placeholder="e.g., Client Onboarding Process"
+              />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Textarea 
+                value={newChecklistRequest.description}
+                onChange={(e) => setNewChecklistRequest({...newChecklistRequest, description: e.target.value})}
+                placeholder="Describe what this SOP covers..."
+                rows={3}
+              />
+            </div>
+            <div>
+              <Label>Category</Label>
+              <Select 
+                value={newChecklistRequest.category}
+                onValueChange={(v) => setNewChecklistRequest({...newChecklistRequest, category: v})}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sales">Sales</SelectItem>
+                  <SelectItem value="client_success">Client Success</SelectItem>
+                  <SelectItem value="operations">Operations</SelectItem>
+                  <SelectItem value="templates">Templates</SelectItem>
+                  <SelectItem value="training">Training</SelectItem>
+                  <SelectItem value="general">General</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <Button 
+              onClick={handleGenerateChecklist}
+              disabled={generating || !newChecklistRequest.title}
+              className="w-full"
+              data-testid="generate-checklist-btn"
+            >
+              {generating ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Generate Checklist
+                </>
+              )}
+            </Button>
+            
+            {/* Generated Checklist Result */}
+            {generatedChecklist && (
+              <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <Label className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    Generated Checklist
+                  </Label>
+                  {generatedChecklist.ai_powered && (
+                    <Badge className="text-xs bg-purple-500/10 text-purple-500">AI Powered</Badge>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  {generatedChecklist.checklist?.map((item, idx) => (
+                    <div key={idx} className="flex items-start gap-2 text-sm">
+                      <Checkbox disabled checked={false} className="mt-0.5" />
+                      <span>{item.text}</span>
+                      {item.required && <span className="text-red-500">*</span>}
+                    </div>
+                  ))}
+                </div>
+                {generatedChecklist.rationale && (
+                  <p className="text-xs text-muted-foreground mt-2 italic">
+                    {generatedChecklist.rationale}
+                  </p>
+                )}
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full mt-2"
+                  onClick={() => {
+                    navigator.clipboard.writeText(JSON.stringify(generatedChecklist.checklist, null, 2));
+                    alert('Checklist copied to clipboard!');
+                  }}
+                >
+                  <Copy className="w-3 h-3 mr-2" />
+                  Copy Checklist JSON
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
 // ==================== MAIN KNOWLEDGE BASE ====================
 const KnowledgeBase = () => {
   const [categories, setCategories] = useState([]);
