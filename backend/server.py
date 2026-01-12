@@ -1164,6 +1164,7 @@ app.include_router(websocket_router)  # WebSocket routes (no /api prefix for WS)
 app.include_router(team_dashboard_router, prefix="/api")  # Team Dashboard routes
 app.include_router(ai_manager_router, prefix="/api")  # AI Manager routes
 app.include_router(permissions_router, prefix="/api")  # Permissions routes
+app.include_router(client_journey_router, prefix="/api")  # Client Journey routes
 
 
 # ==================== UNIFIED SEED ENDPOINT ====================
