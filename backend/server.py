@@ -62,6 +62,7 @@ from knowledge_base_routes import router as knowledge_base_router
 from websocket_routes import router as websocket_router
 from websocket_manager import emit_event, EventType
 from team_dashboard_routes import router as team_dashboard_router
+from ai_manager_routes import router as ai_manager_router
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
