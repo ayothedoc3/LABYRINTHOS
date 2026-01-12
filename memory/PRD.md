@@ -581,3 +581,86 @@ The user provided extensive documentation for a "Labyrinth" system, outlining a 
 - **Backend:** 100% (15/15 tests passed)
 - **Frontend:** 100% (all UI features verified)
 - **Test File:** `/app/test_reports/iteration_6.json`
+
+---
+
+### Phase 11: Knowledge Base / SOP Library ✅ COMPLETE (Jan 2026)
+
+**Purpose:** Contextual guidance system with SOPs, templates, and stage-gating.
+
+**Backend:** `knowledge_base_routes.py`
+- SOP CRUD with categories, stages, deal types
+- Template management with variable substitution
+- Checklist progress tracking
+- Stage-gate validation
+- Analytics dashboard
+
+**Frontend:** 
+- `KnowledgeBase.js` - Main Knowledge Base UI
+- `SOPSidebar.js` - Contextual sidebar component for Deals/Contracts
+
+**Implementation Phases:**
+
+#### Phase 1: Basic SOP Display ✅
+- Category-based SOP organization (Sales, Client Success, Operations, Templates, Training)
+- SOP viewer with markdown content rendering
+- Checklist display with progress tracking
+- Stage and deal type relevance filtering
+- Integrated SOPSidebar into ContractLifecycle and SalesCRM views
+
+#### Phase 2: Template Engine ✅
+- Template variable parsing and display
+- **Auto-Fill from CRM** - Select entity type (Deal, Contract, Client) and auto-populate template
+- Document generation with variable substitution
+- **Document Save** - Save filled templates as documents
+- Document list and retrieval endpoints
+
+#### Phase 3: Smart Guidance ✅
+- **Stage Gate Checking** - Validates checklist completion before stage transitions
+- **Incomplete Badge** - Shows when SOP checklists are incomplete
+- **Stage Gate Warning** - Warning card in ContractLifecycle when progression blocked
+- `onStageGateCheck` callback for real-time validation
+
+**API Endpoints:**
+- `GET /api/knowledge-base/categories` - List categories with counts ✅
+- `GET /api/knowledge-base/sops` - List SOPs (with category/stage filter) ✅
+- `GET /api/knowledge-base/sops/{id}` - Get SOP details ✅
+- `POST /api/knowledge-base/sops` - Create SOP ✅
+- `PATCH /api/knowledge-base/sops/{id}` - Update SOP ✅
+- `DELETE /api/knowledge-base/sops/{id}` - Archive SOP ✅
+- `GET /api/knowledge-base/relevant` - Get contextual SOPs ✅
+- `POST /api/knowledge-base/sops/{id}/track-view` - Track view ✅
+- `POST /api/knowledge-base/sops/{id}/track-use` - Track use ✅
+- `GET /api/knowledge-base/templates` - List templates ✅
+- `POST /api/knowledge-base/templates` - Create template ✅
+- `POST /api/knowledge-base/templates/{id}/fill` - Fill template manually ✅
+- `POST /api/knowledge-base/templates/{id}/fill-from-entity` - Auto-fill from CRM ✅
+- `POST /api/knowledge-base/documents/save` - Save filled document ✅
+- `GET /api/knowledge-base/documents` - List saved documents ✅
+- `GET /api/knowledge-base/documents/{id}` - Get document ✅
+- `GET /api/knowledge-base/checklist-progress/{entity_type}/{entity_id}` - Get progress ✅
+- `POST /api/knowledge-base/checklist-progress` - Update progress ✅
+- `GET /api/knowledge-base/checklist-complete/{entity_type}/{entity_id}/{sop_id}` - Stage gate check ✅
+- `GET /api/knowledge-base/analytics` - Get analytics ✅
+- `POST /api/knowledge-base/seed-demo` - Seed demo data (7 SOPs, 1 template) ✅
+
+### Phase 11 Test Results (Jan 2026)
+- **Backend:** 100% (44/44 tests passed - 25 Phase 1 + 19 Phase 2/3)
+- **Frontend:** 100% (all UI features verified)
+- **Test Files:** 
+  - `/app/test_reports/iteration_8.json` (Phase 1)
+  - `/app/test_reports/iteration_9.json` (Phase 2 & 3)
+- **Pytest Files:**
+  - `/app/tests/test_knowledge_base.py`
+  - `/app/tests/test_knowledge_base_phase2_3.py`
+
+---
+
+## Updated Future Enhancements (Post-MVP)
+
+- [ ] **Mobile Application** - React Native or Flutter mobile app
+- [ ] **Real-time WebSocket Updates** - Replace polling with WebSocket for live updates
+- [ ] **Real OCR Integration** - Google Vision, AWS Textract, or Azure Computer Vision
+- [ ] **SMS/Email Delivery** - Twilio/SendGrid for verification codes and notifications
+- [ ] **Advanced Analytics Dashboard** - More detailed charts and reports
+- [ ] **Real-time Collaboration** - Live cursors, collaborative editing
