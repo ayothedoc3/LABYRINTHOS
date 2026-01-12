@@ -16,13 +16,17 @@ import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
+  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 import { 
   LayoutDashboard, BookOpen, FileText, Users, FileCheck, 
-  BarChart3, Shield, Settings, AlertTriangle, CheckCircle2, 
+  BarChart3, Shield, Settings, AlertTriangle, CheckCircle2, CheckCircle,
   XCircle, Clock, TrendingUp, TrendingDown, Play, RefreshCw,
-  Plus, ChevronRight, Activity, Zap, Target, ArrowRight, Workflow, Sparkles,
+  Plus, ChevronRight, ChevronDown, Activity, Zap, Target, ArrowRight, Workflow, Sparkles,
   FolderOpen, Library, Trash2, GitBranch, UserPlus, Link, MessageSquare, Building2,
-  GraduationCap, Gavel, Bell, Scan
+  GraduationCap, Gavel, Bell, Scan, Wrench
 } from "lucide-react";
 import WorkflowViz from "./WorkflowViz";
 import SettingsPage from "./Settings";
