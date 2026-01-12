@@ -341,6 +341,43 @@ async def update_progress(user_id: str, module_id: str, update: ProgressUpdate):
 
 # ==================== ANALYTICS ====================
 
+@router.get("/summary/{user_id}")
+async def get_user_summary(user_id: str):
+    """Get training summary for a user"""
+    
+    # Get all modules
+    modules = list(trainings_db.values()) if trainings_db else []
+    if trainings_collection is not None:
+        cursor = trainings_collection.find({})
+        db_modules = await cursor.to_list(length=100)
+        modules = db_modules if db_modules else modules
+    
+    total_modules = len(modules)
+    
+    # Get user progress
+    progress_list = []
+    if training_progress_collection is not None:
+        cursor = training_progress_collection.find({"user_id": user_id})
+        progress_list = await cursor.to_list(length=100)
+    else:
+        progress_list = [p for p in progress_db.values() if p.get("user_id") == user_id]
+    
+    completed = len([p for p in progress_list if p.get("status") == "completed"])
+    in_progress = len([p for p in progress_list if p.get("status") == "in_progress"])
+    not_started = total_modules - completed - in_progress
+    
+    total_time = sum(p.get("time_spent_minutes", 0) for p in progress_list)
+    completion_percent = round((completed / total_modules * 100), 1) if total_modules > 0 else 0
+    
+    return {
+        "total_modules": total_modules,
+        "completed": completed,
+        "in_progress": in_progress,
+        "not_started": not_started,
+        "completion_percent": completion_percent,
+        "total_time_spent_minutes": total_time
+    }
+
 @router.get("/analytics/team")
 async def get_team_analytics():
     """Get team-wide training analytics"""
