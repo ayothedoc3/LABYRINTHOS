@@ -38,7 +38,8 @@ import {
 import {
   FileText, Play, Pause, CheckCircle, Clock, Archive, Send,
   Plus, ChevronRight, AlertTriangle, ArrowRight, RefreshCw,
-  Users, DollarSign, Calendar, MessageSquare, BookOpen, Lock
+  Users, DollarSign, Calendar, MessageSquare, BookOpen, Lock,
+  FileCheck, Lightbulb, FileSignature, Target, Rocket
 } from 'lucide-react';
 import SOPSidebar from './SOPSidebar';
 
