@@ -158,7 +158,7 @@ async def handle_client_message(websocket: WebSocket, user_id: str, message: Dic
         logger.warning(f"[WS] Unknown message type: {msg_type} from {user_id}")
 
 
-@router.get("/status")
+@router.get("/api/ws/status")
 async def websocket_status():
     """Get WebSocket server status"""
     return {
@@ -169,7 +169,7 @@ async def websocket_status():
     }
 
 
-@router.get("/users")
+@router.get("/api/ws/users")
 async def get_connected_users():
     """Get list of connected users"""
     users = []
@@ -183,7 +183,7 @@ async def get_connected_users():
     return {"users": users, "count": len(users)}
 
 
-@router.get("/rooms")
+@router.get("/api/ws/rooms")
 async def get_active_rooms():
     """Get list of active rooms"""
     rooms = []
