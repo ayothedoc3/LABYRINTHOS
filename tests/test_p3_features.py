@@ -7,7 +7,7 @@ import requests
 import os
 import time
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://op-manual-system.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://smart-labyrinth.preview.emergentagent.com')
 
 class TestBiddingSystem:
     """Bidding System API Tests"""
