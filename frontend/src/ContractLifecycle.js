@@ -318,6 +318,27 @@ const ContractDetail = ({ contract, onClose, onTransition, onRefresh }) => {
         </Card>
       )}
 
+      {/* SOP Guidance Sidebar */}
+      <Card className="labyrinth-card border-primary/20">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-body font-medium flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-primary" />
+            Guidance & SOPs
+          </CardTitle>
+          <CardDescription className="text-caption">
+            Relevant procedures for this stage
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <SOPSidebar
+            stage={contract.stage?.toLowerCase()}
+            dealType={contract.contract_type?.toLowerCase().replace('_based', '')}
+            entityType="contract"
+            entityId={contract.id}
+          />
+        </CardContent>
+      </Card>
+
       {/* Actions */}
       {nextStages.length > 0 && (
         <Card className="labyrinth-card">
